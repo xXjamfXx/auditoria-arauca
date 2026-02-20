@@ -25,7 +25,7 @@
             </div>
             
             <div class="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-2xl">
-                <input type="password" id="pass-maestra" placeholder="CONTRASEÑA" class="w-full bg-slate-950 border-2 border-slate-800 p-4 rounded-2xl text-center font-mono text-xl mb-4 focus:border-emerald-500 outline-none transition-all text-white">
+                <input type="password" id="pass-maestra" placeholder="CONTRASEÑA" autocomplete="off" class="w-full bg-slate-950 border-2 border-slate-800 p-4 rounded-2xl text-center font-mono text-xl mb-4 focus:border-emerald-500 outline-none transition-all text-white">
                 <button onclick="verificarAcceso()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl transition-all uppercase tracking-widest">
                     Desbloquear Panel
                 </button>
@@ -83,7 +83,6 @@
     </div>
 
     <script>
-        // --- SEGURIDAD ---
         const CLAVE_MAESTRA = "arauca_2026"; 
 
         const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
@@ -98,10 +97,8 @@
                 document.getElementById('bloqueo-central').classList.add('hidden');
                 document.getElementById('contenido-dashboard').classList.remove('hidden');
                 
-                // INICIALIZAMOS SUPABASE Y LA CARGA
                 motorSupabase = supabase.createClient(sUrl, sKey);
                 refrescar();
-                // ACTIVAMOS LA SINCRONIZACIÓN AUTOMÁTICA
                 setInterval(refrescar, 10000); 
             } else {
                 alert("Clave incorrecta");
@@ -121,13 +118,11 @@
 
                 const aprobados = data.filter(r => r.estado === 'aprobado');
 
-                // Actualizar números
                 const totalVotos = aprobados.reduce((sum, r) => sum + (r.votos_oficiales || 0), 0);
                 document.getElementById('total-votos').innerText = totalVotos.toLocaleString();
                 document.getElementById('total-mesas').innerText = aprobados.length;
                 document.getElementById('porcentaje-exito').innerText = ((aprobados.length / 500) * 100).toFixed(1) + "%";
 
-                // Municipios
                 const conteoMun = {};
                 Object.keys(nombresMun).forEach(id => conteoMun[id] = 0);
                 aprobados.forEach(r => { if(conteoMun[r.municipio_id] !== undefined) conteoMun[r.municipio_id] += (r.votos_oficiales || 0); });
@@ -142,7 +137,6 @@
                         </div>`;
                 });
 
-                // Galería
                 const divGaleria = document.getElementById('galeria-actas');
                 divGaleria.innerHTML = '';
                 aprobados.slice(0, 9).forEach(r => {
