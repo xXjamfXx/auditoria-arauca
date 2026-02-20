@@ -220,7 +220,15 @@
             }
         });
 
-        [inputCod, inputVotos].forEach(el => el.addEventListener('input', validarFormulario));
+        // REEMPLAZO: Escuchar múltiples eventos por si el celular autocompleta
+        [inputCod, inputVotos].forEach(el => {
+            el.addEventListener('input', validarFormulario);
+            el.addEventListener('change', validarFormulario);
+            el.addEventListener('blur', validarFormulario);
+        });
+
+        // REEMPLAZO: Un vigilante que fuerza la revisión del formulario cada 1 segundo
+        setInterval(validarFormulario, 1000);
 
         function validarFormulario() {
             const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
