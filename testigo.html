@@ -168,7 +168,7 @@
                 if (error) throw error;
 
                 if (data && data.length > 0) {
-                    alert("⚠️La Mesa " + mesa + " ya fue reportada anteriormente.");
+                    alert("⚠️La Mesa " + mesa + " ya fue reportada anteriormente, verifique su número de mesa.");
                     btnFijar.innerText = "Fijar Ubicación";
                     btnFijar.disabled = false;
                 } else {
@@ -220,14 +220,12 @@
             }
         });
 
-        // REEMPLAZO: Escuchar múltiples eventos por si el celular autocompleta
         [inputCod, inputVotos].forEach(el => {
             el.addEventListener('input', validarFormulario);
             el.addEventListener('change', validarFormulario);
             el.addEventListener('blur', validarFormulario);
         });
 
-        // REEMPLAZO: Un vigilante que fuerza la revisión del formulario cada 1 segundo
         setInterval(validarFormulario, 1000);
 
         function validarFormulario() {
