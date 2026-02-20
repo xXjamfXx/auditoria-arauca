@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Electoral - Arauca 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 p-4 font-sans">
+
+    <div class="max-w-md mx-auto bg-white p-6 rounded-3xl shadow-xl border border-gray-200">
+        
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-black text-blue-900 leading-tight">REPORTE ELECTORAL</h1>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Campaña Oficial Arauca 2026</p>
+        </div>
+
+        <div id="pantalla-config">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Municipio</label>
+                    <select id="select-municipio" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-lg font-bold outline-none focus:border-blue-500 transition-all">
+                        <option value="">Seleccionar...</option>
+                        <option value="1">ARAUCA</option>
+                        <option value="2">ARAUQUITA</option>
+                        <option value="3">CRAVO NORTE</option>
+                        <option value="4">FORTUL</option>
+                        <option value="5">PUERTO RONDÓN</option>
+                        <option value="6">SARAVENA</option>
+                        <option value="7">TAME</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Puesto de Votación</label>
+                    <select id="select-puesto" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-lg font-bold outline-none" disabled>
+                        <option value="">-- Elija municipio --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Mesa Número</label>
+                    <input type="number" id="input-mesa" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-2xl font-black text-blue-900 outline-none" placeholder="00">
+                </div>
+
+                <button id="btn-fijar" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl shadow-lg uppercase tracking-widest mt-4">
+                    Fijar Ubicación
+                </button>
+            </div>
+        </div>
+
+        <div id="pantalla-reporte" class="hidden space-y-6">
+            <div class="bg-blue-900 p-5 rounded-2xl text-white relative">
+                <p id="texto-ubicacion" class="text-sm font-bold leading-tight uppercase"></p>
+                <button onclick="localStorage.removeItem('config_testigo'); location.reload();" class="text-[9px] text-blue-300 underline mt-2 uppercase font-black">Cambiar Mesa</button>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-2 text-center">Votos Candidato en E-14</label>
+                <input type="number" id="input-votos" class="w-full p-6 border-4 border-emerald-500 rounded-3xl text-center text-6xl font-black text-emerald-700 bg-emerald-50 outline-none shadow-inner" placeholder="0">
+            </div>
+
+            <div class="border-4 border-dashed border-slate-200 bg-slate-50 p-8 rounded-3xl text-center cursor-pointer hover:bg-slate-100 transition-all relative" onclick="document.getElementById('input-foto').click()">
+                <div id="previo-foto" class="space-y-2">
+                    <p class="text-4xl">📸</p>
+                    <p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Tomar Foto del Acta E-14</p>
+                    <p id="nombre-foto" class="text-[10px] text-slate-400 italic font-bold">Obligatorio para validar</p>
+                </div>
+                <input type="file" id="input-foto" accept="image/*" capture="environment" class="hidden">
+            </div>
+
+            <div class="bg-slate-100 p-4 rounded-2xl border border-slate-200">
+                <label class="block text-[9px] font-black text-slate-500 uppercase mb-2 text-center">Código de Credencial Campaña</label>
+                <input type="text" id="codigo-seguridad" class="w-full p-3 border-2 border-white rounded-xl text-center font-mono text-xl font-black uppercase outline-none focus:border-blue-500" placeholder="CÓDIGO">
+            </div>
+
+            <button id="btn-enviar" disabled class="w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all">
+                Enviar Reporte
+            </button>
+        </div>
+
+        <div id="pantalla-exito" class="hidden text-center py-10">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">✓</div>
+            <h2 class="text-2xl font-black text-blue-900 uppercase">¡RECIBIDO!</h2>
+            <p class="text-slate-500 text-xs mt-2">El dato pasará a validación municipal.</p>
+            <button onclick="nuevoReporte()" class="mt-8 bg-slate-200 px-8 py-3 rounded-xl font-black text-xs uppercase text-slate-600">Reportar otra mesa</button>
+        </div>
+    </div>
+
+    <script>
+        const CODIGO_MAESTRO = "AR26";
+        const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
+        const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
+        const sClient = supabase.createClient(sUrl, sKey);
+
+        const puestos = {
+            "1": ["Col. Piloto Arauca", "Esc. Central", "Col. Santa Teresita", "Puesto Frontera"],
+            "2": ["Sede Frontera", "Col. Simón Bolívar"],
+            "3": ["Esc. Rural Cravo", "Col. Llanero"],
+            "4": ["Instituto Fortul", "Sede Básico"],
+            "5": ["Col. Rondón", "Escuela Principal"],
+            "6": ["Col. Comercial Saravena", "Esc. Industrial"],
+            "7": ["Col. Inocencio Chincá", "Liceo Tame"]
+        };
+
+        let blobComprimido = null;
+
+        async function comprimirImagen(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 1200;
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        canvas.toBlob((blob) => { resolve(blob); }, 'image/jpeg', 0.6);
+                    };
+                };
+            });
+        }
+
+        const selMun = document.getElementById('select-municipio');
+        const selPue = document.getElementById('select-puesto');
+        const inputVotos = document.getElementById('input-votos');
+        const inputCod = document.getElementById('codigo-seguridad');
+        const btnEnv = document.getElementById('btn-enviar');
+
+        selMun.addEventListener('change', () => {
+            selPue.innerHTML = '<option value="">Seleccione Puesto</option>';
+            if(selMun.value) {
+                puestos[selMun.value].forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = opt.textContent = p;
+                    selPue.appendChild(opt);
+                });
+                selPue.disabled = false;
+            }
+        });
+
+        document.getElementById('btn-fijar').addEventListener('click', async () => {
+            const mesa = document.getElementById('input-mesa').value;
+            const munId = selMun.value;
+            const puesto = selPue.value;
+
+            if(!munId || !puesto || !mesa) return alert("Por favor, completa todos los campos.");
+
+            const btnFijar = document.getElementById('btn-fijar');
+            btnFijar.innerText = "🔍 VERIFICANDO MESA...";
+            btnFijar.disabled = true;
+
+            try {
+                const { data, error } = await sClient
+                    .from('reportes')
+                    .select('id')
+                    .eq('municipio_id', parseInt(munId))
+                    .eq('puesto_nombre', puesto)
+                    .eq('mesa_numero', parseInt(mesa))
+                    .limit(1);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    alert("⚠️La Mesa " + mesa + " ya fue reportada anteriormente.");
+                    btnFijar.innerText = "Fijar Ubicación";
+                    btnFijar.disabled = false;
+                } else {
+                    localStorage.setItem('config_testigo', JSON.stringify({ 
+                        munId: munId, munNom: selMun.options[selMun.selectedIndex].text, pue: puesto, mesa: mesa 
+                    }));
+                    render();
+                }
+            } catch (err) {
+                alert("Error al verificar duplicados.");
+                btnFijar.innerText = "Fijar Ubicación";
+                btnFijar.disabled = false;
+            }
+        });
+
+        function render() {
+            const d = JSON.parse(localStorage.getItem('config_testigo'));
+            if(d) {
+                document.getElementById('pantalla-config').classList.add('hidden');
+                document.getElementById('pantalla-reporte').classList.remove('hidden');
+                document.getElementById('texto-ubicacion').innerText = `${d.munNom} - ${d.pue} \n MESA N° ${d.mesa}`;
+            }
+            if(localStorage.getItem('credencial_arauca')) {
+                inputCod.value = localStorage.getItem('credencial_arauca');
+                validarFormulario();
+            }
+        }
+
+        function nuevoReporte() {
+            localStorage.removeItem('config_testigo');
+            location.reload();
+        }
+
+        document.getElementById('input-foto').addEventListener('change', async (e) => {
+            if(e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    document.getElementById('previo-foto').innerHTML = `
+                        <img src="${event.target.result}" class="max-h-32 mx-auto rounded-lg mb-2 shadow-md">
+                        <p class="text-blue-900 font-black text-[10px] uppercase">Toca para cambiar foto</p>
+                    `;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+
+                document.getElementById('nombre-foto').innerText = "⏳ OPTIMIZANDO...";
+                blobComprimido = await comprimirImagen(e.target.files[0]);
+                document.getElementById('nombre-foto').innerText = "✅ LISTA PARA ENVIAR";
+                validarFormulario();
+            }
+        });
+
+        [inputCod, inputVotos].forEach(el => el.addEventListener('input', validarFormulario));
+
+        function validarFormulario() {
+            const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
+            const votosOk = inputVotos.value.length > 0;
+            const fotoOk = blobComprimido !== null;
+            btnEnv.disabled = !(codOk && votosOk && fotoOk);
+            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest";
+            if(codOk) localStorage.setItem('credencial_arauca', inputCod.value.toUpperCase());
+        }
+
+        btnEnv.addEventListener('click', async () => {
+            btnEnv.innerText = "⏳ SUBIENDO...";
+            btnEnv.disabled = true;
+            try {
+                const conf = JSON.parse(localStorage.getItem('config_testigo'));
+                const fileName = `E14_${Date.now()}.jpg`;
+                const { error: errorFoto } = await sClient.storage.from('fotos_e14').upload(fileName, blobComprimido);
+                if(errorFoto) throw errorFoto;
+                const { data: publicUrl } = sClient.storage.from('fotos_e14').getPublicUrl(fileName);
+                const { error: errorDb } = await sClient.from('reportes').insert([{
+                    municipio_id: parseInt(conf.munId), puesto_nombre: conf.pue, mesa_numero: parseInt(conf.mesa),
+                    votos_candidato: parseInt(inputVotos.value), foto_url: publicUrl.publicUrl, estado: 'pendiente'
+                }]);
+                if(errorDb) throw errorDb;
+                document.getElementById('pantalla-reporte').classList.add('hidden');
+                document.getElementById('pantalla-exito').classList.remove('hidden');
+            } catch (err) {
+                alert("Error al enviar.");
+                btnEnv.innerText = "Enviar Reporte";
+                btnEnv.disabled = false;
+            }
+        });
+
+        render();
+    </script>
+</body>
+</html>
