@@ -40,7 +40,7 @@
 
                 <div>
                     <label class="block text-left text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Contraseña de Estación</label>
-                    <input type="password" id="pass-inicio" placeholder="••••••••" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-500 transition-all text-center tracking-widest">
+                    <input type="password" id="pass-inicio" placeholder="••••••••" autocomplete="off" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-500 transition-all text-center tracking-widest">
                 </div>
 
                 <button onclick="iniciarSesionSegura()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-blue-700 transition-all uppercase tracking-widest text-sm">
@@ -65,14 +65,13 @@
 
         <div class="p-6 max-w-5xl mx-auto">
             <div id="contenedor-reportes" class="space-y-8">
-                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN DE SEGURIDAD - Cambia las contraseñas aquí
         const LLAVES_MUNICIPALES = {
-            "1": "arauca123",    
+            "1": "arauca123",  
             "2": "arauquita123", 
             "3": "cravo123",     
             "4": "fortul123",
@@ -128,7 +127,6 @@
 
             const container = document.getElementById('contenedor-reportes');
             
-            // Si no hay datos, mostrar mensaje de espera
             if (data.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-300">
@@ -138,7 +136,6 @@
                 return;
             }
 
-            // Evitar refrescar si el usuario está escribiendo en un input
             if (document.activeElement.tagName === 'INPUT') return;
 
             container.innerHTML = '';
