@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Central - Privado</title>
+    <title>Consolidado Maestro - Arauca 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
+        .leaflet-container { background: #020617 !important; border-radius: 1.5rem; }
+        .custom-popup .leaflet-popup-content-wrapper { background: #0f172a; color: white; border: 1px solid #1e293b; border-radius: 1rem; }
+        .custom-popup .leaflet-popup-tip { background: #0f172a; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
@@ -20,153 +25,202 @@
                 <div class="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl flex items-center justify-center mx-auto mb-4">
                     <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                 </div>
-                <h2 class="text-3xl font-black text-white uppercase tracking-tighter">Control Ingreso</h2>
-                <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-2 font-inter"></p>
+                <h2 class="text-3xl font-black text-white uppercase tracking-tighter">Acceso Reservado</h2>
+                <p class="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-2">Central de Inteligencia Electoral</p>
             </div>
             
             <div class="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-2xl">
-                <input type="password" id="pass-maestra" placeholder="CONTRASEÑA" autocomplete="off" class="w-full bg-slate-950 border-2 border-slate-800 p-4 rounded-2xl text-center font-mono text-xl mb-4 focus:border-emerald-500 outline-none transition-all text-white">
-                <button onclick="verificarAcceso()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl transition-all uppercase tracking-widest">
-                    Desbloquear Panel
+                <input type="password" id="pass-maestra" placeholder="DIGITE CLAVE MAESTRA" autocomplete="off" class="w-full bg-slate-950 border-2 border-slate-800 p-4 rounded-2xl text-center font-mono text-xl mb-4 focus:border-emerald-500 outline-none transition-all text-white tracking-[0.5em]">
+                <button onclick="verificarAcceso()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl transition-all uppercase tracking-widest text-sm shadow-lg shadow-emerald-900/20">
+                    Desbloquear Sistema
                 </button>
             </div>
         </div>
     </div>
 
     <div id="contenido-dashboard" class="hidden p-4 md:p-8">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center mb-10 gap-4 border-b border-slate-800 pb-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-10 gap-6 border-b border-slate-800 pb-8">
             <div>
-                <h1 class="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 uppercase">Consolidado Oficial</h1>
-                <div class="flex items-center gap-2 mt-1">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <p class="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Sincronización en vivo activa</p>
+                <h1 class="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 uppercase">Arauca Paralelo 2026</h1>
+                <div class="flex items-center gap-3 mt-2">
+                    <div class="flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span class="text-emerald-500 font-black uppercase tracking-widest text-[9px]">Live Sync</span>
+                    </div>
                 </div>
             </div>
             <div class="flex gap-4 items-center">
-                <button onclick="exportarExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-black px-6 py-3 rounded-2xl flex items-center gap-2 shadow-lg transition-all uppercase text-xs">
-                    Descargar Excel
+                <button onclick="exportarExcel()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-6 py-3 rounded-2xl flex items-center gap-2 transition-all uppercase text-[10px] tracking-widest border border-slate-700">
+                    Exportar Reporte
                 </button>
-                <button onclick="location.reload()" class="bg-slate-800 p-3 rounded-2xl hover:bg-red-500 text-white transition-colors" title="Cerrar Sesión">
+                <button onclick="location.reload()" class="bg-red-500/10 text-red-500 p-3 rounded-2xl hover:bg-red-500 hover:text-white transition-all border border-red-500/20">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 </button>
             </div>
         </div>
 
-        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 text-emerald-500/10 text-9xl font-black italic group-hover:scale-110 transition-transform">V</div>
-                <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Votos Validados</p>
-                <h2 id="total-votos" class="text-7xl font-black text-white relative z-10">0</h2>
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative overflow-hidden">
+                <p class="text-slate-500 font-black text-[10px] uppercase mb-1 tracking-widest relative z-10">Total Votos Validados</p>
+                <h2 id="total-votos" class="text-6xl font-black text-white relative z-10 tracking-tighter">0</h2>
+                <div class="absolute -right-4 -bottom-4 opacity-5 text-8xl font-black italic">V</div>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 text-blue-500/10 text-9xl font-black italic group-hover:scale-110 transition-transform">M</div>
-                <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Mesas Escrutadas</p>
-                <h2 id="total-mesas" class="text-6xl font-black text-blue-400 relative z-10">0</h2>
+            <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative overflow-hidden">
+                <p class="text-slate-500 font-black text-[10px] uppercase mb-1 tracking-widest relative z-10">Mesas Procesadas</p>
+                <h2 id="total-mesas" class="text-6xl font-black text-blue-400 relative z-10 tracking-tighter">0</h2>
+                <div class="absolute -right-4 -bottom-4 opacity-5 text-8xl font-black italic">M</div>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 text-emerald-500/10 text-9xl font-black italic group-hover:scale-110 transition-transform">%</div>
-                <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Meta Alcanzada</p>
-                <h2 id="porcentaje-exito" class="text-6xl font-black text-emerald-400 relative z-10">0%</h2>
+            <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative overflow-hidden">
+                <p class="text-slate-500 font-black text-[10px] uppercase mb-1 tracking-widest relative z-10">Efectividad Censo</p>
+                <h2 id="porcentaje-exito" class="text-6xl font-black text-emerald-400 relative z-10 tracking-tighter">0%</h2>
+                <div class="absolute -right-4 -bottom-4 opacity-5 text-8xl font-black italic">%</div>
             </div>
         </div>
 
-        <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl h-fit">
-                <h3 class="text-slate-400 font-black text-xs uppercase mb-6 border-b border-slate-800 pb-4 tracking-tighter">Resultados Municipales</h3>
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8 mb-10">
+            <div class="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-2xl overflow-hidden min-h-[500px] flex flex-col">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <h3 class="text-slate-400 font-black text-[10px] uppercase tracking-widest">Mapa Térmico de Escrutinio</h3>
+                </div>
+                <div id="mapa-arauca" class="flex-grow w-full rounded-2xl z-10 border border-slate-800"></div>
+            </div>
+            
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl h-fit">
+                <h3 class="text-slate-400 font-black text-[10px] uppercase mb-6 border-b border-slate-800 pb-4 tracking-widest">Carga Municipal</h3>
                 <div id="lista-municipios" class="space-y-3"></div>
             </div>
-            <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
-                <h3 class="text-slate-400 font-black text-xs uppercase mb-6 border-b border-slate-800 pb-4 tracking-tighter">Últimas Actas Aprobadas</h3>
-                <div id="galeria-actas" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
-            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl">
+            <h3 class="text-slate-400 font-black text-[10px] uppercase mb-8 border-b border-slate-800 pb-4 tracking-widest">Auditoría Visual: Últimas Actas Validadas</h3>
+            <div id="galeria-actas" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
         </div>
     </div>
 
     <script>
         const CLAVE_MAESTRA = "arauca_2026"; 
-
         const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
         const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
+        
         let motorSupabase;
         let datosExcel = [];
+        let mapa;
+        let marcadores = {};
+        
         const nombresMun = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
+        const coordenadas = {
+            1: [7.0847, -70.7554], 2: [7.0294, -71.2842], 3: [6.3217, -70.2033], 
+            4: [6.7864, -71.7828], 5: [6.2828, -71.0717], 6: [6.9531, -71.8767], 
+            7: [6.5303, -71.7319]
+        };
 
         function verificarAcceso() {
             const pass = document.getElementById('pass-maestra').value;
             if(pass === CLAVE_MAESTRA) {
                 document.getElementById('bloqueo-central').classList.add('hidden');
                 document.getElementById('contenido-dashboard').classList.remove('hidden');
-                
                 motorSupabase = supabase.createClient(sUrl, sKey);
+                initMap();
                 refrescar();
                 setInterval(refrescar, 10000); 
             } else {
-                alert("Clave incorrecta");
+                alert("Acceso Denegado");
                 document.getElementById('pass-maestra').value = "";
             }
         }
 
+        function initMap() {
+            if (mapa) return;
+            mapa = L.map('mapa-arauca', { zoomControl: false }).setView([6.6, -71.0], 8);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(mapa);
+            
+            Object.keys(coordenadas).forEach(id => {
+                marcadores[id] = L.circleMarker(coordenadas[id], {
+                    radius: 14,
+                    fillColor: "#10b981",
+                    color: "#ffffff",
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.6,
+                    className: 'marker-anim'
+                }).addTo(mapa).bindPopup(`<b>${nombresMun[id]}</b>`, { className: 'custom-popup' });
+            });
+        }
+
+        function syncMap(conteo) {
+            Object.keys(conteo).forEach(id => {
+                if (marcadores[id]) {
+                    const dynamicRadius = Math.max(14, Math.min(45, 14 + (conteo[id] / 150))); 
+                    marcadores[id].setRadius(dynamicRadius);
+                    marcadores[id].setPopupContent(`
+                        <div class="text-white p-2 text-center">
+                            <p class="uppercase text-[9px] font-bold text-slate-400 mb-1">${nombresMun[id]}</p>
+                            <p class="text-2xl font-black text-emerald-400">${conteo[id].toLocaleString()}</p>
+                            <p class="text-[8px] text-slate-500 uppercase">Votos Validados</p>
+                        </div>
+                    `);
+                }
+            });
+        }
+
         async function refrescar() {
             try {
-                const { data, error } = await motorSupabase
-                    .from('reportes')
-                    .select('*')
-                    .order('creado_en', { ascending: false });
-
+                const { data, error } = await motorSupabase.from('reportes').select('*').order('creado_en', { ascending: false });
                 if (error) throw error;
                 datosExcel = data;
 
                 const aprobados = data.filter(r => r.estado === 'aprobado');
-
                 const totalVotos = aprobados.reduce((sum, r) => sum + (r.votos_oficiales || 0), 0);
+                
                 document.getElementById('total-votos').innerText = totalVotos.toLocaleString();
                 document.getElementById('total-mesas').innerText = aprobados.length;
                 document.getElementById('porcentaje-exito').innerText = ((aprobados.length / 500) * 100).toFixed(1) + "%";
 
-                const conteoMun = {};
-                Object.keys(nombresMun).forEach(id => conteoMun[id] = 0);
-                aprobados.forEach(r => { if(conteoMun[r.municipio_id] !== undefined) conteoMun[r.municipio_id] += (r.votos_oficiales || 0); });
+                const cMun = {};
+                Object.keys(nombresMun).forEach(id => cMun[id] = 0);
+                aprobados.forEach(r => { if(cMun[r.municipio_id] !== undefined) cMun[r.municipio_id] += (r.votos_oficiales || 0); });
 
-                const divMun = document.getElementById('lista-municipios');
-                divMun.innerHTML = '';
-                Object.keys(conteoMun).forEach(id => {
-                    divMun.innerHTML += `
+                syncMap(cMun);
+
+                const divM = document.getElementById('lista-municipios');
+                divM.innerHTML = '';
+                Object.keys(cMun).forEach(id => {
+                    divM.innerHTML += `
                         <div class="flex justify-between items-center bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-tighter">${nombresMun[id]}</span>
-                            <span class="text-emerald-400 font-black text-xl">${conteoMun[id].toLocaleString()}</span>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase">${nombresMun[id]}</span>
+                            <span class="text-emerald-400 font-black text-lg">${cMun[id].toLocaleString()}</span>
                         </div>`;
                 });
 
-                const divGaleria = document.getElementById('galeria-actas');
-                divGaleria.innerHTML = '';
-                aprobados.slice(0, 9).forEach(r => {
-                    divGaleria.innerHTML += `
-                        <div class="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 p-2 group hover:border-emerald-500/50 transition-colors">
-                            <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg cursor-pointer" onclick="window.open('${r.foto_url}')">
-                            <div class="mt-2 text-center">
-                                <p class="text-[9px] font-black text-slate-500 uppercase">${nombresMun[r.municipio_id]} - M${r.mesa_numero}</p>
-                                <p class="text-sm font-black text-emerald-400">${r.votos_oficiales} Votos</p>
+                const divG = document.getElementById('galeria-actas');
+                divG.innerHTML = '';
+                aprobados.slice(0, 10).forEach(r => {
+                    divG.innerHTML += `
+                        <div class="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 p-2 hover:border-blue-500/50 transition-all cursor-pointer" onclick="window.open('${r.foto_url}')">
+                            <img src="${r.foto_url}" class="w-full h-32 object-cover rounded-lg">
+                            <div class="mt-2 px-1">
+                                <p class="text-[8px] font-bold text-slate-500 uppercase">${nombresMun[r.municipio_id]} · M${r.mesa_numero}</p>
+                                <p class="text-xs font-black text-blue-400">${r.votos_oficiales} Votos</p>
                             </div>
                         </div>`;
                 });
-
-            } catch (err) { console.log("Error de red:", err); }
+            } catch (err) { console.error(err); }
         }
 
         function exportarExcel() {
-            if (datosExcel.length === 0) return alert("No hay datos");
+            if (datosExcel.length === 0) return;
             const reporte = datosExcel.map(r => ({
-                'Hora': new Date(r.creado_en).toLocaleString(),
-                'Municipio': nombresMun[r.municipio_id],
-                'Mesa': r.mesa_numero,
-                'Votos Oficiales': r.votos_oficiales,
-                'Estado': r.estado.toUpperCase(),
-                'Link Foto': r.foto_url
+                'MARCA_TIEMPO': new Date(r.creado_en).toLocaleString(),
+                'MUNICIPIO': nombresMun[r.municipio_id],
+                'MESA': r.mesa_numero,
+                'VOTOS_OFICIALES': r.votos_oficiales,
+                'ESTADO': r.estado.toUpperCase(),
+                'E14_URL': r.foto_url
             }));
             const ws = XLSX.utils.json_to_sheet(reporte);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Escrutinio");
-            XLSX.writeFile(wb, "Consolidado_Arauca_2026.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "AUDITORIA");
+            XLSX.writeFile(wb, "REPORTE_ARAUCA_2026.xlsx");
         }
     </script>
 </body>
