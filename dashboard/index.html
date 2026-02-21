@@ -136,10 +136,10 @@
 
         // NUEVA FUNCIÓN PARA CAMBIAR LA CLAVE
         async function cambiarClaveDashboard() {
-            const nuevaClave = prompt("🔧 INGRESE LA NUEVA CONTRASEÑA PARA EL DASHBOARD:\n(Mínimo 4 caracteres)");
+            const nuevaClave = prompt("INGRESE LA NUEVA CONTRASEÑA:\n(Mínimo 4 caracteres)");
             
             if (nuevaClave === null) return; // Si le da cancelar
-            if (nuevaClave.length < 4) return alert("⚠️ La contraseña es muy corta. Operación cancelada.");
+            if (nuevaClave.length < 4) return alert("La contraseña es muy corta. Operación cancelada.");
 
             const confirmacion = confirm(`¿Está seguro que desea cambiar la contraseña a: ${nuevaClave}?`);
             
@@ -150,9 +150,9 @@
                     .eq('id', 1);
 
                 if (!error) {
-                    alert("✅ CONTRASEÑA ACTUALIZADA CON ÉXITO.\nGuárdela bien, la necesitará para su próximo ingreso.");
+                    alert("CONTRASEÑA ACTUALIZADA CON ÉXITO.\nGuárdela bien, la necesitará para su próximo ingreso.");
                 } else {
-                    alert("❌ Error al actualizar la contraseña en la base de datos.");
+                    alert("Error al actualizar la contraseña en la base de datos.");
                 }
             }
         }
@@ -218,5 +218,6 @@
     </script>
 </body>
 </html>
+
 
 
