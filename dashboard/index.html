@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -42,8 +44,11 @@
                 </div>
             </div>
             <div class="flex gap-4 items-center flex-wrap justify-end">
+                <button onclick="descargarPaqueteE14()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-3 rounded-2xl flex items-center gap-2 transition-all text-xs border border-emerald-500 shadow-lg">
+                     Descargar Actas (ZIP)
+                </button>
                 <button onclick="cambiarClaveDashboard()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-3 rounded-2xl flex items-center gap-2 transition-all text-xs border border-slate-700">
-                    ⚙️ Actualizar Contraseña
+                     Actualizar Contraseña
                 </button>
                 <button onclick="exportarExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-black px-6 py-3 rounded-2xl flex items-center gap-2 shadow-lg transition-all uppercase text-xs">
                     Descargar Excel
@@ -88,14 +93,12 @@
         const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
         const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
         
-        // Iniciamos Supabase desde el principio para poder consultar la clave
         const motorSupabase = supabase.createClient(sUrl, sKey);
         
         let datosExcel = [];
         const nombresMun = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
         const coloresMun = { 1: "#3b82f6", 2: "#10b981", 3: "#8b5cf6", 4: "#06b6d4", 5: "#6366f1", 6: "#2dd4bf", 7: "#a855f7" };
 
-        // NUEVA FUNCIÓN DE ACCESO SEGURO
         async function verificarAcceso() {
             const passInput = document.getElementById('pass-maestra').value;
             if(!passInput) return alert("Ingrese una contraseña");
@@ -105,7 +108,6 @@
             btn.disabled = true;
 
             try {
-                // Consulta a la base de datos la clave real
                 const { data, error } = await motorSupabase
                     .from('configuracion')
                     .select('clave_dashboard')
@@ -115,7 +117,6 @@
                 if (error) throw error;
 
                 if (data && data.clave_dashboard === passInput) {
-                    // Si coincide, lo dejamos entrar
                     document.getElementById('bloqueo-central').classList.add('hidden');
                     document.getElementById('contenido-dashboard').classList.remove('hidden');
                     refrescar();
@@ -123,26 +124,23 @@
                 } else {
                     alert("Clave incorrecta. Acceso denegado.");
                     document.getElementById('pass-maestra').value = "";
-                    btn.innerText = "Desbloquear Panel";
+                    btn.innerText = "INGRESAR";
                     btn.disabled = false;
                 }
             } catch (err) {
                 console.error(err);
                 alert("Error de conexión al verificar la clave.");
-                btn.innerText = "Desbloquear Panel";
+                btn.innerText = "INGRESAR";
                 btn.disabled = false;
             }
         }
 
-        // NUEVA FUNCIÓN PARA CAMBIAR LA CLAVE
         async function cambiarClaveDashboard() {
             const nuevaClave = prompt("INGRESE LA NUEVA CONTRASEÑA:\n(Mínimo 4 caracteres)");
-            
-            if (nuevaClave === null) return; // Si le da cancelar
+            if (nuevaClave === null) return;
             if (nuevaClave.length < 4) return alert("La contraseña es muy corta. Operación cancelada.");
 
             const confirmacion = confirm(`¿Está seguro que desea cambiar la contraseña a: ${nuevaClave}?`);
-            
             if (confirmacion) {
                 const { error } = await motorSupabase
                     .from('configuracion')
@@ -150,9 +148,9 @@
                     .eq('id', 1);
 
                 if (!error) {
-                    alert("CONTRASEÑA ACTUALIZADA CON ÉXITO.\nGuárdela bien, la necesitará para su próximo ingreso.");
+                    alert("CONTRASEÑA ACTUALIZADA CON ÉXITO.");
                 } else {
-                    alert("Error al actualizar la contraseña en la base de datos.");
+                    alert("Error al actualizar la contraseña.");
                 }
             }
         }
@@ -200,6 +198,40 @@
             } catch (err) { console.log("Error de sincronización:", err); }
         }
 
+        // LÓGICA DE DESCARGA ZIP (MUNICIPIO + MESA)
+        async function descargarPaqueteE14() {
+            const aprobados = datosExcel.filter(r => r.estado === 'aprobado');
+            if (aprobados.length === 0) return alert("No hay actas aprobadas para descargar.");
+            
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerText = "⏳ Preparando...";
+            btn.disabled = true;
+
+            const zip = new JSZip();
+            const carpeta = zip.folder("Actas_E14_Arauca");
+            
+            try {
+                const promesas = aprobados.map(async (r) => {
+                    try {
+                        const response = await fetch(r.foto_url);
+                        const blob = await response.blob();
+                        const nombreArchivo = `${nombresMun[r.municipio_id]}_Mesa_${r.mesa_numero}.jpg`.replace(/\s+/g, '_');
+                        carpeta.file(nombreArchivo, blob);
+                    } catch (e) { console.error("Error descargando imagen:", r.foto_url); }
+                });
+
+                await Promise.all(promesas);
+                const content = await zip.generateAsync({ type: "blob" });
+                saveAs(content, `Actas_E14_Arauca_2026.zip`);
+            } catch (err) {
+                alert("Error al generar el paquete.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
         function exportarExcel() {
             if (datosExcel.length === 0) return alert("No hay datos para exportar");
             const reporte = datosExcel.map(r => ({
@@ -218,6 +250,3 @@
     </script>
 </body>
 </html>
-
-
-
