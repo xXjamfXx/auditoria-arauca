@@ -18,15 +18,14 @@
         <div class="max-w-md w-full text-center">
             <div class="mb-8">
                 <div class="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </div>
-                <h2 class="text-3xl font-black text-white uppercase tracking-tighter">Control Ingreso</h2>
-                <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-2 font-inter"></p>
+                <h2 class="text-3xl font-black text-white uppercase tracking-tighter italic">War Room</h2>
             </div>
             
             <div class="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-2xl">
-                <input type="password" id="pass-maestra" placeholder="CONTRASEÑA" autocomplete="off" class="w-full bg-slate-950 border-2 border-slate-800 p-4 rounded-2xl text-center font-mono text-xl mb-4 focus:border-emerald-500 outline-none transition-all text-white">
-                <button onclick="verificarAcceso()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl transition-all uppercase tracking-widest">
+                <input type="password" id="pass-maestra" placeholder="CONTRASEÑA" autocomplete="off" class="w-full bg-slate-950 border-2 border-slate-800 p-4 rounded-2xl text-center font-mono text-xl mb-4 focus:border-emerald-500 outline-none transition-all text-white tracking-widest">
+                <button id="btn-ingreso" onclick="verificarAcceso()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl transition-all uppercase tracking-widest text-sm shadow-lg shadow-emerald-900/20">
                     Desbloquear Panel
                 </button>
             </div>
@@ -42,7 +41,10 @@
                     <p class="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Sincronización en vivo activa</p>
                 </div>
             </div>
-            <div class="flex gap-4 items-center">
+            <div class="flex gap-4 items-center flex-wrap justify-end">
+                <button onclick="cambiarClaveDashboard()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-3 rounded-2xl flex items-center gap-2 transition-all text-xs border border-slate-700">
+                    ⚙️ Cambiar Clave
+                </button>
                 <button onclick="exportarExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-black px-6 py-3 rounded-2xl flex items-center gap-2 shadow-lg transition-all uppercase text-xs">
                     Descargar Excel
                 </button>
@@ -56,17 +58,17 @@
             <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative overflow-hidden group">
                 <div class="absolute -right-4 -top-4 text-emerald-500/10 text-9xl font-black italic group-hover:scale-110 transition-transform">V</div>
                 <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Votos Validados</p>
-                <h2 id="total-votos" class="text-7xl font-black text-white relative z-10">0</h2>
+                <h2 id="total-votos" class="text-7xl font-black text-white relative z-10 tracking-tighter">0</h2>
             </div>
             <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative overflow-hidden group">
                 <div class="absolute -right-4 -top-4 text-blue-500/10 text-9xl font-black italic group-hover:scale-110 transition-transform">M</div>
                 <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Mesas Escrutadas</p>
-                <h2 id="total-mesas" class="text-6xl font-black text-blue-400 relative z-10">0</h2>
+                <h2 id="total-mesas" class="text-6xl font-black text-blue-400 relative z-10 tracking-tighter">0</h2>
             </div>
             <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative overflow-hidden group">
                 <div class="absolute -right-4 -top-4 text-emerald-500/10 text-9xl font-black italic group-hover:scale-110 transition-transform">%</div>
                 <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Meta Alcanzada</p>
-                <h2 id="porcentaje-exito" class="text-6xl font-black text-emerald-400 relative z-10">0%</h2>
+                <h2 id="porcentaje-exito" class="text-6xl font-black text-emerald-400 relative z-10 tracking-tighter">0%</h2>
             </div>
         </div>
 
@@ -76,52 +78,97 @@
                 <div id="lista-municipios" class="space-y-3"></div>
             </div>
             <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
-                <h3 class="text-slate-400 font-black text-xs uppercase mb-6 border-b border-slate-800 pb-4 tracking-tighter">Últimas Actas Aprobadas</h3>
+                <h3 class="text-slate-400 font-black text-xs uppercase mb-6 border-b border-slate-800 pb-4 tracking-tighter">Auditoría Visual: Últimos E-14</h3>
                 <div id="galeria-actas" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const CLAVE_MAESTRA = "arauca_2026"; 
-
         const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
         const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
-        let motorSupabase;
+        
+        // Iniciamos Supabase desde el principio para poder consultar la clave
+        const motorSupabase = supabase.createClient(sUrl, sKey);
+        
         let datosExcel = [];
         const nombresMun = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
+        const coloresMun = { 1: "#3b82f6", 2: "#10b981", 3: "#8b5cf6", 4: "#06b6d4", 5: "#6366f1", 6: "#2dd4bf", 7: "#a855f7" };
 
-        function verificarAcceso() {
-            const pass = document.getElementById('pass-maestra').value;
-            if(pass === CLAVE_MAESTRA) {
-                document.getElementById('bloqueo-central').classList.add('hidden');
-                document.getElementById('contenido-dashboard').classList.remove('hidden');
-                
-                motorSupabase = supabase.createClient(sUrl, sKey);
-                refrescar();
-                setInterval(refrescar, 10000); 
-            } else {
-                alert("Clave incorrecta");
-                document.getElementById('pass-maestra').value = "";
+        // NUEVA FUNCIÓN DE ACCESO SEGURO
+        async function verificarAcceso() {
+            const passInput = document.getElementById('pass-maestra').value;
+            if(!passInput) return alert("Ingrese una contraseña");
+
+            const btn = document.getElementById('btn-ingreso');
+            btn.innerText = "Verificando...";
+            btn.disabled = true;
+
+            try {
+                // Consulta a la base de datos la clave real
+                const { data, error } = await motorSupabase
+                    .from('configuracion')
+                    .select('clave_dashboard')
+                    .eq('id', 1)
+                    .single();
+
+                if (error) throw error;
+
+                if (data && data.clave_dashboard === passInput) {
+                    // Si coincide, lo dejamos entrar
+                    document.getElementById('bloqueo-central').classList.add('hidden');
+                    document.getElementById('contenido-dashboard').classList.remove('hidden');
+                    refrescar();
+                    setInterval(refrescar, 10000); 
+                } else {
+                    alert("Clave incorrecta. Acceso denegado.");
+                    document.getElementById('pass-maestra').value = "";
+                    btn.innerText = "Desbloquear Panel";
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error de conexión al verificar la clave.");
+                btn.innerText = "Desbloquear Panel";
+                btn.disabled = false;
+            }
+        }
+
+        // NUEVA FUNCIÓN PARA CAMBIAR LA CLAVE
+        async function cambiarClaveDashboard() {
+            const nuevaClave = prompt("🔧 INGRESE LA NUEVA CONTRASEÑA PARA EL DASHBOARD:\n(Mínimo 4 caracteres)");
+            
+            if (nuevaClave === null) return; // Si le da cancelar
+            if (nuevaClave.length < 4) return alert("⚠️ La contraseña es muy corta. Operación cancelada.");
+
+            const confirmacion = confirm(`¿Está seguro que desea cambiar la contraseña a: ${nuevaClave}?`);
+            
+            if (confirmacion) {
+                const { error } = await motorSupabase
+                    .from('configuracion')
+                    .update({ clave_dashboard: nuevaClave })
+                    .eq('id', 1);
+
+                if (!error) {
+                    alert("✅ CONTRASEÑA ACTUALIZADA CON ÉXITO.\nGuárdela bien, la necesitará para su próximo ingreso.");
+                } else {
+                    alert("❌ Error al actualizar la contraseña en la base de datos.");
+                }
             }
         }
 
         async function refrescar() {
             try {
-                const { data, error } = await motorSupabase
-                    .from('reportes')
-                    .select('*')
-                    .order('creado_en', { ascending: false });
-
+                const { data, error } = await motorSupabase.from('reportes').select('*').order('creado_en', { ascending: false });
                 if (error) throw error;
                 datosExcel = data;
 
                 const aprobados = data.filter(r => r.estado === 'aprobado');
-
                 const totalVotos = aprobados.reduce((sum, r) => sum + (r.votos_oficiales || 0), 0);
+                
                 document.getElementById('total-votos').innerText = totalVotos.toLocaleString();
                 document.getElementById('total-mesas').innerText = aprobados.length;
-                document.getElementById('porcentaje-exito').innerText = ((aprobados.length / 500) * 100).toFixed(1) + "%";
+                document.getElementById('porcentaje-exito').innerText = ((aprobados.length / 685) * 100).toFixed(1) + "%";
 
                 const conteoMun = {};
                 Object.keys(nombresMun).forEach(id => conteoMun[id] = 0);
@@ -131,9 +178,9 @@
                 divMun.innerHTML = '';
                 Object.keys(conteoMun).forEach(id => {
                     divMun.innerHTML += `
-                        <div class="flex justify-between items-center bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-tighter">${nombresMun[id]}</span>
-                            <span class="text-emerald-400 font-black text-xl">${conteoMun[id].toLocaleString()}</span>
+                        <div class="flex justify-between items-center bg-slate-950 p-4 rounded-2xl border border-slate-800" style="border-left: 4px solid ${coloresMun[id]}">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${nombresMun[id]}</span>
+                            <span class="font-black text-xl" style="color: ${coloresMun[id]}">${conteoMun[id].toLocaleString()}</span>
                         </div>`;
                 });
 
@@ -141,32 +188,32 @@
                 divGaleria.innerHTML = '';
                 aprobados.slice(0, 9).forEach(r => {
                     divGaleria.innerHTML += `
-                        <div class="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 p-2 group hover:border-emerald-500/50 transition-colors">
+                        <div class="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 p-2 group hover:border-blue-500/50 transition-colors">
                             <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg cursor-pointer" onclick="window.open('${r.foto_url}')">
                             <div class="mt-2 text-center">
-                                <p class="text-[9px] font-black text-slate-500 uppercase">${nombresMun[r.municipio_id]} - M${r.mesa_numero}</p>
-                                <p class="text-sm font-black text-emerald-400">${r.votos_oficiales} Votos</p>
+                                <p class="text-[8px] font-black text-slate-500 uppercase">${nombresMun[r.municipio_id]} - M${r.mesa_numero}</p>
+                                <p class="text-xs font-black text-blue-400">${r.votos_oficiales} Votos</p>
                             </div>
                         </div>`;
                 });
 
-            } catch (err) { console.log("Error de red:", err); }
+            } catch (err) { console.log("Error de sincronización:", err); }
         }
 
         function exportarExcel() {
-            if (datosExcel.length === 0) return alert("No hay datos");
+            if (datosExcel.length === 0) return alert("No hay datos para exportar");
             const reporte = datosExcel.map(r => ({
-                'Hora': new Date(r.creado_en).toLocaleString(),
-                'Municipio': nombresMun[r.municipio_id],
-                'Mesa': r.mesa_numero,
-                'Votos Oficiales': r.votos_oficiales,
-                'Estado': r.estado.toUpperCase(),
-                'Link Foto': r.foto_url
+                'MARCA_TIEMPO': new Date(r.creado_en).toLocaleString(),
+                'MUNICIPIO': nombresMun[r.municipio_id],
+                'MESA': r.mesa_numero,
+                'VOTOS': r.votos_oficiales,
+                'ESTADO': r.estado.toUpperCase(),
+                'URL_PRUEBA': r.foto_url
             }));
             const ws = XLSX.utils.json_to_sheet(reporte);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Escrutinio");
-            XLSX.writeFile(wb, "Consolidado_Arauca_2026.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "Auditoria_Electoral");
+            XLSX.writeFile(wb, "Reporte_Consolidado_Arauca.xlsx");
         }
     </script>
 </body>
