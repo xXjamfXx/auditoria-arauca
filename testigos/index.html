@@ -51,9 +51,9 @@
         </div>
 
         <div id="pantalla-reporte" class="hidden space-y-6">
-            <div class="bg-blue-900 p-5 rounded-2xl text-white relative">
+            <div class="bg-blue-900 p-5 rounded-2xl text-white relative text-center">
                 <p id="texto-ubicacion" class="text-sm font-bold leading-tight uppercase"></p>
-                <button onclick="localStorage.removeItem('config_testigo'); location.reload();" class="text-[9px] text-blue-300 underline mt-2 uppercase font-black">Cambiar Mesa</button>
+                <button onclick="localStorage.removeItem('config_testigo'); location.reload();" class="text-[9px] text-blue-300 underline mt-2 uppercase font-black">Cambiar Mesa / Corregir</button>
             </div>
 
             <div>
@@ -95,13 +95,95 @@
         const sClient = supabase.createClient(sUrl, sKey);
 
         const puestos = {
-            "1": ["Col. Piloto Arauca", "Esc. Central", "Col. Santa Teresita", "Puesto Frontera"],
-            "2": ["Sede Frontera", "Col. Simón Bolívar"],
-            "3": ["Esc. Rural Cravo", "Col. Llanero"],
-            "4": ["Instituto Fortul", "Sede Básico"],
-            "5": ["Col. Rondón", "Escuela Principal"],
-            "6": ["Col. Comercial Saravena", "Esc. Industrial"],
-            "7": ["Col. Inocencio Chincá", "Liceo Tame"]
+            "1": [ // ARAUCA
+                { nombre: "COLEGIO SIMON BOLIVAR", mesas: 37 },
+                { nombre: "CONCENTRACION CAMILO TORRES", mesas: 21 },
+                { nombre: "ESCUELA LOS LIBERTADORES", mesas: 8 },
+                { nombre: "ESCUELA JOSE MARIA CORDOBA", mesas: 5 },
+                { nombre: "NORMAL MARIA INMACULADA", mesas: 26 },
+                { nombre: "COLEGIO TEC. CRISTO REY", mesas: 40 },
+                { nombre: "ESCUELA FLOR DE MI LLANO", mesas: 26 },
+                { nombre: "UNIDAD DE SALUD MENTAL ARAUCA", mesas: 1 },
+                { nombre: "IE JUAN ISIDRO DABOIN", mesas: 2 },
+                { nombre: "IE SEDE LUIS CARLOS GALAN", mesas: 1 },
+                { nombre: "COLEGIO SANTANDER PRIMARIA", mesas: 22 },
+                { nombre: "CONC.ESCOLAR LAS COROCORAS", mesas: 13 },
+                { nombre: "CONC.ESCOLAR DIVINO NIÑO", mesas: 28 },
+                { nombre: "COL TEC SANTA TERESITA", mesas: 13 },
+                { nombre: "CARCEL", mesas: 1 },
+                { nombre: "CAÑAS BRAVAS", mesas: 2 },
+                { nombre: "MAPORILLAL", mesas: 1 },
+                { nombre: "SANTA BARBARA", mesas: 4 },
+                { nombre: "CARACOL", mesas: 2 },
+                { nombre: "TODOS LOS SANTOS", mesas: 3 },
+                { nombre: "LAS NUBES", mesas: 2 },
+                { nombre: "FELICIANO", mesas: 1 },
+                { nombre: "CLARINETERO", mesas: 1 }
+            ],
+            "2": [ // ARAUQUITA
+                { nombre: "IE LICEO DEL LLANO", mesas: 16 },
+                { nombre: "IE LICEO DEL LLANO SEDE SIMON BOLIVAR", mesas: 17 },
+                { nombre: "IE GABRIEL GARCIA MARQUEZ SEC PRIMARIA", mesas: 16 },
+                { nombre: "IE GABRIEL GARCIA MARQUEZ SEC SECUNDARIA", mesas: 17 },
+                { nombre: "AGUACHICA", mesas: 6 },
+                { nombre: "LA ESMERALDA", mesas: 11 },
+                { nombre: "LA PAZ", mesas: 4 },
+                { nombre: "REINERA", mesas: 4 },
+                { nombre: "LA PESQUERA", mesas: 5 },
+                { nombre: "BRISAS DEL CARANAL", mesas: 2 },
+                { nombre: "RESGUARDO INDIGENA EL VIGIA", mesas: 1 },
+                { nombre: "RESGUARDO INDIGENA SAN JOSE DE LIPA", mesas: 1 },
+                { nombre: "RESGUARDO INDIGENA IGUANITOS", mesas: 1 },
+                { nombre: "VEREDA FILIPINAS", mesas: 1 },
+                { nombre: "VEREDA SAN LORENZO", mesas: 1 },
+                { nombre: "VEREDA EL TRONCAL", mesas: 2 },
+                { nombre: "PANAMA DE ARAUCA", mesas: 10 }
+            ],
+            "3": [ // CRAVO NORTE
+                { nombre: "PUESTO CABECERA MUNICIPAL", mesas: 12 }
+            ],
+            "4": [ // FORTUL
+                { nombre: "POLIDEPORTIVO MUNICIPAL", mesas: 18 },
+                { nombre: "CONCENTRACION ALEJANDRO HUMBOLDT", mesas: 15 },
+                { nombre: "CAÑO FLOREZ", mesas: 3 },
+                { nombre: "NUEVO CARANAL", mesas: 6 },
+                { nombre: "MATECAÑA", mesas: 2 }
+            ],
+            "5": [ // PUERTO RONDÓN
+                { nombre: "PUESTO CABECERA MUNICIPAL", mesas: 13 }
+            ],
+            "6": [ // SARAVENA
+                { nombre: "CENTRO CULT Y DEPORTIVO SIMON", mesas: 19 },
+                { nombre: "IE LA FRONTERA", mesas: 27 },
+                { nombre: "SEDE EDUCATIVA SEIS DE OCTUBRE", mesas: 19 },
+                { nombre: "SEDE EDUCATIVA LAS VILLAS", mesas: 8 },
+                { nombre: "SEDE EDUCATIVA GENERAL SANTANDER", mesas: 14 },
+                { nombre: "IE TEC.IND.RAFAEL POMBO BTO", mesas: 25 },
+                { nombre: "SEDE EDUCATIVA MANUELA BELTRAN", mesas: 2 },
+                { nombre: "PUERTO NARIÑO", mesas: 10 },
+                { nombre: "RESGUARDO INDIGENAS DE PLAYAS DE BOJABA", mesas: 1 },
+                { nombre: "VEREDA VIAS", mesas: 3 }
+            ],
+            "7": [ // TAME
+                { nombre: "COL. INST. ORIENTAL FEMENINO", mesas: 21 },
+                { nombre: "ESCUELA SAN ANTONIO", mesas: 22 },
+                { nombre: "COLISEO CUBIERTO LOS LIBERTADORES", mesas: 13 },
+                { nombre: "COLEGIO FROILAN FARIAS", mesas: 19 },
+                { nombre: "CIUDADELA UNIVERSITARIA", mesas: 14 },
+                { nombre: "IE SAN LUIS", mesas: 1 },
+                { nombre: "BETOYES", mesas: 5 },
+                { nombre: "PUERTO GAITAN", mesas: 1 },
+                { nombre: "PUERTO SAN SALVADOR", mesas: 1 },
+                { nombre: "LA HOLANDA", mesas: 1 },
+                { nombre: "LA ARENOSA", mesas: 2 },
+                { nombre: "LAS MALVINAS", mesas: 2 },
+                { nombre: "PUERTO JORDAN", mesas: 10 },
+                { nombre: "CACHAMA", mesas: 1 },
+                { nombre: "EL BOTALON", mesas: 7 },
+                { nombre: "EL TABLON", mesas: 2 },
+                { nombre: "CENTRO POBLADO  COROCITO", mesas: 4 },
+                { nombre: "SANTO DOMINGO", mesas: 1 }
+            ]
         };
 
         let blobComprimido = null;
@@ -138,19 +220,31 @@
             if(selMun.value) {
                 puestos[selMun.value].forEach(p => {
                     const opt = document.createElement('option');
-                    opt.value = opt.textContent = p;
+                    opt.value = p.nombre;
+                    opt.textContent = `${p.nombre} (Máx: ${p.mesas})`;
+                    opt.dataset.maxMesas = p.mesas;
                     selPue.appendChild(opt);
                 });
                 selPue.disabled = false;
+            } else {
+                selPue.disabled = true;
             }
         });
 
         document.getElementById('btn-fijar').addEventListener('click', async () => {
-            const mesa = document.getElementById('input-mesa').value;
+            const mesaInput = document.getElementById('input-mesa').value;
+            const mesa = parseInt(mesaInput);
             const munId = selMun.value;
             const puesto = selPue.value;
 
-            if(!munId || !puesto || !mesa) return alert("Por favor, completa todos los campos.");
+            if(!munId || !puesto || !mesaInput) return alert("Por favor, completa todos los campos.");
+
+            const opcionSeleccionada = selPue.options[selPue.selectedIndex];
+            const maxMesas = parseInt(opcionSeleccionada.dataset.maxMesas);
+
+            if (mesa < 1 || mesa > maxMesas) {
+                return alert(`⚠️ ERROR: El puesto ${puesto} solo tiene ${maxMesas} mesas. Verifique el número de su mesa.`);
+            }
 
             const btnFijar = document.getElementById('btn-fijar');
             btnFijar.innerText = "🔍 VERIFICANDO MESA...";
@@ -162,13 +256,13 @@
                     .select('id')
                     .eq('municipio_id', parseInt(munId))
                     .eq('puesto_nombre', puesto)
-                    .eq('mesa_numero', parseInt(mesa))
+                    .eq('mesa_numero', mesa)
                     .limit(1);
 
                 if (error) throw error;
 
                 if (data && data.length > 0) {
-                    alert("⚠️La Mesa " + mesa + " ya fue reportada anteriormente, verifique su número de mesa.");
+                    alert("⚠️ La Mesa " + mesa + " ya fue reportada anteriormente. Verifique si ya envió el dato.");
                     btnFijar.innerText = "Fijar Ubicación";
                     btnFijar.disabled = false;
                 } else {
@@ -178,7 +272,7 @@
                     render();
                 }
             } catch (err) {
-                alert("Error al verificar duplicados.");
+                alert("Error al verificar base de datos.");
                 btnFijar.innerText = "Fijar Ubicación";
                 btnFijar.disabled = false;
             }
@@ -189,7 +283,7 @@
             if(d) {
                 document.getElementById('pantalla-config').classList.add('hidden');
                 document.getElementById('pantalla-reporte').classList.remove('hidden');
-                document.getElementById('texto-ubicacion').innerText = `${d.munNom} - ${d.pue} \n MESA N° ${d.mesa}`;
+                document.getElementById('texto-ubicacion').innerText = `${d.munNom}\n${d.pue}\nMESA N° ${d.mesa}`;
             }
             if(localStorage.getItem('credencial_arauca')) {
                 inputCod.value = localStorage.getItem('credencial_arauca');
@@ -233,7 +327,7 @@
             const votosOk = inputVotos.value.length > 0;
             const fotoOk = blobComprimido !== null;
             btnEnv.disabled = !(codOk && votosOk && fotoOk);
-            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest";
+            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest hover:bg-emerald-700";
             if(codOk) localStorage.setItem('credencial_arauca', inputCod.value.toUpperCase());
         }
 
@@ -254,7 +348,7 @@
                 document.getElementById('pantalla-reporte').classList.add('hidden');
                 document.getElementById('pantalla-exito').classList.remove('hidden');
             } catch (err) {
-                alert("Error al enviar.");
+                alert("Error al enviar el reporte. Revise su conexión.");
                 btnEnv.innerText = "Enviar Reporte";
                 btnEnv.disabled = false;
             }
