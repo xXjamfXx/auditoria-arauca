@@ -3,31 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estación de Validación Segura - Arauca 2026</title>
+    <title>Reporte Electoral - Arauca 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-    </style>
 </head>
-<body class="bg-slate-100 min-h-screen">
+<body class="bg-gray-100 p-4 font-sans">
 
-    <div id="pantalla-login" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center border-t-8 border-blue-600">
-            <div class="mb-6">
-                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                </div>
-                <h2 class="text-2xl font-black text-slate-800 uppercase tracking-tighter">Acceso Restringido</h2>
-                <p class="text-slate-400 text-[10px] font-black uppercase mt-1 tracking-widest">Estación de Validación Municipal</p>
-            </div>
-            
+    <div class="max-w-md mx-auto bg-white p-6 rounded-3xl shadow-xl border border-gray-200">
+        
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-black text-blue-900 leading-tight">REPORTE ELECTORAL</h1>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Campaña Oficial Arauca 2026</p>
+        </div>
+
+        <div id="pantalla-config">
             <div class="space-y-4">
                 <div>
-                    <label class="block text-left text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Seleccione Municipio</label>
-                    <select id="select-inicio" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-500 transition-all">
-                        <option value="">-- Municipio --</option>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Municipio</label>
+                    <select id="select-municipio" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-lg font-bold outline-none focus:border-blue-500 transition-all">
+                        <option value="">Seleccionar...</option>
                         <option value="1">ARAUCA</option>
                         <option value="2">ARAUQUITA</option>
                         <option value="3">CRAVO NORTE</option>
@@ -39,164 +33,328 @@
                 </div>
 
                 <div>
-                    <label class="block text-left text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Contraseña de Estación</label>
-                    <input type="password" id="pass-inicio" placeholder="••••••••" autocomplete="off" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-500 transition-all text-center tracking-widest">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Puesto de Votación</label>
+                    <select id="select-puesto" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-lg font-bold outline-none" disabled>
+                        <option value="">-- Elija municipio --</option>
+                    </select>
                 </div>
 
-                <button onclick="iniciarSesionSegura()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-blue-700 transition-all uppercase tracking-widest text-sm">
-                    Ingresar a Estación
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Mesa Número</label>
+                    <input type="number" id="input-mesa" autocomplete="off" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-2xl font-black text-blue-900 outline-none" placeholder="00">
+                </div>
+
+                <button id="btn-fijar" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl shadow-lg uppercase tracking-widest mt-4">
+                    Fijar Ubicación
                 </button>
             </div>
         </div>
-    </div>
 
-    <div id="interfaz-trabajo" class="hidden">
-        <nav class="bg-white border-b border-slate-200 p-4 sticky top-0 z-40 shadow-sm flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <span class="bg-blue-900 text-white text-[10px] font-black px-2 py-1 rounded tracking-tighter uppercase">Validador Oficial</span>
-                <h1 id="titulo-municipio" class="text-xl font-black text-blue-900 uppercase tracking-tighter"></h1>
+        <div id="pantalla-reporte" class="hidden space-y-6">
+            <div class="bg-blue-900 p-5 rounded-2xl text-white relative text-center">
+                <p id="texto-ubicacion" class="text-sm font-bold leading-tight uppercase"></p>
+                <button onclick="localStorage.removeItem('config_testigo'); location.reload();" class="text-[9px] text-blue-300 underline mt-2 uppercase font-black">Cambiar Mesa / Corregir</button>
             </div>
-            <div class="flex items-center gap-2">
-                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Sincronizado (3s)</span>
-                <button onclick="cerrarSesion()" class="ml-4 text-[10px] font-black text-red-500 border border-red-100 px-3 py-1 rounded-lg hover:bg-red-50 uppercase">Salir</button>
-            </div>
-        </nav>
 
-        <div class="p-6 max-w-5xl mx-auto">
-            <div id="contenedor-reportes" class="space-y-8">
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-2 text-center">Votos Candidato en E-14</label>
+                <input type="number" id="input-votos" autocomplete="off" class="w-full p-6 border-4 border-emerald-500 rounded-3xl text-center text-6xl font-black text-emerald-700 bg-emerald-50 outline-none shadow-inner" placeholder="0">
             </div>
+
+            <div class="border-4 border-dashed border-slate-200 bg-slate-50 p-8 rounded-3xl text-center cursor-pointer hover:bg-slate-100 transition-all relative" onclick="document.getElementById('input-foto').click()">
+                <div id="previo-foto" class="space-y-2">
+                    <p class="text-4xl">📸</p>
+                    <p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Tomar Foto del Acta E-14</p>
+                    <p id="nombre-foto" class="text-[10px] text-slate-400 italic font-bold">Obligatorio para validar</p>
+                </div>
+                <input type="file" id="input-foto" accept="image/*" capture="environment" class="hidden">
+            </div>
+
+            <div class="bg-slate-100 p-4 rounded-2xl border border-slate-200">
+                <label class="block text-[9px] font-black text-slate-500 uppercase mb-2 text-center">Código de Credencial Campaña</label>
+                <input type="text" id="codigo-seguridad" autocomplete="off" class="w-full p-3 border-2 border-white rounded-xl text-center font-mono text-xl font-black uppercase outline-none focus:border-blue-500" placeholder="CÓDIGO">
+            </div>
+
+            <button id="btn-enviar" disabled class="w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all">
+                Enviar Reporte
+            </button>
+        </div>
+
+        <div id="pantalla-exito" class="hidden text-center py-10">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">✓</div>
+            <h2 class="text-2xl font-black text-blue-900 uppercase">¡RECIBIDO!</h2>
+            <p class="text-slate-500 text-xs mt-2">El dato pasará a validación municipal.</p>
+            <button onclick="nuevoReporte()" class="mt-8 bg-slate-200 px-8 py-3 rounded-xl font-black text-xs uppercase text-slate-600">Reportar otra mesa</button>
         </div>
     </div>
 
     <script>
-        const LLAVES_MUNICIPALES = {
-            "1": "arauca123",  
-            "2": "arauquita123", 
-            "3": "cravo123",     
-            "4": "fortul123",
-            "5": "rondon123",
-            "6": "saravena123",
-            "7": "tame123"
+        const CODIGO_MAESTRO = "AR26";
+        const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
+        const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
+        const sClient = supabase.createClient(sUrl, sKey);
+
+        const puestos = {
+            "1": [ // ARAUCA
+                { nombre: "COLEGIO SIMON BOLIVAR", mesas: 37 },
+                { nombre: "CONCENTRACION CAMILO TORRES", mesas: 21 },
+                { nombre: "ESCUELA LOS LIBERTADORES", mesas: 8 },
+                { nombre: "ESCUELA JOSE MARIA CORDOBA", mesas: 5 },
+                { nombre: "NORMAL MARIA INMACULADA", mesas: 26 },
+                { nombre: "COLEGIO TEC. CRISTO REY", mesas: 40 },
+                { nombre: "ESCUELA FLOR DE MI LLANO", mesas: 26 },
+                { nombre: "UNIDAD DE SALUD MENTAL ARAUCA", mesas: 1 },
+                { nombre: "IE JUAN ISIDRO DABOIN", mesas: 2 },
+                { nombre: "IE SEDE LUIS CARLOS GALAN", mesas: 1 },
+                { nombre: "COLEGIO SANTANDER PRIMARIA", mesas: 22 },
+                { nombre: "CONC.ESCOLAR LAS COROCORAS", mesas: 13 },
+                { nombre: "CONC.ESCOLAR DIVINO NIÑO", mesas: 28 },
+                { nombre: "COL TEC SANTA TERESITA", mesas: 13 },
+                { nombre: "CARCEL", mesas: 1 },
+                { nombre: "CAÑAS BRAVAS", mesas: 2 },
+                { nombre: "MAPORILLAL", mesas: 1 },
+                { nombre: "SANTA BARBARA", mesas: 4 },
+                { nombre: "CARACOL", mesas: 2 },
+                { nombre: "TODOS LOS SANTOS", mesas: 3 },
+                { nombre: "LAS NUBES", mesas: 2 },
+                { nombre: "FELICIANO", mesas: 1 },
+                { nombre: "CLARINETERO", mesas: 1 }
+            ],
+            "2": [ // ARAUQUITA
+                { nombre: "IE LICEO DEL LLANO", mesas: 16 },
+                { nombre: "IE LICEO DEL LLANO SEDE SIMON BOLIVAR", mesas: 17 },
+                { nombre: "IE GABRIEL GARCIA MARQUEZ SEC PRIMARIA", mesas: 16 },
+                { nombre: "IE GABRIEL GARCIA MARQUEZ SEC SECUNDARIA", mesas: 17 },
+                { nombre: "AGUACHICA", mesas: 6 },
+                { nombre: "LA ESMERALDA", mesas: 11 },
+                { nombre: "LA PAZ", mesas: 4 },
+                { nombre: "REINERA", mesas: 4 },
+                { nombre: "LA PESQUERA", mesas: 5 },
+                { nombre: "BRISAS DEL CARANAL", mesas: 2 },
+                { nombre: "RESGUARDO INDIGENA EL VIGIA", mesas: 1 },
+                { nombre: "RESGUARDO INDIGENA SAN JOSE DE LIPA", mesas: 1 },
+                { nombre: "RESGUARDO INDIGENA IGUANITOS", mesas: 1 },
+                { nombre: "VEREDA FILIPINAS", mesas: 1 },
+                { nombre: "VEREDA SAN LORENZO", mesas: 1 },
+                { nombre: "VEREDA EL TRONCAL", mesas: 2 },
+                { nombre: "PANAMA DE ARAUCA", mesas: 10 }
+            ],
+            "3": [ // CRAVO NORTE
+                { nombre: "PUESTO CABECERA MUNICIPAL", mesas: 12 }
+            ],
+            "4": [ // FORTUL
+                { nombre: "POLIDEPORTIVO MUNICIPAL", mesas: 18 },
+                { nombre: "CONCENTRACION ALEJANDRO HUMBOLDT", mesas: 15 },
+                { nombre: "CAÑO FLOREZ", mesas: 3 },
+                { nombre: "NUEVO CARANAL", mesas: 6 },
+                { nombre: "MATECAÑA", mesas: 2 }
+            ],
+            "5": [ // PUERTO RONDÓN
+                { nombre: "PUESTO CABECERA MUNICIPAL", mesas: 13 }
+            ],
+            "6": [ // SARAVENA
+                { nombre: "CENTRO CULT Y DEPORTIVO SIMON", mesas: 19 },
+                { nombre: "IE LA FRONTERA", mesas: 27 },
+                { nombre: "SEDE EDUCATIVA SEIS DE OCTUBRE", mesas: 19 },
+                { nombre: "SEDE EDUCATIVA LAS VILLAS", mesas: 8 },
+                { nombre: "SEDE EDUCATIVA GENERAL SANTANDER", mesas: 14 },
+                { nombre: "IE TEC.IND.RAFAEL POMBO BTO", mesas: 25 },
+                { nombre: "SEDE EDUCATIVA MANUELA BELTRAN", mesas: 2 },
+                { nombre: "PUERTO NARIÑO", mesas: 10 },
+                { nombre: "RESGUARDO INDIGENAS DE PLAYAS DE BOJABA", mesas: 1 },
+                { nombre: "VEREDA VIAS", mesas: 3 }
+            ],
+            "7": [ // TAME
+                { nombre: "COL. INST. ORIENTAL FEMENINO", mesas: 21 },
+                { nombre: "ESCUELA SAN ANTONIO", mesas: 22 },
+                { nombre: "COLISEO CUBIERTO LOS LIBERTADORES", mesas: 13 },
+                { nombre: "COLEGIO FROILAN FARIAS", mesas: 19 },
+                { nombre: "CIUDADELA UNIVERSITARIA", mesas: 14 },
+                { nombre: "IE SAN LUIS", mesas: 1 },
+                { nombre: "BETOYES", mesas: 5 },
+                { nombre: "PUERTO GAITAN", mesas: 1 },
+                { nombre: "PUERTO SAN SALVADOR", mesas: 1 },
+                { nombre: "LA HOLANDA", mesas: 1 },
+                { nombre: "LA ARENOSA", mesas: 2 },
+                { nombre: "LAS MALVINAS", mesas: 2 },
+                { nombre: "PUERTO JORDAN", mesas: 10 },
+                { nombre: "CACHAMA", mesas: 1 },
+                { nombre: "EL BOTALON", mesas: 7 },
+                { nombre: "EL TABLON", mesas: 2 },
+                { nombre: "CENTRO POBLADO  COROCITO", mesas: 4 },
+                { nombre: "SANTO DOMINGO", mesas: 1 }
+            ]
         };
 
-        const SUPA_URL = 'https://fybolbgnxoertkocmmza.supabase.co';
-        const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
-        const sClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+        let blobComprimido = null;
 
-        let municipioActual = null;
-        let nombreMunActual = "";
-        let timer = null;
-
-        const nombres = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
-
-        function iniciarSesionSegura() {
-            const idMun = document.getElementById('select-inicio').value;
-            const passIngresada = document.getElementById('pass-inicio').value;
-
-            if (!idMun) return alert("Seleccione un municipio");
-            
-            if (LLAVES_MUNICIPALES[idMun] === passIngresada) {
-                municipioActual = idMun;
-                nombreMunActual = nombres[idMun];
-                
-                document.getElementById('titulo-municipio').innerText = nombreMunActual;
-                document.getElementById('pantalla-login').classList.add('hidden');
-                document.getElementById('interfaz-trabajo').classList.remove('hidden');
-                
-                cargarDatos();
-                timer = setInterval(cargarDatos, 3000);
-            } else {
-                alert("⚠️ Contraseña incorrecta para este municipio");
-                document.getElementById('pass-inicio').value = "";
-            }
-        }
-
-        function cerrarSesion() {
-            clearInterval(timer);
-            location.reload();
-        }
-
-        async function cargarDatos() {
-            const { data, error } = await sClient
-                .from('reportes')
-                .select('*')
-                .eq('municipio_id', municipioActual)
-                .eq('estado', 'pendiente')
-                .order('creado_en', { ascending: true });
-
-            const container = document.getElementById('contenedor-reportes');
-            
-            if (data.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-300">
-                        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                        <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Esperando nuevos reportes de ${nombreMunActual}...</p>
-                    </div>`;
-                return;
-            }
-
-            if (document.activeElement.tagName === 'INPUT') return;
-
-            container.innerHTML = '';
-            data.forEach(r => {
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row border-l-[12px] border-blue-600 animate-in slide-in-from-right duration-500";
-                card.innerHTML = `
-                    <div class="md:w-1/2 bg-slate-900 flex items-center justify-center p-2 relative">
-                        <img src="${r.foto_url}" class="max-h-[500px] rounded-lg cursor-zoom-in shadow-2xl" onclick="window.open('${r.foto_url}')">
-                        <span class="absolute bottom-4 bg-black/40 text-white text-[9px] px-3 py-1 rounded-full backdrop-blur-md font-bold uppercase tracking-widest">Click para Lupa</span>
-                    </div>
-                    <div class="md:w-1/2 p-8 flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-center mb-4">
-                                <span class="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Mesa ${r.mesa_numero}</span>
-                                <span class="text-[10px] font-mono text-slate-400">${new Date(r.creado_en).toLocaleTimeString()}</span>
-                            </div>
-                            <h3 class="text-3xl font-black text-slate-800 leading-tight">${r.puesto_nombre}</h3>
-                            <div class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reporte del Testigo:</p>
-                                <p class="text-3xl font-black text-slate-700">${r.votos_candidato} <span class="text-sm font-normal text-slate-400 uppercase">Votos</span></p>
-                            </div>
-                        </div>
-
-                        <div class="mt-8 space-y-4">
-                            <label class="block text-xs font-black text-slate-500 uppercase ml-1">Confirmar Dato Oficial (Ver Foto):</label>
-                            <input type="number" id="votos-${r.id}" value="${r.votos_candidato}" 
-                                class="w-full border-4 border-emerald-500 p-5 rounded-2xl text-5xl font-black text-emerald-700 outline-none focus:ring-8 ring-emerald-100 transition-all bg-emerald-50/30">
-                            
-                            <div class="flex gap-3 pt-2">
-                                <button onclick="procesar('${r.id}', 'aprobado')" 
-                                    class="flex-1 bg-emerald-500 text-white font-black py-5 rounded-2xl shadow-lg shadow-emerald-200 hover:bg-emerald-600 transition-all uppercase text-xs tracking-widest">
-                                    Validar Acta ✅
-                                </button>
-                                <button onclick="procesar('${r.id}', 'rechazado')" 
-                                    class="px-6 bg-red-50 text-red-500 font-bold py-5 rounded-2xl hover:bg-red-100 transition-all uppercase text-[9px]">
-                                    Rechazar ❌
-                                </button>
-                            </div>
-                        </div>
-                    </div>`;
-                container.appendChild(card);
+        async function comprimirImagen(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 1200;
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        canvas.toBlob((blob) => { resolve(blob); }, 'image/jpeg', 0.6);
+                    };
+                };
             });
         }
 
-        async function procesar(id, estado) {
-            const v = document.getElementById('votos-' + id).value;
-            const { error } = await sClient
-                .from('reportes')
-                .update({ 
-                    estado: estado, 
-                    votos_oficiales: parseInt(v) 
-                })
-                .eq('id', id);
+        const selMun = document.getElementById('select-municipio');
+        const selPue = document.getElementById('select-puesto');
+        const inputVotos = document.getElementById('input-votos');
+        const inputCod = document.getElementById('codigo-seguridad');
+        const btnEnv = document.getElementById('btn-enviar');
 
-            if (!error) {
-                cargarDatos();
+        selMun.addEventListener('change', () => {
+            selPue.innerHTML = '<option value="">Seleccione Puesto</option>';
+            if(selMun.value) {
+                puestos[selMun.value].forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.nombre;
+                    opt.textContent = `${p.nombre} (Máx: ${p.mesas})`;
+                    opt.dataset.maxMesas = p.mesas;
+                    selPue.appendChild(opt);
+                });
+                selPue.disabled = false;
             } else {
-                alert("Error de conexión al procesar.");
+                selPue.disabled = true;
+            }
+        });
+
+        document.getElementById('btn-fijar').addEventListener('click', async () => {
+            const mesaInput = document.getElementById('input-mesa').value;
+            const mesa = parseInt(mesaInput);
+            const munId = selMun.value;
+            const puesto = selPue.value;
+
+            if(!munId || !puesto || !mesaInput) return alert("Por favor, completa todos los campos.");
+
+            const opcionSeleccionada = selPue.options[selPue.selectedIndex];
+            const maxMesas = parseInt(opcionSeleccionada.dataset.maxMesas);
+
+            if (mesa < 1 || mesa > maxMesas) {
+                return alert(`⚠️ ERROR: El puesto ${puesto} solo tiene ${maxMesas} mesas. Verifique el número de su mesa.`);
+            }
+
+            const btnFijar = document.getElementById('btn-fijar');
+            btnFijar.innerText = "🔍 VERIFICANDO MESA...";
+            btnFijar.disabled = true;
+
+            try {
+                const { data, error } = await sClient
+                    .from('reportes')
+                    .select('id')
+                    .eq('municipio_id', parseInt(munId))
+                    .eq('puesto_nombre', puesto)
+                    .eq('mesa_numero', mesa)
+                    .limit(1);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    alert("⚠️ La Mesa " + mesa + " ya fue reportada anteriormente. Verifique si ya envió el dato.");
+                    btnFijar.innerText = "Fijar Ubicación";
+                    btnFijar.disabled = false;
+                } else {
+                    localStorage.setItem('config_testigo', JSON.stringify({ 
+                        munId: munId, munNom: selMun.options[selMun.selectedIndex].text, pue: puesto, mesa: mesa 
+                    }));
+                    render();
+                }
+            } catch (err) {
+                alert("Error al verificar base de datos.");
+                btnFijar.innerText = "Fijar Ubicación";
+                btnFijar.disabled = false;
+            }
+        });
+
+        function render() {
+            const d = JSON.parse(localStorage.getItem('config_testigo'));
+            if(d) {
+                document.getElementById('pantalla-config').classList.add('hidden');
+                document.getElementById('pantalla-reporte').classList.remove('hidden');
+                document.getElementById('texto-ubicacion').innerText = `${d.munNom}\n${d.pue}\nMESA N° ${d.mesa}`;
+            }
+            if(localStorage.getItem('credencial_arauca')) {
+                inputCod.value = localStorage.getItem('credencial_arauca');
+                validarFormulario();
             }
         }
+
+        function nuevoReporte() {
+            localStorage.removeItem('config_testigo');
+            location.reload();
+        }
+
+        document.getElementById('input-foto').addEventListener('change', async (e) => {
+            if(e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    document.getElementById('previo-foto').innerHTML = `
+                        <img src="${event.target.result}" class="max-h-32 mx-auto rounded-lg mb-2 shadow-md">
+                        <p class="text-blue-900 font-black text-[10px] uppercase">Toca para cambiar foto</p>
+                    `;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+
+                document.getElementById('nombre-foto').innerText = "⏳ OPTIMIZANDO...";
+                blobComprimido = await comprimirImagen(e.target.files[0]);
+                document.getElementById('nombre-foto').innerText = "✅ LISTA PARA ENVIAR";
+                validarFormulario();
+            }
+        });
+
+        [inputCod, inputVotos].forEach(el => {
+            el.addEventListener('input', validarFormulario);
+            el.addEventListener('change', validarFormulario);
+            el.addEventListener('blur', validarFormulario);
+        });
+
+        setInterval(validarFormulario, 1000);
+
+        function validarFormulario() {
+            const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
+            const votosOk = inputVotos.value.length > 0;
+            const fotoOk = blobComprimido !== null;
+            btnEnv.disabled = !(codOk && votosOk && fotoOk);
+            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest hover:bg-emerald-700";
+            if(codOk) localStorage.setItem('credencial_arauca', inputCod.value.toUpperCase());
+        }
+
+        btnEnv.addEventListener('click', async () => {
+            btnEnv.innerText = "⏳ SUBIENDO...";
+            btnEnv.disabled = true;
+            try {
+                const conf = JSON.parse(localStorage.getItem('config_testigo'));
+                const fileName = `E14_${Date.now()}.jpg`;
+                const { error: errorFoto } = await sClient.storage.from('fotos_e14').upload(fileName, blobComprimido);
+                if(errorFoto) throw errorFoto;
+                const { data: publicUrl } = sClient.storage.from('fotos_e14').getPublicUrl(fileName);
+                const { error: errorDb } = await sClient.from('reportes').insert([{
+                    municipio_id: parseInt(conf.munId), puesto_nombre: conf.pue, mesa_numero: parseInt(conf.mesa),
+                    votos_candidato: parseInt(inputVotos.value), foto_url: publicUrl.publicUrl, estado: 'pendiente'
+                }]);
+                if(errorDb) throw errorDb;
+                document.getElementById('pantalla-reporte').classList.add('hidden');
+                document.getElementById('pantalla-exito').classList.remove('hidden');
+            } catch (err) {
+                alert("Error al enviar el reporte. Revise su conexión.");
+                btnEnv.innerText = "Enviar Reporte";
+                btnEnv.disabled = false;
+            }
+        });
+
+        render();
     </script>
 </body>
 </html>
