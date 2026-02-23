@@ -100,10 +100,30 @@
     </div>
 
     <script>
-        const CODIGO_MAESTRO = "AR26";
+        // CÓDIGO SEGURO: Empieza vacío, nadie lo puede ver en el código fuente
+        let CODIGO_MAESTRO = ""; 
+
         const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
         const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
         const sClient = supabase.createClient(sUrl, sKey);
+
+        // FUNCIÓN NUEVA: Extrae la clave desde la base de datos de manera oculta
+        async function cargarCodigoSeguridad() {
+            try {
+                const { data, error } = await sClient
+                    .from('configuracion')
+                    .select('codigo_testigos') // Asegúrate de crear esta columna en Supabase
+                    .eq('id', 1)
+                    .single();
+                
+                if (data && !error) {
+                    CODIGO_MAESTRO = data.codigo_testigos.toUpperCase();
+                }
+            } catch (err) {
+                console.log("Esperando código de seguridad...");
+            }
+        }
+        cargarCodigoSeguridad(); // Llama a la base de datos ni bien abre la página
 
         const puestos = {
             "1": [ // ARAUCA
@@ -334,6 +354,9 @@
         setInterval(validarFormulario, 1000);
 
         function validarFormulario() {
+            // Protección: Si el código maestro aún no ha cargado, no activa el botón
+            if (CODIGO_MAESTRO === "") return;
+
             const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
             const votosOk = inputVotos.value.length > 0;
             const fotoOk = blobComprimido !== null;
@@ -369,4 +392,3 @@
     </script>
 </body>
 </html>
-
