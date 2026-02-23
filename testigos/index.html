@@ -6,14 +6,26 @@
     <title>Reporte Electoral - Arauca 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Agregado para asegurar que la capa de fondo se posicione bien detrás de todo */
+        body { position: relative; z-index: 10; overflow-x: hidden; }
+    </style>
 </head>
-<body class="bg-gray-100 p-4 font-sans">
+<body class="bg-gray-100 p-4 font-sans min-h-screen">
 
-    <div class="max-w-md mx-auto bg-white p-6 rounded-3xl shadow-xl border border-gray-200">
+    <div class="fixed inset-0 z-[-1] bg-cover bg-center bg-no-repeat opacity-[0.05] pointer-events-none" 
+         style="background-image: url('https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/fondo_candidato.JPG'); filter: grayscale(10%); mix-blend-mode: multiply;">
+    </div>
+
+    <div class="max-w-md mx-auto bg-white/95 backdrop-blur-sm p-6 rounded-3xl shadow-xl border border-gray-200 relative z-10">
         
-        <div class="text-center mb-6">
-            <h1 class="text-2xl font-black text-blue-900 leading-tight">REPORTE ELECTORAL</h1>
-            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Campaña Oficial Arauca 2026</p>
+        <div class="text-center mb-6"><img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  
+         alt="Logo L102" 
+         class="h-24 w-auto object-contain drop-shadow-md inline-block">
+         <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
+         alt="Numero 102" 
+         class="h-24 w-auto object-contain drop-shadow-md inline-block">
+            <h1 class="text-2xl font-black text-blue-900 leading-tight">Reporte Testigos</h1>
         </div>
 
         <div id="pantalla-config">
@@ -63,11 +75,11 @@
 
             <div class="border-4 border-dashed border-slate-200 bg-slate-50 p-8 rounded-3xl text-center cursor-pointer hover:bg-slate-100 transition-all relative" onclick="document.getElementById('input-foto').click()">
                 <div id="previo-foto" class="space-y-2">
-                    <p class="text-4xl">📸</p>
-                    <p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Tomar Foto del Acta E-14</p>
+                    <p class="text-4xl">📸 📁</p>
+                    <p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Tomar o Subir Foto del E-14</p>
                     <p id="nombre-foto" class="text-[10px] text-slate-400 italic font-bold">Obligatorio para validar</p>
                 </div>
-                <input type="file" id="input-foto" accept="image/*" capture="environment" class="hidden">
+                <input type="file" id="input-foto" accept="image/*" class="hidden">
             </div>
 
             <div class="bg-slate-100 p-4 rounded-2xl border border-slate-200">
@@ -327,7 +339,7 @@
             const votosOk = inputVotos.value.length > 0;
             const fotoOk = blobComprimido !== null;
             btnEnv.disabled = !(codOk && votosOk && fotoOk);
-            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest hover:bg-emerald-700";
+            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest hover:bg-emerald-700 transition-all";
             if(codOk) localStorage.setItem('credencial_arauca', inputCod.value.toUpperCase());
         }
 
