@@ -25,17 +25,15 @@
             <div class="mb-8 text-center">
                 <div class="flex items-center justify-center mx-auto mb-4">
                     <div class="text-center">
-    <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  
-         alt="Logo L102" 
-         class="h-24 w-auto object-contain drop-shadow-md inline-block">
-         
-    <br> <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
-         alt="Numero 102" 
-         class="h-24 w-auto object-contain drop-shadow-md inline-block">
-</div>
-                
-            </div>
-               
+                        <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  
+                             alt="Logo L102" 
+                             class="h-24 w-auto object-contain drop-shadow-md inline-block">
+                             
+                        <br> <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
+                             alt="Numero 102" 
+                             class="h-24 w-auto object-contain drop-shadow-md inline-block">
+                    </div>
+                </div>
             </div>
             
             <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
@@ -73,7 +71,7 @@
                     <button onclick="exportarExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-black px-6 py-3 rounded-2xl flex items-center gap-2 shadow-md transition-all uppercase text-xs">
                         Descargar Excel
                     </button>
-                    <button onclick="location.reload()" class="bg-white p-3 rounded-2xl hover:bg-red-50 hover:text-red-600 text-red-400 transition-colors border border-slate-200 shadow-sm" title="Cerrar Sesión">
+                    <button onclick="cerrarSesion()" class="bg-white p-3 rounded-2xl hover:bg-red-50 hover:text-red-600 text-red-400 transition-colors border border-slate-200 shadow-sm" title="Cerrar Sesión">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                     </button>
                 </div>
@@ -120,6 +118,22 @@
         const nombresMun = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
         const coloresMun = { 1: "#3b82f6", 2: "#10b981", 3: "#8b5cf6", 4: "#06b6d4", 5: "#6366f1", 6: "#2dd4bf", 7: "#a855f7" };
 
+        // NUEVA LÓGICA: Leer memoria al cargar la página
+        window.onload = () => {
+            if (localStorage.getItem('sesion_dashboard_l102') === 'activa') {
+                document.getElementById('bloqueo-central').classList.add('hidden');
+                document.getElementById('contenido-dashboard').classList.remove('hidden');
+                refrescar();
+                setInterval(refrescar, 10000);
+            }
+        };
+
+        // NUEVA LÓGICA: Función para borrar memoria y salir
+        function cerrarSesion() {
+            localStorage.removeItem('sesion_dashboard_l102');
+            location.reload();
+        }
+
         async function verificarAcceso() {
             const passInput = document.getElementById('pass-maestra').value;
             if(!passInput) return alert("Ingrese una contraseña");
@@ -138,7 +152,9 @@
                 if (error) throw error;
 
                 if (data && data.clave_dashboard === passInput) {
-                    // Ocultamos el bloqueo y mostramos el dashboard
+                    // NUEVA LÓGICA: Guardar memoria al entrar con éxito
+                    localStorage.setItem('sesion_dashboard_l102', 'activa');
+                    
                     document.getElementById('bloqueo-central').classList.add('hidden');
                     document.getElementById('contenido-dashboard').classList.remove('hidden');
                     refrescar();
