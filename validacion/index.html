@@ -9,17 +9,26 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
+        #pantalla-login, #interfaz-trabajo { position: relative; z-index: 10; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen">
+<body class="bg-slate-100 min-h-screen relative overflow-x-hidden">
 
-    <div id="pantalla-login" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center border-t-8 border-blue-600">
+    <div class="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-15 pointer-events-none" 
+         style="background-image: url('https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/fondo_candidato.JPG'); mix-blend-mode: multiply;">
+    </div>
+
+    <div id="pantalla-login" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6 backdrop-blur-sm">
+
+        <div class="bg-white/95 p-8 rounded-3xl shadow-xl max-w-sm w-full text-center border-t-4 border-blue-500 backdrop-blur-md">
             <div class="mb-6">
-                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                </div>
-                <h2 class="text-2xl font-black text-slate-800 uppercase tracking-tighter">Acceso Municipal</h2>
+                          
+                 <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  
+         alt="Logo L102" 
+         class="h-24 w-auto object-contain drop-shadow-md inline-block">
+         <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
+         alt="Numero 102" 
+         class="h-24 w-auto object-contain drop-shadow-md inline-block">
                 <p class="text-slate-400 text-[10px] font-black uppercase mt-1 tracking-widest">Estación de Validación Oficial</p>
             </div>
             
@@ -43,7 +52,7 @@
                     <input type="password" id="pass-inicio" placeholder="••••••••" autocomplete="off" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-500 transition-all text-center tracking-widest">
                 </div>
 
-                <button id="btn-login" onclick="iniciarSesionSegura()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-blue-700 transition-all uppercase tracking-widest text-sm">
+                <button id="btn-login" onclick="iniciarSesionSegura()" class="w-full bg-slate-700 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-slate-800 transition-all uppercase tracking-widest text-sm">
                     Ingresar a Estación
                 </button>
             </div>
@@ -51,18 +60,21 @@
     </div>
 
     <div id="interfaz-trabajo" class="hidden">
-        <nav class="bg-white border-b border-slate-200 p-4 sticky top-0 z-40 shadow-sm flex flex-wrap justify-between items-center gap-4">
+        <nav class="bg-white/90 border-b border-slate-200 p-4 sticky top-0 z-40 shadow-sm flex flex-wrap justify-between items-center gap-4 backdrop-blur-md">
             <div class="flex items-center gap-3">
-                <span class="bg-blue-900 text-white text-[10px] font-black px-2 py-1 rounded tracking-tighter uppercase">Validador</span>
+                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  
+         alt="Logo L102" 
+         class="h-24 w-auto object-contain drop-shadow-md inline-block">
+                
                 <h1 id="titulo-municipio" class="text-xl font-black text-blue-900 uppercase tracking-tighter"></h1>
             </div>
             <div class="flex items-center gap-4">
                 <button onclick="cambiarClaveMunicipal()" class="text-[10px] font-black text-slate-500 hover:text-blue-600 uppercase border-b border-transparent hover:border-blue-600 transition-all">
-                    ⚙️ Cambiar Mi Clave
+                    Cambiar Contraseña
                 </button>
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Sincronización en vivo</span>
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Online</span>
                 </div>
                 <button onclick="cerrarSesion()" class="text-[10px] font-black text-red-500 border border-red-100 px-3 py-1 rounded-lg hover:bg-red-50 uppercase">Salir</button>
             </div>
@@ -83,6 +95,24 @@
         let timer = null;
 
         const nombres = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
+
+        // NUEVA LÓGICA: Leer memoria al cargar la página
+        window.onload = () => {
+            const munGuardado = localStorage.getItem('sesion_validador_munId');
+            const nombreGuardado = localStorage.getItem('sesion_validador_munNombre');
+            
+            if (munGuardado && nombreGuardado) {
+                municipioActual = munGuardado;
+                nombreMunActual = nombreGuardado;
+                
+                document.getElementById('titulo-municipio').innerText = nombreMunActual;
+                document.getElementById('pantalla-login').classList.add('hidden');
+                document.getElementById('interfaz-trabajo').classList.remove('hidden');
+                
+                cargarDatos();
+                timer = setInterval(cargarDatos, 3000);
+            }
+        };
 
         async function iniciarSesionSegura() {
             const idMun = document.getElementById('select-inicio').value;
@@ -108,6 +138,10 @@
                     municipioActual = idMun;
                     nombreMunActual = nombres[idMun];
                     
+                    // NUEVA LÓGICA: Guardar en memoria qué municipio inició sesión
+                    localStorage.setItem('sesion_validador_munId', municipioActual);
+                    localStorage.setItem('sesion_validador_munNombre', nombreMunActual);
+                    
                     document.getElementById('titulo-municipio').innerText = nombreMunActual;
                     document.getElementById('pantalla-login').classList.add('hidden');
                     document.getElementById('interfaz-trabajo').classList.remove('hidden');
@@ -115,13 +149,13 @@
                     cargarDatos();
                     timer = setInterval(cargarDatos, 3000);
                 } else {
-                    alert("⚠️ Contraseña incorrecta para este municipio");
+                    alert("Contraseña incorrecta para este municipio");
                     document.getElementById('pass-inicio').value = "";
                     btn.innerText = "Ingresar a Estación";
                     btn.disabled = false;
                 }
             } catch (err) {
-                alert("Error de conexión con la base de datos.");
+                alert("Error de conexión con la base de datos o municipio no configurado.");
                 btn.innerText = "Ingresar a Estación";
                 btn.disabled = false;
             }
@@ -136,12 +170,15 @@
                 .update({ clave: nueva })
                 .eq('municipio_id', municipioActual);
 
-            if (!error) alert("✅ Clave municipal actualizada.");
+            if (!error) alert("Clave municipal actualizada.");
             else alert("Error al actualizar.");
         }
 
         function cerrarSesion() {
             clearInterval(timer);
+            // NUEVA LÓGICA: Borrar la memoria al salir
+            localStorage.removeItem('sesion_validador_munId');
+            localStorage.removeItem('sesion_validador_munNombre');
             location.reload();
         }
 
@@ -155,11 +192,12 @@
 
             const container = document.getElementById('contenedor-reportes');
             
+            // Cuadro de espera más suave y translúcido
             if (data.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-300">
-                        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                        <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Esperando reportes de ${nombreMunActual}...</p>
+                    <div class="text-center py-20 bg-white/70 rounded-3xl border border-slate-200 backdrop-blur-sm shadow-sm">
+                        <div class="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p class="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Esperando reportes de ${nombreMunActual}...</p>
                     </div>`;
                 return;
             }
@@ -169,7 +207,7 @@
             container.innerHTML = '';
             data.forEach(r => {
                 const card = document.createElement('div');
-                card.className = "bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row border-l-[12px] border-blue-600 animate-in slide-in-from-right duration-500 mb-6";
+                card.className = "bg-white/95 rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row border-l-[12px] border-blue-600 animate-in slide-in-from-right duration-500 mb-6 backdrop-blur-sm";
                 card.innerHTML = `
                     <div class="md:w-1/2 bg-slate-900 flex items-center justify-center p-2">
                         <img src="${r.foto_url}" class="max-h-[500px] rounded-lg shadow-2xl cursor-zoom-in" onclick="window.open('${r.foto_url}')">
@@ -208,4 +246,3 @@
     </script>
 </body>
 </html>
-
