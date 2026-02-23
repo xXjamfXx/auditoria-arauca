@@ -261,7 +261,7 @@
                 puestos[selMun.value].forEach(p => {
                     const opt = document.createElement('option');
                     opt.value = p.nombre;
-                    opt.textContent = `${p.nombre} (Máx: ${p.mesas})`;
+                    opt.textContent = `${p.nombre} `;
                     opt.dataset.maxMesas = p.mesas;
                     selPue.appendChild(opt);
                 });
@@ -401,4 +401,5 @@
     </script>
 </body>
 </html>
+
 
