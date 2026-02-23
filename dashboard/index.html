@@ -14,76 +14,97 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
+<body class="bg-slate-50 text-slate-800 min-h-screen relative overflow-x-hidden">
 
-    <div id="bloqueo-central" class="fixed inset-0 bg-slate-950 z-[100] flex items-center justify-center p-6">
+    <div class="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-[0.05] pointer-events-none" 
+         style="background-image: url('https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/fondo_candidato.JPG'); filter: grayscale(10%); mix-blend-mode: multiply;">
+    </div>
+
+    <div id="bloqueo-central" class="fixed inset-0 bg-slate-100 z-[100] flex items-center justify-center p-6">
         <div class="max-w-md w-full text-center">
-            <div class="mb-8">
-                <div class="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                </div>
-                <h2 class="text-3xl font-black text-white uppercase tracking-tighter italic">L 102</h2>
+            <div class="mb-8 text-center">
+                <div class="flex items-center justify-center mx-auto mb-4">
+                    <div class="text-center">
+    <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  
+         alt="Logo L102" 
+         class="h-24 w-auto object-contain drop-shadow-md inline-block">
+         
+    <br> <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
+         alt="Numero 102" 
+         class="h-24 w-auto object-contain drop-shadow-md inline-block">
+</div>
+                
+            </div>
+               
             </div>
             
-            <div class="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-2xl">
-                <input type="password" id="pass-maestra" placeholder="CONTRASEÑA" autocomplete="off" class="w-full bg-slate-950 border-2 border-slate-800 p-4 rounded-2xl text-center font-mono text-xl mb-4 focus:border-emerald-500 outline-none transition-all text-white tracking-widest">
-                <button id="btn-ingreso" onclick="verificarAcceso()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl transition-all uppercase tracking-widest text-sm shadow-lg shadow-emerald-900/20">
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
+                <input type="password" id="pass-maestra" placeholder="Contraseña" autocomplete="off" class="w-full bg-slate-50 border-2 border-slate-200 p-4 rounded-2xl text-center font-mono text-xl mb-4 focus:border-emerald-500 outline-none transition-all text-slate-800 tracking-widest">
+                <button id="btn-ingreso" onclick="verificarAcceso()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl transition-all uppercase tracking-widest text-sm shadow-lg shadow-emerald-200">
                     INGRESAR
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="contenido-dashboard" class="hidden p-4 md:p-8">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center mb-10 gap-4 border-b border-slate-800 pb-8">
-            <div>
-                <h1 class="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 uppercase">Consolidado Oficial</h1>
-                <div class="flex items-center gap-2 mt-1">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <p class="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Sincronización en vivo activa</p>
-                </div>
+    <div id="contenido-dashboard" class="hidden p-4 md:p-8 relative z-10">
+        
+        <div class="max-w-6xl mx-auto mb-10 bg-white/80 p-6 rounded-3xl backdrop-blur-md shadow-sm border border-slate-200 flex flex-col gap-4">
+            
+            <div class="w-full relative overflow-hidden rounded-2xl">
+                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/baner%20pagina2.jpg" 
+                     class="w-full h-48 md:h-56 object-cover object-top drop-shadow-sm" 
+                     alt="Banner Campaña L102">
             </div>
-            <div class="flex gap-4 items-center flex-wrap justify-end">
-                <button onclick="descargarPaqueteE14()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-3 rounded-2xl flex items-center gap-2 transition-all text-xs border border-emerald-500 shadow-lg">
-                     Descargar Actas (ZIP)
-                </button>
-                <button onclick="cambiarClaveDashboard()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-3 rounded-2xl flex items-center gap-2 transition-all text-xs border border-slate-700">
-                     Actualizar Contraseña
-                </button>
-                <button onclick="exportarExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-black px-6 py-3 rounded-2xl flex items-center gap-2 shadow-lg transition-all uppercase text-xs">
-                    Descargar Excel
-                </button>
-                <button onclick="location.reload()" class="bg-slate-800 p-3 rounded-2xl hover:bg-red-500 text-white transition-colors" title="Cerrar Sesión">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                </button>
+
+            <div class="flex flex-col md:flex-row justify-between items-center px-2 pt-2 gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <p class="text-slate-500 font-bold uppercase tracking-widest text-[11px]">Sincronización en vivo activa</p>
+                </div>
+
+                <div class="flex gap-3 items-center flex-wrap justify-center md:justify-end">
+                    <button onclick="descargarPaqueteE14()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-3 rounded-2xl flex items-center gap-2 transition-all text-xs shadow-md">
+                        📦 Descargar Actas (ZIP)
+                    </button>
+                    <button onclick="cambiarClaveDashboard()" class="bg-white hover:bg-slate-50 text-slate-600 font-bold px-4 py-3 rounded-2xl flex items-center gap-2 transition-all text-xs border border-slate-200 shadow-sm">
+                        ⚙️ Actualizar Contraseña
+                    </button>
+                    <button onclick="exportarExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-black px-6 py-3 rounded-2xl flex items-center gap-2 shadow-md transition-all uppercase text-xs">
+                        Descargar Excel
+                    </button>
+                    <button onclick="location.reload()" class="bg-white p-3 rounded-2xl hover:bg-red-50 hover:text-red-600 text-red-400 transition-colors border border-slate-200 shadow-sm" title="Cerrar Sesión">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    </button>
+                </div>
             </div>
         </div>
 
         <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 text-emerald-500/10 text-9xl font-black italic group-hover:scale-110 transition-transform">V</div>
+            <div class="bg-white/90 border border-slate-200 p-8 rounded-3xl relative overflow-hidden group backdrop-blur-md shadow-xl">
+                <div class="absolute -right-4 -top-4 text-slate-100 text-9xl font-black italic group-hover:scale-110 transition-transform">V</div>
                 <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Votos Validados</p>
-                <h2 id="total-votos" class="text-7xl font-black text-white relative z-10 tracking-tighter">0</h2>
+                <h2 id="total-votos" class="text-7xl font-black text-slate-800 relative z-10 tracking-tighter">0</h2>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 text-blue-500/10 text-9xl font-black italic group-hover:scale-110 transition-transform">M</div>
+            <div class="bg-white/90 border border-slate-200 p-8 rounded-3xl relative overflow-hidden group backdrop-blur-md shadow-xl">
+                <div class="absolute -right-4 -top-4 text-blue-50 text-9xl font-black italic group-hover:scale-110 transition-transform">M</div>
                 <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Mesas Escrutadas</p>
-                <h2 id="total-mesas" class="text-6xl font-black text-blue-400 relative z-10 tracking-tighter">0</h2>
+                <h2 id="total-mesas" class="text-6xl font-black text-blue-600 relative z-10 tracking-tighter">0</h2>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 text-emerald-500/10 text-9xl font-black italic group-hover:scale-110 transition-transform">%</div>
+            <div class="bg-white/90 border border-slate-200 p-8 rounded-3xl relative overflow-hidden group backdrop-blur-md shadow-xl">
+                <div class="absolute -right-4 -top-4 text-emerald-50 text-9xl font-black italic group-hover:scale-110 transition-transform">%</div>
                 <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Meta Alcanzada</p>
-                <h2 id="porcentaje-exito" class="text-6xl font-black text-emerald-400 relative z-10 tracking-tighter">0%</h2>
+                <h2 id="porcentaje-exito" class="text-6xl font-black text-emerald-500 relative z-10 tracking-tighter">0%</h2>
             </div>
         </div>
 
         <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl h-fit">
-                <h3 class="text-slate-400 font-black text-xs uppercase mb-6 border-b border-slate-800 pb-4 tracking-tighter">Resultados Municipales</h3>
+            <div class="bg-white/90 border border-slate-200 rounded-3xl p-6 shadow-xl h-fit backdrop-blur-md">
+                <h3 class="text-slate-400 font-black text-xs uppercase mb-6 border-b border-slate-100 pb-4 tracking-tighter">Resultados Municipales</h3>
                 <div id="lista-municipios" class="space-y-3"></div>
             </div>
-            <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
-                <h3 class="text-slate-400 font-black text-xs uppercase mb-6 border-b border-slate-800 pb-4 tracking-tighter">Auditoría Visual: Últimos E-14</h3>
+            <div class="lg:col-span-2 bg-white/90 border border-slate-200 rounded-3xl p-6 shadow-xl backdrop-blur-md">
+                <h3 class="text-slate-400 font-black text-xs uppercase mb-6 border-b border-slate-100 pb-4 tracking-tighter">Auditoría Visual: Últimos E-14</h3>
                 <div id="galeria-actas" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
             </div>
         </div>
@@ -117,6 +138,7 @@
                 if (error) throw error;
 
                 if (data && data.clave_dashboard === passInput) {
+                    // Ocultamos el bloqueo y mostramos el dashboard
                     document.getElementById('bloqueo-central').classList.add('hidden');
                     document.getElementById('contenido-dashboard').classList.remove('hidden');
                     refrescar();
@@ -176,8 +198,8 @@
                 divMun.innerHTML = '';
                 Object.keys(conteoMun).forEach(id => {
                     divMun.innerHTML += `
-                        <div class="flex justify-between items-center bg-slate-950 p-4 rounded-2xl border border-slate-800" style="border-left: 4px solid ${coloresMun[id]}">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${nombresMun[id]}</span>
+                        <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-100 shadow-sm" style="border-left: 4px solid ${coloresMun[id]}">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">${nombresMun[id]}</span>
                             <span class="font-black text-xl" style="color: ${coloresMun[id]}">${conteoMun[id].toLocaleString()}</span>
                         </div>`;
                 });
@@ -186,11 +208,11 @@
                 divGaleria.innerHTML = '';
                 aprobados.slice(0, 9).forEach(r => {
                     divGaleria.innerHTML += `
-                        <div class="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 p-2 group hover:border-blue-500/50 transition-colors">
+                        <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 p-2 shadow-sm group hover:border-blue-300 transition-colors">
                             <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg cursor-pointer" onclick="window.open('${r.foto_url}')">
                             <div class="mt-2 text-center">
-                                <p class="text-[8px] font-black text-slate-500 uppercase">${nombresMun[r.municipio_id]} - M${r.mesa_numero}</p>
-                                <p class="text-xs font-black text-blue-400">${r.votos_oficiales} Votos</p>
+                                <p class="text-[8px] font-black text-slate-400 uppercase">${nombresMun[r.municipio_id]} - M${r.mesa_numero}</p>
+                                <p class="text-xs font-black text-blue-600">${r.votos_oficiales} Votos</p>
                             </div>
                         </div>`;
                 });
@@ -198,7 +220,6 @@
             } catch (err) { console.log("Error de sincronización:", err); }
         }
 
-        // LÓGICA DE DESCARGA ZIP (MUNICIPIO + MESA)
         async function descargarPaqueteE14() {
             const aprobados = datosExcel.filter(r => r.estado === 'aprobado');
             if (aprobados.length === 0) return alert("No hay actas aprobadas para descargar.");
