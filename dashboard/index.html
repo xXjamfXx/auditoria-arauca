@@ -58,15 +58,15 @@
             <div class="flex flex-col md:flex-row justify-between items-center px-2 pt-2 gap-4">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <p class="text-slate-500 font-bold uppercase tracking-widest text-[11px]">Online</p>
+                    <p class="text-slate-500 font-bold uppercase tracking-widest text-[11px]">Sincronización en vivo activa</p>
                 </div>
 
                 <div class="flex gap-3 items-center flex-wrap justify-center md:justify-end">
                     <button onclick="descargarPaqueteE14()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-3 rounded-2xl flex items-center gap-2 transition-all text-xs shadow-md">
-                        Descargar Actas (ZIP)
+                        📦 Descargar Actas (ZIP)
                     </button>
                     <button onclick="cambiarClaveDashboard()" class="bg-white hover:bg-slate-50 text-slate-600 font-bold px-4 py-3 rounded-2xl flex items-center gap-2 transition-all text-xs border border-slate-200 shadow-sm">
-                        Actualizar Contraseña
+                        ⚙️ Actualizar Contraseña
                     </button>
                     <button onclick="exportarExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-black px-6 py-3 rounded-2xl flex items-center gap-2 shadow-md transition-all uppercase text-xs">
                         Descargar Excel
@@ -102,7 +102,21 @@
                 <div id="lista-municipios" class="space-y-3"></div>
             </div>
             <div class="lg:col-span-2 bg-white/90 border border-slate-200 rounded-3xl p-6 shadow-xl backdrop-blur-md">
-                <h3 class="text-slate-400 font-black text-xs uppercase mb-6 border-b border-slate-100 pb-4 tracking-tighter">Auditoría Visual: Últimos E-14</h3>
+                
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-slate-100 pb-4 gap-3">
+                    <h3 class="text-slate-400 font-black text-xs uppercase tracking-tighter">Auditoría Visual: Actas E-14</h3>
+                    <select id="filtro-municipio" onchange="renderizarGaleria()" class="bg-slate-50 border border-slate-200 text-xs font-bold p-2 rounded-xl outline-none focus:border-blue-500 text-slate-600">
+                        <option value="todos">Todos los Municipios</option>
+                        <option value="1">Arauca</option>
+                        <option value="2">Arauquita</option>
+                        <option value="3">Cravo Norte</option>
+                        <option value="4">Fortul</option>
+                        <option value="5">Puerto Rondón</option>
+                        <option value="6">Saravena</option>
+                        <option value="7">Tame</option>
+                    </select>
+                </div>
+
                 <div id="galeria-actas" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
             </div>
         </div>
@@ -115,10 +129,11 @@
         const motorSupabase = supabase.createClient(sUrl, sKey);
         
         let datosExcel = [];
+        let actasAprobadasGlobal = []; // Variable para guardar las actas y poder filtrarlas sin recargar
+        
         const nombresMun = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
         const coloresMun = { 1: "#3b82f6", 2: "#10b981", 3: "#8b5cf6", 4: "#06b6d4", 5: "#6366f1", 6: "#2dd4bf", 7: "#a855f7" };
 
-        // NUEVA LÓGICA: Leer memoria al cargar la página
         window.onload = () => {
             if (localStorage.getItem('sesion_dashboard_l102') === 'activa') {
                 document.getElementById('bloqueo-central').classList.add('hidden');
@@ -128,7 +143,6 @@
             }
         };
 
-        // NUEVA LÓGICA: Función para borrar memoria y salir
         function cerrarSesion() {
             localStorage.removeItem('sesion_dashboard_l102');
             location.reload();
@@ -152,7 +166,6 @@
                 if (error) throw error;
 
                 if (data && data.clave_dashboard === passInput) {
-                    // NUEVA LÓGICA: Guardar memoria al entrar con éxito
                     localStorage.setItem('sesion_dashboard_l102', 'activa');
                     
                     document.getElementById('bloqueo-central').classList.add('hidden');
@@ -200,6 +213,8 @@
                 datosExcel = data;
 
                 const aprobados = data.filter(r => r.estado === 'aprobado');
+                actasAprobadasGlobal = aprobados; // Guardamos en global para el filtro
+                
                 const totalVotos = aprobados.reduce((sum, r) => sum + (r.votos_oficiales || 0), 0);
                 
                 document.getElementById('total-votos').innerText = totalVotos.toLocaleString();
@@ -220,20 +235,43 @@
                         </div>`;
                 });
 
-                const divGaleria = document.getElementById('galeria-actas');
-                divGaleria.innerHTML = '';
-                aprobados.slice(0, 9).forEach(r => {
-                    divGaleria.innerHTML += `
-                        <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 p-2 shadow-sm group hover:border-blue-300 transition-colors">
-                            <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg cursor-pointer" onclick="window.open('${r.foto_url}')">
-                            <div class="mt-2 text-center">
-                                <p class="text-[8px] font-black text-slate-400 uppercase">${nombresMun[r.municipio_id]} - M${r.mesa_numero}</p>
-                                <p class="text-xs font-black text-blue-600">${r.votos_oficiales} Votos</p>
-                            </div>
-                        </div>`;
-                });
+                // Llamamos a la función de la galería para que dibuje respetando el filtro actual
+                renderizarGaleria();
 
             } catch (err) { console.log("Error de sincronización:", err); }
+        }
+
+        // 👇 NUEVA FUNCIÓN: Dibuja la galería y aplica el filtro si hay uno seleccionado
+        function renderizarGaleria() {
+            const filtroMun = document.getElementById('filtro-municipio').value;
+            let actasParaMostrar = actasAprobadasGlobal;
+
+            // Si hay un filtro, recortamos la lista solo a ese municipio
+            if (filtroMun !== 'todos') {
+                actasParaMostrar = actasParaMostrar.filter(r => r.municipio_id == filtroMun);
+            }
+
+            const divGaleria = document.getElementById('galeria-actas');
+            divGaleria.innerHTML = '';
+
+            if (actasParaMostrar.length === 0) {
+                divGaleria.innerHTML = `<p class="col-span-full text-center text-xs text-slate-400 py-8 uppercase tracking-widest font-bold">No hay actas en este municipio</p>`;
+                return;
+            }
+
+            // Mostramos las últimas 9 o 12 (puse 12 para que se vea más lleno)
+            actasParaMostrar.slice(0, 12).forEach(r => {
+                divGaleria.innerHTML += `
+                    <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 p-2 shadow-sm group hover:border-blue-300 transition-colors flex flex-col justify-between">
+                        <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg cursor-pointer" onclick="window.open('${r.foto_url}')">
+                        <div class="mt-2 text-center flex-1 flex flex-col justify-end">
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-tight">${nombresMun[r.municipio_id]}</p>
+                            <p class="text-[10px] font-black text-slate-800 uppercase leading-tight mt-1 mb-1 truncate px-1" title="${r.puesto_nombre}">${r.puesto_nombre}</p>
+                            <p class="text-[9px] font-bold text-slate-500 uppercase bg-slate-100 rounded-md py-0.5 w-fit mx-auto px-2">Mesa ${r.mesa_numero}</p>
+                            <p class="text-sm font-black text-blue-600 mt-2">${r.votos_oficiales} Votos</p>
+                        </div>
+                    </div>`;
+            });
         }
 
         async function descargarPaqueteE14() {
@@ -253,7 +291,7 @@
                     try {
                         const response = await fetch(r.foto_url);
                         const blob = await response.blob();
-                        const nombreArchivo = `${nombresMun[r.municipio_id]}_Mesa_${r.mesa_numero}.jpg`.replace(/\s+/g, '_');
+                        const nombreArchivo = `${nombresMun[r.municipio_id]}_${r.puesto_nombre.substring(0,10)}_Mesa_${r.mesa_numero}.jpg`.replace(/\s+/g, '_');
                         carpeta.file(nombreArchivo, blob);
                     } catch (e) { console.error("Error descargando imagen:", r.foto_url); }
                 });
@@ -274,8 +312,11 @@
             const reporte = datosExcel.map(r => ({
                 'MARCA_TIEMPO': new Date(r.creado_en).toLocaleString(),
                 'MUNICIPIO': nombresMun[r.municipio_id],
+                // 👇 SE AÑADIÓ EL PUESTO TAMBIÉN AL EXCEL PARA AUDITORÍA
+                'PUESTO_VOTACION': r.puesto_nombre, 
                 'MESA': r.mesa_numero,
-                'VOTOS': r.votos_oficiales,
+                'VOTOS_REPORTADOS': r.votos_candidato,
+                'VOTOS_VALIDADOS': r.votos_oficiales,
                 'ESTADO': r.estado.toUpperCase(),
                 'URL_PRUEBA': r.foto_url
             }));
@@ -287,5 +328,3 @@
     </script>
 </body>
 </html>
-
-
