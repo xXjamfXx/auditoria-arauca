@@ -397,9 +397,22 @@
             }
         });
 
+        const parametrosURL = new URLSearchParams(window.location.search);
+        const municipioFijo = parametrosURL.get('mun');
+
+        if (municipioFijo && puestos[municipioFijo]) {
+            selMun.value = municipioFijo; // Selecciona el municipio automáticamente
+            selMun.dispatchEvent(new Event('change')); // Carga los colegios de ese municipio
+            
+            // Opcional: Bloquea el selector para que el testigo no lo pueda cambiar por error
+            selMun.disabled = true; 
+            selMun.classList.add('opacity-70'); // Lo pone un poco transparente para que se vea bloqueado
+        }
+        // ---------------------------------------------
         render();
     </script>
 </body>
 </html>
+
 
 
