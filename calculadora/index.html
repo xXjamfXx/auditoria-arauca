@@ -20,10 +20,8 @@
          <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
          alt="Numero 102" 
          class="h-24 w-auto object-contain drop-shadow-md inline-block">
-           
-            
-            <h1 class="text-2xl font-black text-blue-900 mt-2">DIFERENCIAL 10%</h1>
-            <p class="text-[9px] text-slate-500 font-bold uppercase">Análisis Técnico de Votación por Mesa</p>
+          <h1 class="text-2xl font-black text-blue-900 mt-2">DIFERENCIAL 10%</h1>
+            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Art. 164 del Código Electoral Colombiano</p>
         </div>
 
         <div class="space-y-4">
@@ -52,7 +50,7 @@
             <div class="grid grid-cols-1 gap-2">
                 <label class="flex items-center space-x-3 p-3 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50">
                     <input type="checkbox" id="tachaduras" onchange="calcular()" class="w-5 h-5 accent-blue-900">
-                    <span class="text-[11px] font-bold text-slate-700 uppercase">Tachaduras / Enmendaduras NO OBSERVADAS</span>
+                    <span class="text-[11px] font-bold text-slate-700 uppercase leading-tight">Tachaduras / Enmendaduras NO justificadas en observaciones</span>
                 </label>
             </div>
 
@@ -61,8 +59,8 @@
                 <p id="resultado-base" class="text-[10px] mt-2 font-bold leading-relaxed"></p>
             </div>
 
-            <p class="text-[8px] text-center text-slate-400 font-medium italic">
-                "Las comisiones no podrán negar la solicitud de recuento cuando aparezca una diferencia del 10% o más..." - Art. 164
+            <p class="text-[8px] text-center text-slate-400 font-medium italic px-4">
+                "Las comisiones escrutadoras no podrán negar la solicitud de recuento cuando aparezca una diferencia del 10% o más..." - Art. 164 Código Electoral.
             </p>
         </div>
     </div>
@@ -101,18 +99,18 @@
             if (esIlegal || tachaduras) {
                 caja.className = "p-5 rounded-2xl text-center alerta-legal";
                 diffPorcTxt.className = "text-xl font-black text-red-500";
-                texto.innerText = "🚨 RECUENTO OBLIGATORIO (ART. 164)";
+                texto.innerText = "🚨 RECUENTO OBLIGATORIO";
                 
                 let razon = "";
-                if (esIlegal) razon += `Diferencial del ${porcentaje.toFixed(1)}% (${diferencia} votos), superando el umbral del 10%. `;
-                if (tachaduras) razon += "Presencia de tachaduras o enmendaduras NO justificadas en el campo de observaciones. ";
+                if (esIlegal) razon += `Diferencial del ${porcentaje.toFixed(1)}% (${diferencia} votos). `;
+                if (tachaduras) razon += "Tachaduras/enmendaduras sin observar. ";
                 
-                base.innerText = razon + "Por mandato legal del Artículo 164, la Comisión NO PODRÁ NEGAR la solicitud de recuento ante estas evidencias.";
+                base.innerText = razon + "Según el Artículo 164 del Código Electoral Colombiano, la Comisión Escrutadora NO PODRÁ NEGAR la solicitud de recuento ante estas causales.";
             } else {
                 caja.className = "p-5 rounded-2xl text-center exito-legal";
                 diffPorcTxt.className = "text-xl font-black text-emerald-400";
-                texto.innerText = "✅ VALORES DENTRO DEL RANGO";
-                base.innerText = "Diferencial actual: " + porcentaje.toFixed(1) + "%. No alcanza el 10% y no se reportan tachaduras sin observar. La mesa se presume exacta.";
+                texto.innerText = "✅ DENTRO DEL RANGO";
+                base.innerText = "El diferencial del " + porcentaje.toFixed(1) + "% no cumple la causal de obligatoriedad del Art. 164 del Código Electoral.";
             }
         }
     </script>
