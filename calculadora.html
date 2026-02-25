@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Jurídica L102 - Art. 164</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .alerta-legal { background: #fee2e2; border: 2px solid #ef4444; color: #b91c1c; }
+        .exito-legal { background: #dcfce7; border: 2px solid #22c55e; color: #15803d; }
+    </style>
+</head>
+<body class="bg-slate-100 p-4 font-sans text-slate-800">
+
+    <div class="max-w-md mx-auto bg-white p-6 rounded-3xl shadow-2xl border border-slate-200">
+        <div class="text-center mb-6">
+             <div class="text-center mb-6"><img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  
+         alt="Logo L102" 
+         class="h-24 w-auto object-contain drop-shadow-md inline-block">
+         <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
+         alt="Numero 102" 
+         class="h-24 w-auto object-contain drop-shadow-md inline-block">
+           
+            
+            <h1 class="text-2xl font-black text-blue-900 mt-2">DIFERENCIAL 10%</h1>
+            <p class="text-[9px] text-slate-500 font-bold uppercase">Análisis Técnico de Votación por Mesa</p>
+        </div>
+
+        <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-50 p-3 rounded-2xl">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Votos Cámara</label>
+                    <input type="number" id="votosA" oninput="calcular()" class="w-full bg-transparent text-center text-3xl font-black text-blue-900 outline-none" placeholder="0">
+                </div>
+                <div class="bg-slate-50 p-3 rounded-2xl">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Votos Senado</label>
+                    <input type="number" id="votosB" oninput="calcular()" class="w-full bg-transparent text-center text-3xl font-black text-blue-900 outline-none" placeholder="0">
+                </div>
+            </div>
+
+            <div id="panel-calculo" class="bg-slate-900 text-white p-4 rounded-2xl hidden">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase text-slate-400">Diferencia Votos:</span>
+                    <span id="diff-votos" class="text-xl font-black text-emerald-400">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] font-bold uppercase text-slate-400">Porcentaje de Variación:</span>
+                    <span id="diff-porcentaje" class="text-xl font-black text-emerald-400">0%</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-2">
+                <label class="flex items-center space-x-3 p-3 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50">
+                    <input type="checkbox" id="tachaduras" onchange="calcular()" class="w-5 h-5 accent-blue-900">
+                    <span class="text-[11px] font-bold text-slate-700 uppercase">Tachaduras / Enmendaduras NO OBSERVADAS</span>
+                </label>
+            </div>
+
+            <div id="resultado-caja" class="p-5 rounded-2xl text-center hidden">
+                <p id="resultado-texto" class="text-sm font-black uppercase leading-tight"></p>
+                <p id="resultado-base" class="text-[10px] mt-2 font-bold leading-relaxed"></p>
+            </div>
+
+            <p class="text-[8px] text-center text-slate-400 font-medium italic">
+                "Las comisiones no podrán negar la solicitud de recuento cuando aparezca una diferencia del 10% o más..." - Art. 164
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function calcular() {
+            const vA = parseFloat(document.getElementById('votosA').value) || 0;
+            const vB = parseFloat(document.getElementById('votosB').value) || 0;
+            const tachaduras = document.getElementById('tachaduras').checked;
+            
+            const panel = document.getElementById('panel-calculo');
+            const diffVotosTxt = document.getElementById('diff-votos');
+            const diffPorcTxt = document.getElementById('diff-porcentaje');
+            const caja = document.getElementById('resultado-caja');
+            const texto = document.getElementById('resultado-texto');
+            const base = document.getElementById('resultado-base');
+
+            if (vA === 0 && vB === 0 && !tachaduras) {
+                panel.classList.add('hidden');
+                caja.classList.add('hidden');
+                return;
+            }
+
+            panel.classList.remove('hidden');
+            caja.classList.remove('hidden');
+
+            const diferencia = Math.abs(vA - vB);
+            const mayorValor = Math.max(vA, vB);
+            const porcentaje = mayorValor > 0 ? (diferencia / mayorValor) * 100 : 0;
+
+            diffVotosTxt.innerText = diferencia;
+            diffPorcTxt.innerText = porcentaje.toFixed(1) + "%";
+
+            const esIlegal = porcentaje >= 10;
+
+            if (esIlegal || tachaduras) {
+                caja.className = "p-5 rounded-2xl text-center alerta-legal";
+                diffPorcTxt.className = "text-xl font-black text-red-500";
+                texto.innerText = "🚨 RECUENTO OBLIGATORIO (ART. 164)";
+                
+                let razon = "";
+                if (esIlegal) razon += `Diferencial del ${porcentaje.toFixed(1)}% (${diferencia} votos), superando el umbral del 10%. `;
+                if (tachaduras) razon += "Presencia de tachaduras o enmendaduras NO justificadas en el campo de observaciones. ";
+                
+                base.innerText = razon + "Por mandato legal del Artículo 164, la Comisión NO PODRÁ NEGAR la solicitud de recuento ante estas evidencias.";
+            } else {
+                caja.className = "p-5 rounded-2xl text-center exito-legal";
+                diffPorcTxt.className = "text-xl font-black text-emerald-400";
+                texto.innerText = "✅ VALORES DENTRO DEL RANGO";
+                base.innerText = "Diferencial actual: " + porcentaje.toFixed(1) + "%. No alcanza el 10% y no se reportan tachaduras sin observar. La mesa se presume exacta.";
+            }
+        }
+    </script>
+</body>
+</html>
