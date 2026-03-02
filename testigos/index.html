@@ -258,7 +258,8 @@
         selMun.addEventListener('change', () => {
             selPue.innerHTML = '<option value="">Seleccione Puesto</option>';
             if(selMun.value) {
-                puestos[selMun.value].forEach(p => {
+                const listaPuestos = puestos[selMun.value];
+                listaPuestos.forEach(p => {
                     const opt = document.createElement('option');
                     opt.value = p.nombre;
                     opt.textContent = `${p.nombre} `;
@@ -266,6 +267,11 @@
                     selPue.appendChild(opt);
                 });
                 selPue.disabled = false;
+                
+                // Si solo hay un puesto en el municipio, seleccionarlo automáticamente
+                if (listaPuestos.length === 1) {
+                    selPue.value = listaPuestos[0].nombre;
+                }
             } else {
                 selPue.disabled = true;
             }
