@@ -28,8 +28,12 @@
     <div class="max-w-md mx-auto bg-white/95 backdrop-blur-sm p-6 rounded-3xl shadow-xl border border-gray-200 relative z-10">
         
         <div class="text-center mb-6">
-            <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  alt="Logo L102" class="h-24 w-auto object-contain drop-shadow-md inline-block">
-            <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png" alt="Numero 102" class="h-24 w-auto object-contain drop-shadow-md inline-block">
+            <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  
+         alt="Logo L102" 
+         class="h-24 w-auto object-contain drop-shadow-md inline-block">
+         <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
+         alt="Numero 102" 
+         class="h-24 w-auto object-contain drop-shadow-md inline-block">
             <h1 class="text-2xl font-black text-blue-900 leading-tight">Reporte Testigos</h1>
         </div>
 
@@ -81,7 +85,7 @@
             <div class="border-4 border-dashed border-slate-200 bg-slate-50 p-8 rounded-3xl text-center cursor-pointer hover:bg-slate-100 transition-all relative" onclick="document.getElementById('input-foto').click()">
                 <div id="previo-foto" class="space-y-2">
                     <p class="text-4xl">📸 📁</p>
-                    <p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Subir Foto del E-14 (Original)</p>
+                    <p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Subir Foto del E-14 (Desde Galería)</p>
                     <p id="nombre-foto" class="text-[10px] text-slate-400 italic font-bold">Obligatorio para validar</p>
                 </div>
                 <input type="file" id="input-foto" accept=".jpg, .jpeg, .png" class="hidden">
@@ -106,18 +110,19 @@
     </div>
 
     <script>
+        // CÓDIGO SEGURO: Empieza vacío, nadie lo puede ver en el código fuente
         let CODIGO_MAESTRO = ""; 
-        let archivoOriginal = null; // Variable para almacenar el archivo sin procesar
 
         const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
         const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
         const sClient = supabase.createClient(sUrl, sKey);
 
+        // FUNCIÓN NUEVA: Extrae la clave desde la base de datos de manera oculta
         async function cargarCodigoSeguridad() {
             try {
                 const { data, error } = await sClient
                     .from('configuracion')
-                    .select('codigo_testigos')
+                    .select('codigo_testigos') // Asegúrate de crear esta columna en Supabase
                     .eq('id', 1)
                     .single();
                 
@@ -125,20 +130,104 @@
                     CODIGO_MAESTRO = data.codigo_testigos.toUpperCase();
                 }
             } catch (err) {
-                console.log("Error cargando código seguridad");
+                console.log("Esperando código de seguridad...");
             }
         }
-        cargarCodigoSeguridad();
+        cargarCodigoSeguridad(); // Llama a la base de datos ni bien abre la página
 
         const puestos = {
-            "1": [{ nombre: "COLEGIO SIMON BOLIVAR", mesas: 37 }, { nombre: "CONCENTRACION CAMILO TORRES", mesas: 21 }, { nombre: "ESCUELA LOS LIBERTADORES", mesas: 8 }, { nombre: "ESCUELA JOSE MARIA CORDOBA", mesas: 5 }, { nombre: "NORMAL MARIA INMACULADA", mesas: 26 }, { nombre: "COLEGIO TEC. CRISTO REY", mesas: 40 }, { nombre: "ESCUELA FLOR DE MI LLANO", mesas: 26 }, { nombre: "UNIDAD DE SALUD MENTAL ARAUCA", mesas: 1 }, { nombre: "IE JUAN ISIDRO DABOIN", mesas: 2 }, { nombre: "IE SEDE LUIS CARLOS GALAN", mesas: 1 }, { nombre: "COLEGIO SANTANDER PRIMARIA", mesas: 22 }, { nombre: "CONC.ESCOLAR LAS COROCORAS", mesas: 13 }, { nombre: "CONC.ESCOLAR DIVINO NIÑO", mesas: 28 }, { nombre: "COL TEC SANTA TERESITA", mesas: 13 }, { nombre: "CARCEL", mesas: 1 }, { nombre: "CAÑAS BRAVAS", mesas: 2 }, { nombre: "MAPORILLAL", mesas: 1 }, { nombre: "SANTA BARBARA", mesas: 4 }, { nombre: "CARACOL", mesas: 2 }, { nombre: "TODOS LOS SANTOS", mesas: 3 }, { nombre: "LAS NUBES", mesas: 2 }, { nombre: "FELICIANO", mesas: 1 }, { nombre: "CLARINETERO", mesas: 1 }],
-            "2": [{ nombre: "IE LICEO DEL LLANO", mesas: 16 }, { nombre: "IE LICEO DEL LLANO SEDE SIMON BOLIVAR", mesas: 17 }, { nombre: "IE GABRIEL GARCIA MARQUEZ SEC PRIMARIA", mesas: 16 }, { nombre: "IE GABRIEL GARCIA MARQUEZ SEC SECUNDARIA", mesas: 17 }, { nombre: "AGUACHICA", mesas: 6 }, { nombre: "LA ESMERALDA", mesas: 11 }, { nombre: "LA PAZ", mesas: 4 }, { nombre: "REINERA", mesas: 4 }, { nombre: "LA PESQUERA", mesas: 5 }, { nombre: "BRISAS DEL CARANAL", mesas: 2 }, { nombre: "RESGUARDO INDIGENA EL VIGIA", mesas: 1 }, { nombre: "RESGUARDO INDIGENA SAN JOSE DE LIPA", mesas: 1 }, { nombre: "RESGUARDO INDIGENA IGUANITOS", mesas: 1 }, { nombre: "VEREDA FILIPINAS", mesas: 1 }, { nombre: "VEREDA SAN LORENZO", mesas: 1 }, { nombre: "VEREDA EL TRONCAL", mesas: 2 }, { nombre: "PANAMA DE ARAUCA", mesas: 10 }],
-            "3": [{ nombre: "PUESTO CABECERA MUNICIPAL", mesas: 12 }],
-            "4": [{ nombre: "POLIDEPORTIVO MUNICIPAL", mesas: 18 }, { nombre: "CONCENTRACION ALEJANDRO HUMBOLDT", mesas: 15 }, { nombre: "CAÑO FLOREZ", mesas: 3 }, { nombre: "NUEVO CARANAL", mesas: 6 }, { nombre: "MATECAÑA", mesas: 2 }],
-            "5": [{ nombre: "PUESTO CABECERA MUNICIPAL", mesas: 13 }],
-            "6": [{ nombre: "CENTRO CULT Y DEPORTIVO SIMON", mesas: 19 }, { nombre: "IE LA FRONTERA", mesas: 27 }, { nombre: "SEDE EDUCATIVA SEIS DE OCTUBRE", mesas: 19 }, { nombre: "SEDE EDUCATIVA LAS VILLAS", mesas: 8 }, { nombre: "SEDE EDUCATIVA GENERAL SANTANDER", mesas: 14 }, { nombre: "IE TEC.IND.RAFAEL POMBO BTO", mesas: 25 }, { nombre: "SEDE EDUCATIVA MANUELA BELTRAN", mesas: 2 }, { nombre: "PUERTO NARIÑO", mesas: 10 }, { nombre: "RESGUARDO INDIGENAS DE PLAYAS DE BOJABA", mesas: 1 }, { nombre: "VEREDA VIAS", mesas: 3 }],
-            "7": [{ nombre: "COL. INST. ORIENTAL FEMENINO", mesas: 21 }, { nombre: "ESCUELA SAN ANTONIO", mesas: 22 }, { nombre: "COLISEO CUBIERTO LOS LIBERTADORES", mesas: 13 }, { nombre: "COLEGIO FROILAN FARIAS", mesas: 19 }, { nombre: "CIUDADELA UNIVERSITARIA", mesas: 14 }, { nombre: "IE SAN LUIS", mesas: 1 }, { nombre: "BETOYES", mesas: 5 }, { nombre: "PUERTO GAITAN", mesas: 1 }, { nombre: "PUERTO SAN SALVADOR", mesas: 1 }, { nombre: "LA HOLANDA", mesas: 1 }, { nombre: "LA ARENOSA", mesas: 2 }, { nombre: "LAS MALVINAS", mesas: 2 }, { nombre: "PUERTO JORDAN", mesas: 10 }, { nombre: "CACHAMA", mesas: 1 }, { nombre: "EL BOTALON", mesas: 7 }, { nombre: "EL TABLON", mesas: 2 }, { nombre: "CENTRO POBLADO COROCITO", mesas: 4 }, { nombre: "SANTO DOMINGO", mesas: 1 }]
+            "1": [ // ARAUCA
+                { nombre: "COLEGIO SIMON BOLIVAR", mesas: 37 },
+                { nombre: "CONCENTRACION CAMILO TORRES", mesas: 21 },
+                { nombre: "ESCUELA LOS LIBERTADORES", mesas: 8 },
+                { nombre: "ESCUELA JOSE MARIA CORDOBA", mesas: 5 },
+                { nombre: "NORMAL MARIA INMACULADA", mesas: 26 },
+                { nombre: "COLEGIO TEC. CRISTO REY", mesas: 40 },
+                { nombre: "ESCUELA FLOR DE MI LLANO", mesas: 26 },
+                { nombre: "UNIDAD DE SALUD MENTAL ARAUCA", mesas: 1 },
+                { nombre: "IE JUAN ISIDRO DABOIN", mesas: 2 },
+                { nombre: "IE SEDE LUIS CARLOS GALAN", mesas: 1 },
+                { nombre: "COLEGIO SANTANDER PRIMARIA", mesas: 22 },
+                { nombre: "CONC.ESCOLAR LAS COROCORAS", mesas: 13 },
+                { nombre: "CONC.ESCOLAR DIVINO NIÑO", mesas: 28 },
+                { nombre: "COL TEC SANTA TERESITA", mesas: 13 },
+                { nombre: "CARCEL", mesas: 1 },
+                { nombre: "CAÑAS BRAVAS", mesas: 2 },
+                { nombre: "MAPORILLAL", mesas: 1 },
+                { nombre: "SANTA BARBARA", mesas: 4 },
+                { nombre: "CARACOL", mesas: 2 },
+                { nombre: "TODOS LOS SANTOS", mesas: 3 },
+                { nombre: "LAS NUBES", mesas: 2 },
+                { nombre: "FELICIANO", mesas: 1 },
+                { nombre: "CLARINETERO", mesas: 1 }
+            ],
+            "2": [ // ARAUQUITA
+                { nombre: "IE LICEO DEL LLANO", mesas: 16 },
+                { nombre: "IE LICEO DEL LLANO SEDE SIMON BOLIVAR", mesas: 17 },
+                { nombre: "IE GABRIEL GARCIA MARQUEZ SEC PRIMARIA", mesas: 16 },
+                { nombre: "IE GABRIEL GARCIA MARQUEZ SEC SECUNDARIA", mesas: 17 },
+                { nombre: "AGUACHICA", mesas: 6 },
+                { nombre: "LA ESMERALDA", mesas: 11 },
+                { nombre: "LA PAZ", mesas: 4 },
+                { nombre: "REINERA", mesas: 4 },
+                { nombre: "LA PESQUERA", mesas: 5 },
+                { nombre: "BRISAS DEL CARANAL", mesas: 2 },
+                { nombre: "RESGUARDO INDIGENA EL VIGIA", mesas: 1 },
+                { nombre: "RESGUARDO INDIGENA SAN JOSE DE LIPA", mesas: 1 },
+                { nombre: "RESGUARDO INDIGENA IGUANITOS", mesas: 1 },
+                { nombre: "VEREDA FILIPINAS", mesas: 1 },
+                { nombre: "VEREDA SAN LORENZO", mesas: 1 },
+                { nombre: "VEREDA EL TRONCAL", mesas: 2 },
+                { nombre: "PANAMA DE ARAUCA", mesas: 10 }
+            ],
+            "3": [ // CRAVO NORTE
+                { nombre: "PUESTO CABECERA MUNICIPAL", mesas: 12 }
+            ],
+            "4": [ // FORTUL
+                { nombre: "POLIDEPORTIVO MUNICIPAL", mesas: 18 },
+                { nombre: "CONCENTRACION ALEJANDRO HUMBOLDT", mesas: 15 },
+                { nombre: "CAÑO FLOREZ", mesas: 3 },
+                { nombre: "NUEVO CARANAL", mesas: 6 },
+                { nombre: "MATECAÑA", mesas: 2 }
+            ],
+            "5": [ // PUERTO RONDÓN
+                { nombre: "PUESTO CABECERA MUNICIPAL", mesas: 13 }
+            ],
+            "6": [ // SARAVENA
+                { nombre: "CENTRO CULT Y DEPORTIVO SIMON", mesas: 19 },
+                { nombre: "IE LA FRONTERA", mesas: 27 },
+                { nombre: "SEDE EDUCATIVA SEIS DE OCTUBRE", mesas: 19 },
+                { nombre: "SEDE EDUCATIVA LAS VILLAS", mesas: 8 },
+                { nombre: "SEDE EDUCATIVA GENERAL SANTANDER", mesas: 14 },
+                { nombre: "IE TEC.IND.RAFAEL POMBO BTO", mesas: 25 },
+                { nombre: "SEDE EDUCATIVA MANUELA BELTRAN", mesas: 2 },
+                { nombre: "PUERTO NARIÑO", mesas: 10 },
+                { nombre: "RESGUARDO INDIGENAS DE PLAYAS DE BOJABA", mesas: 1 },
+                { nombre: "VEREDA VIAS", mesas: 3 }
+            ],
+            "7": [ // TAME
+                { nombre: "COL. INST. ORIENTAL FEMENINO", mesas: 21 },
+                { nombre: "ESCUELA SAN ANTONIO", mesas: 22 },
+                { nombre: "COLISEO CUBIERTO LOS LIBERTADORES", mesas: 13 },
+                { nombre: "COLEGIO FROILAN FARIAS", mesas: 19 },
+                { nombre: "CIUDADELA UNIVERSITARIA", mesas: 14 },
+                { nombre: "IE SAN LUIS", mesas: 1 },
+                { nombre: "BETOYES", mesas: 5 },
+                { nombre: "PUERTO GAITAN", mesas: 1 },
+                { nombre: "PUERTO SAN SALVADOR", mesas: 1 },
+                { nombre: "LA HOLANDA", mesas: 1 },
+                { nombre: "LA ARENOSA", mesas: 2 },
+                { nombre: "LAS MALVINAS", mesas: 2 },
+                { nombre: "PUERTO JORDAN", mesas: 10 },
+                { nombre: "CACHAMA", mesas: 1 },
+                { nombre: "EL BOTALON", mesas: 7 },
+                { nombre: "EL TABLON", mesas: 2 },
+                { nombre: "CENTRO POBLADO  COROCITO", mesas: 4 },
+                { nombre: "SANTO DOMINGO", mesas: 1 }
+            ]
         };
+
+        let archivoOriginal = null;
 
         const selMun = document.getElementById('select-municipio');
         const selPue = document.getElementById('select-puesto');
@@ -153,12 +242,16 @@
                 listaPuestos.forEach(p => {
                     const opt = document.createElement('option');
                     opt.value = p.nombre;
-                    opt.textContent = p.nombre;
+                    opt.textContent = `${p.nombre} `;
                     opt.dataset.maxMesas = p.mesas;
                     selPue.appendChild(opt);
                 });
                 selPue.disabled = false;
-                if (listaPuestos.length === 1) selPue.value = listaPuestos[0].nombre;
+                
+                // Si solo hay un puesto en el municipio, seleccionarlo automáticamente
+                if (listaPuestos.length === 1) {
+                    selPue.value = listaPuestos[0].nombre;
+                }
             } else {
                 selPue.disabled = true;
             }
@@ -170,27 +263,44 @@
             const munId = selMun.value;
             const puesto = selPue.value;
 
-            if(!munId || !puesto || !mesaInput) return alert("Completa todos los campos.");
+            if(!munId || !puesto || !mesaInput) return alert("Por favor, completa todos los campos.");
 
             const opcionSeleccionada = selPue.options[selPue.selectedIndex];
             const maxMesas = parseInt(opcionSeleccionada.dataset.maxMesas);
 
-            if (mesa < 1 || mesa > maxMesas) return alert(`La mesa ${mesa} no existe en este puesto.`);
+            if (mesa < 1 || mesa > maxMesas) {
+                return alert(`⚠️ ERROR: El puesto ${puesto} solo tiene ${maxMesas} mesas. Verifique el número de su mesa.`);
+            }
 
-            document.getElementById('btn-fijar').disabled = true;
+            const btnFijar = document.getElementById('btn-fijar');
+            btnFijar.innerText = "🔍 VERIFICANDO MESA...";
+            btnFijar.disabled = true;
 
             try {
-                const { data } = await sClient.from('reportes').select('id').eq('municipio_id', parseInt(munId)).eq('puesto_nombre', puesto).eq('mesa_numero', mesa).limit(1);
+                const { data, error } = await sClient
+                    .from('reportes')
+                    .select('id')
+                    .eq('municipio_id', parseInt(munId))
+                    .eq('puesto_nombre', puesto)
+                    .eq('mesa_numero', mesa)
+                    .limit(1);
+
+                if (error) throw error;
+
                 if (data && data.length > 0) {
-                    alert("Esta mesa ya fue reportada.");
-                    document.getElementById('btn-fijar').disabled = false;
+                    alert("⚠️ La Mesa " + mesa + " ya fue reportada anteriormente. Verifique si ya envió el dato.");
+                    btnFijar.innerText = "Fijar Ubicación";
+                    btnFijar.disabled = false;
                 } else {
-                    localStorage.setItem('config_testigo', JSON.stringify({ munId, munNom: selMun.options[selMun.selectedIndex].text, pue: puesto, mesa }));
+                    localStorage.setItem('config_testigo', JSON.stringify({ 
+                        munId: munId, munNom: selMun.options[selMun.selectedIndex].text, pue: puesto, mesa: mesa 
+                    }));
                     render();
                 }
             } catch (err) {
-                alert("Error de conexión.");
-                document.getElementById('btn-fijar').disabled = false;
+                alert("Error al verificar base de datos.");
+                btnFijar.innerText = "Fijar Ubicación";
+                btnFijar.disabled = false;
             }
         });
 
@@ -207,26 +317,45 @@
             }
         }
 
+        function nuevoReporte() {
+            localStorage.removeItem('config_testigo');
+            location.reload();
+        }
+
         document.getElementById('input-foto').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if(file) {
-                archivoOriginal = file; // Guardar el archivo real para subir
+            if(e.target.files[0]) {
+                archivoOriginal = e.target.files[0];
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    document.getElementById('previo-foto').innerHTML = `<img src="${event.target.result}" class="max-h-32 mx-auto rounded-lg mb-2 shadow-md">`;
-                    document.getElementById('nombre-foto').innerText = "✅ ARCHIVO CARGADO";
-                    validarFormulario();
+                    document.getElementById('previo-foto').innerHTML = `
+                        <img src="${event.target.result}" class="max-h-32 mx-auto rounded-lg mb-2 shadow-md">
+                        <p class="text-blue-900 font-black text-[10px] uppercase">Toca para cambiar foto</p>
+                    `;
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(e.target.files[0]);
+
+                document.getElementById('nombre-foto').innerText = "✅ LISTA PARA ENVIAR";
+                validarFormulario();
             }
         });
 
+        [inputCod, inputVotos].forEach(el => {
+            el.addEventListener('input', validarFormulario);
+            el.addEventListener('change', validarFormulario);
+            el.addEventListener('blur', validarFormulario);
+        });
+
+        setInterval(validarFormulario, 1000);
+
         function validarFormulario() {
+            // Protección: Si el código maestro aún no ha cargado, no activa el botón
+            if (CODIGO_MAESTRO === "") return;
+
             const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
             const votosOk = inputVotos.value.length > 0;
             const fotoOk = archivoOriginal !== null;
             btnEnv.disabled = !(codOk && votosOk && fotoOk);
-            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest";
+            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest hover:bg-emerald-700 transition-all";
             if(codOk) localStorage.setItem('credencial_arauca', inputCod.value.toUpperCase());
         }
 
@@ -235,30 +364,40 @@
             btnEnv.disabled = true;
             try {
                 const conf = JSON.parse(localStorage.getItem('config_testigo'));
-                const ext = archivoOriginal.name.split('.').pop();
-                const fileName = `E14_${Date.now()}.${ext}`;
-
-                // SUBIDA DIRECTA DEL ARCHIVO ORIGINAL
+                
+                // Extraer la extensión del archivo original
+                const extension = archivoOriginal.name.split('.').pop();
+                const fileName = `E14_${Date.now()}.${extension}`;
+                
                 const { error: errorFoto } = await sClient.storage.from('fotos_e14').upload(fileName, archivoOriginal);
                 if(errorFoto) throw errorFoto;
-
                 const { data: publicUrl } = sClient.storage.from('fotos_e14').getPublicUrl(fileName);
                 const { error: errorDb } = await sClient.from('reportes').insert([{
                     municipio_id: parseInt(conf.munId), puesto_nombre: conf.pue, mesa_numero: parseInt(conf.mesa),
                     votos_candidato: parseInt(inputVotos.value), foto_url: publicUrl.publicUrl, estado: 'pendiente'
                 }]);
                 if(errorDb) throw errorDb;
-
                 document.getElementById('pantalla-reporte').classList.add('hidden');
                 document.getElementById('pantalla-exito').classList.remove('hidden');
             } catch (err) {
-                alert("Error al enviar.");
+                alert("Error al enviar el reporte. Revise su conexión.");
                 btnEnv.innerText = "Enviar Reporte";
                 btnEnv.disabled = false;
             }
         });
 
-        function nuevoReporte() { localStorage.removeItem('config_testigo'); location.reload(); }
+        const parametrosURL = new URLSearchParams(window.location.search);
+        const municipioFijo = parametrosURL.get('mun');
+
+        if (municipioFijo && puestos[municipioFijo]) {
+            selMun.value = municipioFijo; // Selecciona el municipio automáticamente
+            selMun.dispatchEvent(new Event('change')); // Carga los colegios de ese municipio
+            
+            // Opcional: Bloquea el selector para que el testigo no lo pueda cambiar por error
+            selMun.disabled = true; 
+            selMun.classList.add('opacity-70'); // Lo pone un poco transparente para que se vea bloqueado
+        }
+        // ---------------------------------------------
         render();
     </script>
 </body>
