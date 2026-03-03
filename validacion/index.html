@@ -44,14 +44,13 @@
 
     <div id="pantalla-roles" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6 backdrop-blur-md">
         <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center">
-            <h2 class="text-xl font-black text-blue-900 mb-2 uppercase">Identificación</h2>
              <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png" alt="Logo" class="h-24 w-auto object-contain drop-shadow-md inline-block">
                 <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png" alt="102" class="h-24 w-auto object-contain drop-shadow-md inline-block">
             <p class="text-slate-500 text-[10px] font-bold mb-6 uppercase tracking-widest">Puesto Saravena</p>
             <div class="space-y-3">
-                <button onclick="seleccionarRol('ING. URIEL')" class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 p-4 rounded-2xl font-black text-blue-900 uppercase text-xs">👤 ING. URIEL </button>
-                <button onclick="seleccionarRol('ANA TRIANA')" class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 p-4 rounded-2xl font-black text-blue-900 uppercase text-xs">👤 ANA TRIANA</button>
-                <button onclick="seleccionarRol('MAYERLI')" class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 p-4 rounded-2xl font-black text-blue-900 uppercase text-xs">👤 MAYERLI</button>
+                <button onclick="seleccionarRol('ING. URIEL')" class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 p-4 rounded-2xl font-black text-blue-900 uppercase text-xs"> ING. URIEL </button>
+                <button onclick="seleccionarRol('ANA TRIANA')" class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 p-4 rounded-2xl font-black text-blue-900 uppercase text-xs"> ANA TRIANA</button>
+                <button onclick="seleccionarRol('MAYERLI')" class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 p-4 rounded-2xl font-black text-blue-900 uppercase text-xs"> MAYERLI</button>
             </div>
         </div>
     </div>
@@ -85,8 +84,6 @@
 
         const nombres = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
 
-        // MOTOR DE REPARTO EQUITATIVO (ALGORITMO DJB2)
-        // Convierte el ID en un número distribuido uniformemente
         function generarHashEquitativo(str) {
             let hash = 5381;
             for (let i = 0; i < str.length; i++) {
@@ -104,7 +101,13 @@
                 municipioActual = munGuardado;
                 nombreMunActual = nombreGuardado;
                 validadorActual = valGuardado || "";
-                mostrarInterfaz();
+
+                if (municipioActual === "6" && !validadorActual) {
+                    document.getElementById('pantalla-login').classList.add('hidden');
+                    document.getElementById('pantalla-roles').classList.remove('hidden');
+                } else {
+                    mostrarInterfaz();
+                }
             }
         };
 
@@ -170,21 +173,23 @@
             }
             if (document.activeElement.tagName === 'INPUT') return;
 
-            // --- LÓGICA DE REPARTO BALANCEADO ---
             let dataFiltrada = data;
             if (municipioActual === "6" && validadorActual !== "") {
-                const numValidador = parseInt(validadorActual.split(" ")[1]); 
+                // Mapeo manual de nombres a números 1, 2, 3 para el reparto
+                let numValidador = 0;
+                if (validadorActual === 'ING. URIEL') numValidador = 1;
+                if (validadorActual === 'ANA TRIANA') numValidador = 2;
+                if (validadorActual === 'MAYERLI') numValidador = 3;
                 
                 dataFiltrada = data.filter(r => {
                     const hashValue = generarHashEquitativo(r.id.toString());
-                    // El resto de la división por 3 siempre dará 0, 1 o 2 de forma equitativa
                     return (hashValue % 3) === (numValidador - 1);
                 });
             }
 
             container.innerHTML = '';
             if (dataFiltrada.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 font-bold text-slate-400">Bandeja vacía. Esperando actas asignadas a tu perfil...</div>`;
+                container.innerHTML = `<div class="text-center py-10 font-bold text-slate-400 uppercase text-[10px]">Bandeja vacía. Sin actas asignadas a tu perfil en este momento.</div>`;
                 return;
             }
 
@@ -230,6 +235,3 @@
     </script>
 </body>
 </html>
-
-
-
