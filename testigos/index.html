@@ -227,7 +227,7 @@
             ]
         };
 
-        let archivoOriginal = null;
+        let archivoOriginalParaSubir = null;
 
         const selMun = document.getElementById('select-municipio');
         const selPue = document.getElementById('select-puesto');
@@ -324,17 +324,16 @@
 
         document.getElementById('input-foto').addEventListener('change', (e) => {
             if(e.target.files[0]) {
-                archivoOriginal = e.target.files[0];
+                archivoOriginalParaSubir = e.target.files[0];
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     document.getElementById('previo-foto').innerHTML = `
                         <img src="${event.target.result}" class="max-h-32 mx-auto rounded-lg mb-2 shadow-md">
                         <p class="text-blue-900 font-black text-[10px] uppercase">Toca para cambiar foto</p>
                     `;
+                    document.getElementById('nombre-foto').innerText = "✅ LISTA PARA ENVIAR";
                 };
-                reader.readAsDataURL(e.target.files[0]);
-
-                document.getElementById('nombre-foto').innerText = "✅ LISTA PARA ENVIAR";
+                reader.readAsDataURL(archivoOriginalParaSubir);
                 validarFormulario();
             }
         });
@@ -353,35 +352,52 @@
 
             const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
             const votosOk = inputVotos.value.length > 0;
-            const fotoOk = archivoOriginal !== null;
+            const fotoOk = archivoOriginalParaSubir !== null;
+            
             btnEnv.disabled = !(codOk && votosOk && fotoOk);
-            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest hover:bg-emerald-700 transition-all";
+            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest hover:bg-emerald-700 transition-all flex justify-center items-center gap-2";
             if(codOk) localStorage.setItem('credencial_arauca', inputCod.value.toUpperCase());
         }
 
         btnEnv.addEventListener('click', async () => {
-            btnEnv.innerText = "⏳ SUBIENDO...";
+            // Reemplazar texto por el spinner de Tailwind
+            btnEnv.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                SUBIENDO FOTO...
+            `;
             btnEnv.disabled = true;
+            
             try {
                 const conf = JSON.parse(localStorage.getItem('config_testigo'));
                 
-                // Extraer la extensión del archivo original
-                const extension = archivoOriginal.name.split('.').pop();
+                // Mantenemos la extensión original de la foto
+                const extension = archivoOriginalParaSubir.name.split('.').pop();
                 const fileName = `E14_${Date.now()}.${extension}`;
                 
-                const { error: errorFoto } = await sClient.storage.from('fotos_e14').upload(fileName, archivoOriginal);
+                const { error: errorFoto } = await sClient.storage.from('fotos_e14').upload(fileName, archivoOriginalParaSubir);
                 if(errorFoto) throw errorFoto;
+                
                 const { data: publicUrl } = sClient.storage.from('fotos_e14').getPublicUrl(fileName);
+                
                 const { error: errorDb } = await sClient.from('reportes').insert([{
-                    municipio_id: parseInt(conf.munId), puesto_nombre: conf.pue, mesa_numero: parseInt(conf.mesa),
-                    votos_candidato: parseInt(inputVotos.value), foto_url: publicUrl.publicUrl, estado: 'pendiente'
+                    municipio_id: parseInt(conf.munId), 
+                    puesto_nombre: conf.pue, 
+                    mesa_numero: parseInt(conf.mesa),
+                    votos_candidato: parseInt(inputVotos.value), 
+                    foto_url: publicUrl.publicUrl, 
+                    estado: 'pendiente'
                 }]);
+                
                 if(errorDb) throw errorDb;
+                
                 document.getElementById('pantalla-reporte').classList.add('hidden');
                 document.getElementById('pantalla-exito').classList.remove('hidden');
             } catch (err) {
                 alert("Error al enviar el reporte. Revise su conexión.");
-                btnEnv.innerText = "Enviar Reporte";
+                btnEnv.innerHTML = "ENVIAR REPORTE";
                 btnEnv.disabled = false;
             }
         });
