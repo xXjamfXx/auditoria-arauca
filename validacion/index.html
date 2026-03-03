@@ -83,6 +83,16 @@
 
         const nombres = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
 
+        // MOTOR DE REPARTO EQUITATIVO (ALGORITMO DJB2)
+        // Convierte el ID en un número distribuido uniformemente
+        function generarHashEquitativo(str) {
+            let hash = 5381;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) + hash) + str.charCodeAt(i);
+            }
+            return Math.abs(hash);
+        }
+
         window.onload = () => {
             const munGuardado = localStorage.getItem('sesion_validador_munId');
             const nombreGuardado = localStorage.getItem('sesion_validador_munNombre');
@@ -134,7 +144,7 @@
             document.getElementById('pantalla-login').classList.add('hidden');
             document.getElementById('interfaz-trabajo').classList.remove('hidden');
             cargarDatos();
-            if(!timer) timer = setInterval(cargarDatos, 4000); // Intervalo un poco más largo para estabilidad
+            if(!timer) timer = setInterval(cargarDatos, 4000);
         }
 
         function cerrarSesion() {
@@ -158,26 +168,21 @@
             }
             if (document.activeElement.tagName === 'INPUT') return;
 
-            // --- LÓGICA DE REPARTO MATEMÁTICO INMUTABLE ---
+            // --- LÓGICA DE REPARTO BALANCEADO ---
             let dataFiltrada = data;
             if (municipioActual === "6" && validadorActual !== "") {
                 const numValidador = parseInt(validadorActual.split(" ")[1]); 
                 
                 dataFiltrada = data.filter(r => {
-                    // Convertimos el ID en un número puro (si es texto, suma sus caracteres)
-                    const numericId = isNaN(r.id) ? 
-                        r.id.toString().split('').reduce((a, b) => a + b.charCodeAt(0), 0) : 
-                        parseInt(r.id);
-                    
-                    // Esta fórmula garantiza que el ID 30 siempre sea del Validador 1, el 31 del 2, etc.
-                    // Sin importar cuántas actas se borren o aprueben antes o después.
-                    return (numericId % 3) === (numValidador - 1);
+                    const hashValue = generarHashEquitativo(r.id.toString());
+                    // El resto de la división por 3 siempre dará 0, 1 o 2 de forma equitativa
+                    return (hashValue % 3) === (numValidador - 1);
                 });
             }
 
             container.innerHTML = '';
             if (dataFiltrada.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 font-bold text-slate-400">Tu bandeja está vacía. Esperando actas asignadas a tu perfil...</div>`;
+                container.innerHTML = `<div class="text-center py-10 font-bold text-slate-400">Bandeja vacía. Esperando actas asignadas a tu perfil...</div>`;
                 return;
             }
 
@@ -192,7 +197,7 @@
                         <div>
                             <div class="flex justify-between items-center mb-4">
                                 <span class="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Mesa ${r.mesa_numero}</span>
-                                <span class="text-[9px] font-mono text-slate-400">ID: ${r.id}</span>
+                                <span class="text-[9px] font-mono text-slate-400">REF: ${r.id.toString().slice(-4)}</span>
                             </div>
                             <h3 class="text-3xl font-black text-slate-800 leading-tight">${r.puesto_nombre}</h3>
                             <div class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
@@ -218,7 +223,7 @@
                 .update({ estado: estado, votos_oficiales: parseInt(v), validador_identidad: validadorActual })
                 .eq('id', id);
             if (!error) cargarDatos();
-            else alert("Error al procesar. Intente de nuevo.");
+            else alert("Error de red. Intente de nuevo.");
         }
     </script>
 </body>
