@@ -21,34 +21,23 @@
     <div id="pantalla-login" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6 backdrop-blur-sm">
         <div class="bg-white/95 p-8 rounded-3xl shadow-xl max-w-sm w-full text-center border-t-4 border-blue-500 backdrop-blur-md">
             <div class="mb-6">
-                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png" alt="Logo L102" class="h-24 w-auto object-contain drop-shadow-md inline-block">
-                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png" alt="Numero 102" class="h-24 w-auto object-contain drop-shadow-md inline-block">
+                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png" alt="Logo" class="h-24 w-auto object-contain drop-shadow-md inline-block">
+                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png" alt="102" class="h-24 w-auto object-contain drop-shadow-md inline-block">
                 <p class="text-slate-400 text-[10px] font-black uppercase mt-1 tracking-widest">Validación Municipal</p>
             </div>
-            
             <div class="space-y-4">
-                <div>
-                    <label class="block text-left text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Seleccione Municipio</label>
-                    <select id="select-inicio" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-500 transition-all">
-                        <option value="">-- Municipio --</option>
-                        <option value="1">ARAUCA</option>
-                        <option value="2">ARAUQUITA</option>
-                        <option value="3">CRAVO NORTE</option>
-                        <option value="4">FORTUL</option>
-                        <option value="5">PUERTO RONDÓN</option>
-                        <option value="6">SARAVENA</option>
-                        <option value="7">TAME</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-left text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Contraseña Municipal</label>
-                    <input type="password" id="pass-inicio" placeholder="••••••••" autocomplete="off" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-500 transition-all text-center tracking-widest">
-                </div>
-
-                <button id="btn-login" onclick="iniciarSesionSegura()" class="w-full bg-slate-700 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-slate-800 transition-all uppercase tracking-widest text-sm">
-                    Ingresar a Estación
-                </button>
+                <select id="select-inicio" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-500 transition-all">
+                    <option value="">-- Municipio --</option>
+                    <option value="1">ARAUCA</option>
+                    <option value="2">ARAUQUITA</option>
+                    <option value="3">CRAVO NORTE</option>
+                    <option value="4">FORTUL</option>
+                    <option value="5">PUERTO RONDÓN</option>
+                    <option value="6">SARAVENA</option>
+                    <option value="7">TAME</option>
+                </select>
+                <input type="password" id="pass-inicio" placeholder="CONTRASEÑA" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-500 text-center tracking-widest">
+                <button onclick="iniciarSesionSegura()" class="w-full bg-slate-700 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-slate-800 transition-all uppercase text-sm">Ingresar</button>
             </div>
         </div>
     </div>
@@ -56,34 +45,25 @@
     <div id="pantalla-roles" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6 backdrop-blur-md">
         <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center">
             <h2 class="text-xl font-black text-blue-900 mb-2 uppercase">Identificación</h2>
-            <p class="text-slate-500 text-[10px] font-bold mb-6 uppercase tracking-widest">Puesto de trabajo Saravena</p>
+            <p class="text-slate-500 text-[10px] font-bold mb-6 uppercase tracking-widest">Puesto Saravena</p>
             <div class="space-y-3">
-                <button onclick="seleccionarRol('Validador 1')" class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 hover:border-blue-500 p-4 rounded-2xl font-black text-blue-900 transition-all uppercase text-xs">👤 Validador 1</button>
-                <button onclick="seleccionarRol('Validador 2')" class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 hover:border-blue-500 p-4 rounded-2xl font-black text-blue-900 transition-all uppercase text-xs">👤 Validador 2</button>
-                <button onclick="seleccionarRol('Validador 3')" class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 hover:border-blue-500 p-4 rounded-2xl font-black text-blue-900 transition-all uppercase text-xs">👤 Validador 3</button>
+                <button onclick="seleccionarRol('Validador 1')" class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 p-4 rounded-2xl font-black text-blue-900 uppercase text-xs">👤 Validador 1</button>
+                <button onclick="seleccionarRol('Validador 2')" class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 p-4 rounded-2xl font-black text-blue-900 uppercase text-xs">👤 Validador 2</button>
+                <button onclick="seleccionarRol('Validador 3')" class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 p-4 rounded-2xl font-black text-blue-900 uppercase text-xs">👤 Validador 3</button>
             </div>
         </div>
     </div>
 
     <div id="interfaz-trabajo" class="hidden">
-        <nav class="bg-white/90 border-b border-slate-200 p-4 sticky top-0 z-40 shadow-sm flex flex-wrap justify-between items-center gap-4 backdrop-blur-md">
+        <nav class="bg-white/90 border-b border-slate-200 p-4 sticky top-0 z-40 shadow-sm flex justify-between items-center backdrop-blur-md">
             <div class="flex items-center gap-3">
-                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png" alt="Logo L102" class="h-16 w-auto object-contain drop-shadow-md inline-block">
+                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png" class="h-16 w-auto">
                 <div>
-                    <h1 id="titulo-municipio" class="text-xl font-black text-blue-900 uppercase tracking-tighter"></h1>
+                    <h1 id="titulo-municipio" class="text-xl font-black text-blue-900 uppercase"></h1>
                     <p id="identidad-validador" class="text-[9px] font-black text-slate-400 uppercase tracking-widest"></p>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <button onclick="cambiarClaveMunicipal()" class="text-[10px] font-black text-slate-500 hover:text-blue-600 uppercase border-b border-transparent hover:border-blue-600 transition-all">
-                    Cambiar Contraseña
-                </button>
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Online</span>
-                </div>
-                <button onclick="cerrarSesion()" class="text-[10px] font-black text-red-500 border border-red-100 px-3 py-1 rounded-lg hover:bg-red-50 uppercase">Salir</button>
-            </div>
+            <button onclick="cerrarSesion()" class="text-[10px] font-black text-red-500 border border-red-100 px-3 py-1 rounded-lg uppercase">Salir</button>
         </nav>
 
         <div class="p-6 max-w-5xl mx-auto">
@@ -112,50 +92,33 @@
                 municipioActual = munGuardado;
                 nombreMunActual = nombreGuardado;
                 validadorActual = valGuardado || "";
-                document.getElementById('titulo-municipio').innerText = nombreMunActual;
-                document.getElementById('identidad-validador').innerText = validadorActual;
-                document.getElementById('pantalla-login').classList.add('hidden');
-                document.getElementById('interfaz-trabajo').classList.remove('hidden');
-                cargarDatos();
-                timer = setInterval(cargarDatos, 3000);
+                mostrarInterfaz();
             }
         };
 
         async function iniciarSesionSegura() {
             const idMun = document.getElementById('select-inicio').value;
             const passIngresada = document.getElementById('pass-inicio').value;
-            const btn = document.getElementById('btn-login');
-
-            if (!idMun || !passIngresada) return alert("Complete los datos");
-            btn.innerText = "Verificando...";
-            btn.disabled = true;
+            if (!idMun || !passIngresada) return alert("Datos incompletos");
 
             try {
                 const { data, error } = await sClient.from('llaves_municipales').select('clave').eq('municipio_id', idMun).single();
-                if (error) throw error;
-
                 if (data && data.clave === passIngresada) {
                     municipioActual = idMun;
                     nombreMunActual = nombres[idMun];
-                    localStorage.setItem('sesion_validador_munId', municipioActual);
+                    localStorage.setItem('sesion_validador_munId', idMun);
                     localStorage.setItem('sesion_validador_munNombre', nombreMunActual);
-                    document.getElementById('pantalla-login').classList.add('hidden');
                     
                     if (idMun === "6") {
+                        document.getElementById('pantalla-login').classList.add('hidden');
                         document.getElementById('pantalla-roles').classList.remove('hidden');
                     } else {
                         validadorActual = "";
                         localStorage.removeItem('sesion_validador_identidad');
                         mostrarInterfaz();
                     }
-                } else {
-                    alert("Contraseña incorrecta");
-                    btn.innerText = "Ingresar a Estación"; btn.disabled = false;
-                }
-            } catch (err) {
-                alert("Error de conexión.");
-                btn.innerText = "Ingresar a Estación"; btn.disabled = false;
-            }
+                } else { alert("Clave incorrecta"); }
+            } catch (err) { alert("Error de acceso"); }
         }
 
         function seleccionarRol(rol) {
@@ -168,16 +131,10 @@
         function mostrarInterfaz() {
             document.getElementById('titulo-municipio').innerText = nombreMunActual;
             document.getElementById('identidad-validador').innerText = validadorActual;
+            document.getElementById('pantalla-login').classList.add('hidden');
             document.getElementById('interfaz-trabajo').classList.remove('hidden');
             cargarDatos();
-            timer = setInterval(cargarDatos, 3000);
-        }
-
-        async function cambiarClaveMunicipal() {
-            const nueva = prompt(`Nueva clave:`);
-            if (!nueva) return;
-            await sClient.from('llaves_municipales').update({ clave: nueva }).eq('municipio_id', municipioActual);
-            alert("Actualizada");
+            if(!timer) timer = setInterval(cargarDatos, 4000); // Intervalo un poco más largo para estabilidad
         }
 
         function cerrarSesion() {
@@ -196,28 +153,31 @@
 
             const container = document.getElementById('contenedor-reportes');
             if (!data || data.length === 0) {
-                container.innerHTML = `<div class="text-center py-20 bg-white/70 rounded-3xl border border-slate-200 backdrop-blur-sm shadow-sm"><div class="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p class="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Esperando reportes...</p></div>`;
+                container.innerHTML = `<div class="text-center py-20 bg-white/70 rounded-3xl border border-slate-200 backdrop-blur-sm"><p class="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Esperando nuevos reportes...</p></div>`;
                 return;
             }
             if (document.activeElement.tagName === 'INPUT') return;
 
-            container.innerHTML = '';
-
-            // --- LÓGICA DE REPARTO FIJO PARA SARAVENA ---
+            // --- LÓGICA DE REPARTO MATEMÁTICO INMUTABLE ---
             let dataFiltrada = data;
             if (municipioActual === "6" && validadorActual !== "") {
                 const numValidador = parseInt(validadorActual.split(" ")[1]); 
-                // Usamos el ID del reporte para que el reparto sea SIEMPRE el mismo para cada acta
+                
                 dataFiltrada = data.filter(r => {
-                    // Creamos un número único basado en el ID (sea número o texto)
-                    const hashId = r.id.toString().split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-                    return (hashId % 3) === (numValidador - 1);
+                    // Convertimos el ID en un número puro (si es texto, suma sus caracteres)
+                    const numericId = isNaN(r.id) ? 
+                        r.id.toString().split('').reduce((a, b) => a + b.charCodeAt(0), 0) : 
+                        parseInt(r.id);
+                    
+                    // Esta fórmula garantiza que el ID 30 siempre sea del Validador 1, el 31 del 2, etc.
+                    // Sin importar cuántas actas se borren o aprueben antes o después.
+                    return (numericId % 3) === (numValidador - 1);
                 });
             }
-            // ---------------------------------------------
 
+            container.innerHTML = '';
             if (dataFiltrada.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 font-bold text-slate-400">Sin actas asignadas temporalmente. Esperando nuevos reportes...</div>`;
+                container.innerHTML = `<div class="text-center py-10 font-bold text-slate-400">Tu bandeja está vacía. Esperando actas asignadas a tu perfil...</div>`;
                 return;
             }
 
@@ -232,18 +192,17 @@
                         <div>
                             <div class="flex justify-between items-center mb-4">
                                 <span class="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Mesa ${r.mesa_numero}</span>
-                                <span class="text-[10px] font-mono text-slate-400">${new Date(r.creado_en).toLocaleTimeString()}</span>
+                                <span class="text-[9px] font-mono text-slate-400">ID: ${r.id}</span>
                             </div>
                             <h3 class="text-3xl font-black text-slate-800 leading-tight">${r.puesto_nombre}</h3>
                             <div class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reporte Testigo:</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dato Testigo:</p>
                                 <p class="text-3xl font-black text-slate-700">${r.votos_candidato} <span class="text-sm font-normal text-slate-400 uppercase">Votos</span></p>
                             </div>
                         </div>
                         <div class="mt-8 space-y-4">
-                            <label class="block text-xs font-black text-slate-500 uppercase ml-1">Confirmar Dato Oficial:</label>
                             <input type="number" id="votos-${r.id}" value="${r.votos_candidato}" class="w-full border-4 border-emerald-500 p-5 rounded-2xl text-5xl font-black text-emerald-700 outline-none bg-emerald-50/30">
-                            <div class="flex gap-3 pt-2">
+                            <div class="flex gap-3">
                                 <button onclick="procesar('${r.id}', 'aprobado')" class="flex-1 bg-emerald-500 text-white font-black py-5 rounded-2xl shadow-lg hover:bg-emerald-600 transition-all uppercase text-xs tracking-widest">Validar ✅</button>
                                 <button onclick="procesar('${r.id}', 'rechazado')" class="px-6 bg-red-50 text-red-500 font-bold py-5 rounded-2xl hover:bg-red-100 transition-all uppercase text-[9px]">Rechazar ❌</button>
                             </div>
@@ -259,6 +218,7 @@
                 .update({ estado: estado, votos_oficiales: parseInt(v), validador_identidad: validadorActual })
                 .eq('id', id);
             if (!error) cargarDatos();
+            else alert("Error al procesar. Intente de nuevo.");
         }
     </script>
 </body>
