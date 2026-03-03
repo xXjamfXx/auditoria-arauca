@@ -203,17 +203,21 @@
 
             container.innerHTML = '';
 
-            // --- LÓGICA DE REPARTO PARA SARAVENA ---
+            // --- LÓGICA DE REPARTO FIJO PARA SARAVENA ---
             let dataFiltrada = data;
             if (municipioActual === "6" && validadorActual !== "") {
-                const numValidador = parseInt(validadorActual.split(" ")[1]); // Extrae el 1, 2 o 3
-                // Filtra: El Validador 1 ve el index 0, 3, 6... El 2 ve el 1, 4, 7... El 3 ve el 2, 5, 8...
-                dataFiltrada = data.filter((item, index) => (index % 3) === (numValidador - 1));
+                const numValidador = parseInt(validadorActual.split(" ")[1]); 
+                // Usamos el ID del reporte para que el reparto sea SIEMPRE el mismo para cada acta
+                dataFiltrada = data.filter(r => {
+                    // Creamos un número único basado en el ID (sea número o texto)
+                    const hashId = r.id.toString().split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                    return (hashId % 3) === (numValidador - 1);
+                });
             }
-            // ---------------------------------------
+            // ---------------------------------------------
 
             if (dataFiltrada.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 font-bold text-slate-400">Sin actas asignadas en este momento.</div>`;
+                container.innerHTML = `<div class="text-center py-10 font-bold text-slate-400">Sin actas asignadas temporalmente. Esperando nuevos reportes...</div>`;
                 return;
             }
 
