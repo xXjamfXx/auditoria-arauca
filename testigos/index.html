@@ -186,7 +186,6 @@
             btnFijar.disabled = true;
 
             try {
-                // CONSULTAMOS TODOS LOS REPORTES DE ESTA MESA
                 const { data, error } = await sClient
                     .from('reportes')
                     .select('tipo_eleccion')
@@ -196,7 +195,6 @@
 
                 if (error) throw error;
 
-                // Si ya tiene los 4 tipos, la mesa está completa
                 if (data && data.length >= 4) {
                     alert("Esta Mesa " + mesa + " ya tiene todos sus E-14 reportados (Cámara, Senado, Consulta y CITREP).");
                     btnFijar.innerText = "Fijar Ubicación";
@@ -204,7 +202,6 @@
                     return;
                 }
 
-                // Guardamos los tipos que ya existen para filtrarlos después
                 const tiposReportados = data.map(r => r.tipo_eleccion);
                 localStorage.setItem('config_testigo', JSON.stringify({ 
                     munId: munId, munNom: selMun.options[selMun.selectedIndex].text, pue: puesto, mesa: mesa, tiposHechos: tiposReportados 
@@ -225,7 +222,6 @@
                 document.getElementById('pantalla-reporte').classList.remove('hidden');
                 document.getElementById('texto-ubicacion').innerText = `${d.munNom}\n${d.pue}\nMESA N° ${d.mesa}`;
                 
-                // FILTRAR SELECTOR DE TIPOS
                 const opciones = selTipo.querySelectorAll('option');
                 opciones.forEach(opt => {
                     if (d.tiposHechos.includes(opt.value)) {
@@ -240,18 +236,14 @@
         }
 
         function nuevoReporte() {
-            // No borramos todo, solo volvemos a la pantalla de reporte para la misma mesa
             const d = JSON.parse(localStorage.getItem('config_testigo'));
             if (d) {
                 document.getElementById('pantalla-exito').classList.add('hidden');
                 document.getElementById('pantalla-reporte').classList.remove('hidden');
-                // Limpiamos campos de datos pero mantenemos ubicación
                 inputVotos.value = "";
                 archivoOriginalParaSubir = null;
                 document.getElementById('previo-foto').innerHTML = `<p class="text-4xl">📸 📁</p><p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Subir Foto del E-14</p>`;
                 document.getElementById('nombre-foto').innerText = "Obligatorio para validar";
-                
-                // Volvemos a consultar para actualizar los checks de "Hecho"
                 document.getElementById('btn-fijar').click();
             } else { location.reload(); }
         }
@@ -304,6 +296,21 @@
                 btnEnv.disabled = false;
             }
         });
+
+        // RE-ACTIVACIÓN DE PARÁMETRO URL (?mun=X)
+        const parametrosURL = new URLSearchParams(window.location.search);
+        const municipioFijo = parametrosURL.get('mun');
+        if (municipioFijo && puestos[municipioFijo]) {
+            selMun.value = municipioFijo;
+            selMun.dispatchEvent(new Event('change'));
+            selMun.disabled = true; 
+            selMun.classList.add('opacity-70');
+        }
+
+        render();
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); });
+        }
     </script>
 </body>
 </html>
