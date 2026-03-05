@@ -116,11 +116,11 @@
         <div id="pantalla-exito" class="hidden text-center py-10">
             <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">✓</div>
             <h2 class="text-2xl font-black text-blue-900 uppercase">¡RECIBIDO!</h2>
-            <p class="text-slate-500 text-[10px] mt-2 font-bold">El dato pasará a validación municipal.</p>
+            <p class="text-slate-500 text-[10px] mt-2 font-bold uppercase tracking-widest">El dato pasará a validación municipal.</p>
             
             <div class="mt-8 space-y-3">
-                <button onclick="continuarMismaMesa()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-md">Siguiente E-14 de esta mesa</button>
-                <button onclick="volverAlInicio()" class="w-full bg-slate-200 text-slate-600 font-black py-4 rounded-2xl text-xs uppercase">Finalizar / Cambiar Mesa</button>
+                <button onclick="continuarMismaMesa()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-md tracking-widest">Siguiente E-14 de esta mesa</button>
+                <button onclick="volverAlInicio()" class="w-full bg-slate-200 text-slate-600 font-black py-4 rounded-2xl text-xs uppercase tracking-widest">Finalizar / Cambiar Mesa</button>
             </div>
         </div>
     </div>
@@ -128,7 +128,7 @@
     <div class="max-w-md mx-auto text-center py-8 opacity-40 pointer-events-none">
         <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
             Propiedad Intelectual de JAMF <br>
-            © 2026 Auditoría Electoral L102 • Todos los derechos reservados
+            © 2026 AuditorÍA ELECTORAL L102 • TODOS LOS DERECHOS RESERVADOS
         </p>
     </div>
 
@@ -183,15 +183,14 @@
             if(!munId || !puesto || !mesaInput) return alert("Completa los datos");
 
             const btnFijar = document.getElementById('btn-fijar');
-            btnFijar.innerText = "🔍 CONSULTANDO...";
-            btnFijar.disabled = true;
+            btnFijar.innerText = "🔍 CONSULTANDO..."; btnFijar.disabled = true;
 
             try {
                 const { data } = await sClient.from('reportes').select('tipo_eleccion').eq('municipio_id', parseInt(munId)).eq('puesto_nombre', puesto).eq('mesa_numero', parseInt(mesaInput));
                 
-                const tiposHechos = data.map(r => r.tipo_eleccion);
+                const tiposHechos = data ? data.map(r => r.tipo_eleccion) : [];
                 if(tiposHechos.length >= 4) {
-                    alert("Esta mesa ya completó todos sus reportes.");
+                    alert("Esta mesa ya completó todos sus reportes (Cámara, Senado, Consulta y CITREP).");
                     btnFijar.innerText = "Fijar Ubicación"; btnFijar.disabled = false;
                     return;
                 }
@@ -208,18 +207,20 @@
             if(d) {
                 document.getElementById('pantalla-config').classList.add('hidden');
                 document.getElementById('pantalla-reporte').classList.remove('hidden');
+                document.getElementById('pantalla-exito').classList.add('hidden');
                 document.getElementById('texto-ubicacion').innerText = `${d.munNom}\n${d.pue}\nMESA ${d.mesa}`;
                 
                 selTipo.querySelectorAll('option').forEach(opt => {
+                    const textoLimpio = opt.textContent.replace("✅ ", "");
                     if(d.tiposHechos.includes(opt.value)) {
-                        opt.disabled = true; opt.textContent = "✅ " + opt.textContent.replace("✅ ", "");
+                        opt.disabled = true; opt.textContent = "✅ " + textoLimpio;
                     } else {
-                        opt.disabled = false; opt.textContent = opt.textContent.replace("✅ ", "");
+                        opt.disabled = false; opt.textContent = textoLimpio;
                     }
                 });
                 selTipo.value = "";
                 
-                // IMPORTANTE: Resetear botón al renderizar para evitar que quede en "SUBIENDO..."
+                // RESET TOTAL DEL BOTÓN
                 btnEnv.innerText = "Enviar Reporte";
                 validarFormulario();
             }
@@ -227,12 +228,13 @@
 
         function continuarMismaMesa() {
             document.getElementById('pantalla-exito').classList.add('hidden');
+            // LIMPIEZA FÍSICA Y LÓGICA
             inputVotos.value = ""; 
             archivoOriginalParaSubir = null;
-            document.getElementById('previo-foto').innerHTML = `<p class="text-4xl">📸 📁</p><p class="text-blue-900 font-black text-xs uppercase">Subir Foto E-14</p>`;
+            document.getElementById('input-foto').value = ""; // Limpiar input real
+            document.getElementById('previo-foto').innerHTML = `<p class="text-4xl">📸 📁</p><p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Subir Foto del E-14 (Desde Galería)</p>`;
             document.getElementById('nombre-foto').innerText = "Obligatorio para validar";
             
-            // Reiniciamos el estado del botón
             btnEnv.innerText = "Enviar Reporte";
             btnEnv.disabled = true;
             
@@ -248,7 +250,7 @@
             if(e.target.files[0]) {
                 archivoOriginalParaSubir = e.target.files[0];
                 
-                // RESTAURADA PREVISUALIZACIÓN DE IMAGEN
+                // PREVISUALIZACIÓN RESTAURADA
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     document.getElementById('previo-foto').innerHTML = `
@@ -271,16 +273,18 @@
             const fotoOk = archivoOriginalParaSubir !== null;
             
             btnEnv.disabled = !(tipoOk && codOk && votosOk && fotoOk);
-            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg";
+            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest";
+            
+            // Asegurar que el texto sea correcto si el formulario es válido pero no se ha enviado aún
+            if(!btnEnv.disabled && btnEnv.innerText !== "SUBIENDO...") {
+                btnEnv.innerText = "Enviar Reporte";
+            }
         }
 
         [inputCod, inputVotos, selTipo].forEach(el => el.addEventListener('input', validarFormulario));
 
         async function enviarReporte() {
-            // Cambio visual inmediato
-            btnEnv.innerText = "SUBIENDO..."; 
-            btnEnv.disabled = true;
-            
+            btnEnv.innerText = "SUBIENDO..."; btnEnv.disabled = true;
             try {
                 const conf = JSON.parse(localStorage.getItem('config_testigo'));
                 const extension = archivoOriginalParaSubir.name.split('.').pop();
@@ -302,19 +306,16 @@
                 document.getElementById('pantalla-reporte').classList.add('hidden');
                 document.getElementById('pantalla-exito').classList.remove('hidden');
             } catch (err) { 
-                alert("Error al enviar el reporte. Por favor intente de nuevo."); 
-                btnEnv.innerText = "Enviar Reporte"; 
-                btnEnv.disabled = false; 
+                alert("Error al enviar. Intente de nuevo."); 
+                btnEnv.innerText = "Enviar Reporte"; btnEnv.disabled = false; 
             }
         }
 
         const parametrosURL = new URLSearchParams(window.location.search);
         const munUrl = parametrosURL.get('mun');
         if (munUrl && puestos[munUrl]) {
-            selMun.value = munUrl; 
-            selMun.dispatchEvent(new Event('change'));
-            selMun.disabled = true; 
-            selMun.classList.add('opacity-70');
+            selMun.value = munUrl; selMun.dispatchEvent(new Event('change'));
+            selMun.disabled = true; selMun.classList.add('opacity-70');
         }
     </script>
 </body>
