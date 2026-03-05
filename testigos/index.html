@@ -202,7 +202,7 @@
                     .limit(1);
                 if (error) throw error;
                 if (data && data.length > 0) {
-                    alert("La Mesa " + mesa + " ya fue reportada anteriormente.");
+                    alert("La Mesa " + mesa + " ya fue reportada anteriormente, valide e ingrese correctamente su información");
                     btnFijar.innerText = "Fijar Ubicación";
                     btnFijar.disabled = false;
                 } else {
@@ -314,3 +314,4 @@
     </script>
 </body>
 </html>
+
