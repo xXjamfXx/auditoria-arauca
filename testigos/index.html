@@ -66,7 +66,7 @@
                     <input type="number" id="input-mesa" autocomplete="off" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-2xl font-black text-blue-900 outline-none" placeholder="00">
                 </div>
 
-                <button id="btn-fijar" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl shadow-lg uppercase tracking-widest mt-4">
+                <button id="btn-fijar" onclick="verificarMesa()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl shadow-lg uppercase tracking-widest mt-4">
                     Fijar Ubicación
                 </button>
             </div>
@@ -75,7 +75,7 @@
         <div id="pantalla-reporte" class="hidden space-y-6">
             <div class="bg-blue-900 p-5 rounded-2xl text-white relative text-center">
                 <p id="texto-ubicacion" class="text-sm font-bold leading-tight uppercase"></p>
-                <button onclick="localStorage.removeItem('config_testigo'); location.reload();" class="text-[9px] text-blue-300 underline mt-2 uppercase font-black">Cambiar Mesa / Corregir</button>
+                <button onclick="volverAlInicio()" class="text-[9px] text-blue-300 underline mt-2 uppercase font-black">Cambiar Mesa / Corregir</button>
             </div>
 
             <div>
@@ -108,7 +108,7 @@
                 <input type="text" id="codigo-seguridad" autocomplete="off" class="w-full p-3 border-2 border-white rounded-xl text-center font-mono text-xl font-black uppercase outline-none focus:border-blue-500" placeholder="CÓDIGO">
             </div>
 
-            <button id="btn-enviar" disabled class="w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all">
+            <button id="btn-enviar" onclick="enviarReporte()" disabled class="w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all">
                 Enviar Reporte
             </button>
         </div>
@@ -116,8 +116,12 @@
         <div id="pantalla-exito" class="hidden text-center py-10">
             <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">✓</div>
             <h2 class="text-2xl font-black text-blue-900 uppercase">¡RECIBIDO!</h2>
-            <p class="text-slate-500 text-xs mt-2">El dato pasará a validación municipal.</p>
-            <button onclick="nuevoReporte()" class="mt-8 bg-slate-200 px-8 py-3 rounded-xl font-black text-xs uppercase text-slate-600">Siguiente E-14 de esta mesa</button>
+            <p class="text-slate-500 text-[10px] mt-2 font-bold">El dato pasará a validación municipal.</p>
+            
+            <div class="mt-8 space-y-3">
+                <button onclick="continuarMismaMesa()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-md">Siguiente E-14 de esta mesa</button>
+                <button onclick="volverAlInicio()" class="w-full bg-slate-200 text-slate-600 font-black py-4 rounded-2xl text-xs uppercase">Finalizar / Cambiar Mesa</button>
+            </div>
         </div>
     </div>
 
@@ -130,18 +134,9 @@
 
     <script>
         let CODIGO_MAESTRO = ""; 
-
         const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
         const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
         const sClient = supabase.createClient(sUrl, sKey);
-
-        async function cargarCodigoSeguridad() {
-            try {
-                const { data, error } = await sClient.from('configuracion').select('codigo_testigos').eq('id', 1).single();
-                if (data && !error) CODIGO_MAESTRO = data.codigo_testigos.toUpperCase();
-            } catch (err) { console.log("Esperando código..."); }
-        }
-        cargarCodigoSeguridad();
 
         const puestos = {
             "1": [ { nombre: "COLEGIO SIMON BOLIVAR", mesas: 37 }, { nombre: "CONCENTRACION CAMILO TORRES", mesas: 21 }, { nombre: "ESCUELA LOS LIBERTADORES", mesas: 8 }, { nombre: "ESCUELA JOSE MARIA CORDOBA", mesas: 5 }, { nombre: "NORMAL MARIA INMACULADA", mesas: 26 }, { nombre: "COLEGIO TEC. CRISTO REY", mesas: 40 }, { nombre: "ESCUELA FLOR DE MI LLANO", mesas: 26 }, { nombre: "UNIDAD DE SALUD MENTAL ARAUCA", mesas: 1 }, { nombre: "IE JUAN ISIDRO DABOIN", mesas: 2 }, { nombre: "IE SEDE LUIS CARLOS GALAN", mesas: 1 }, { nombre: "COLEGIO SANTANDER PRIMARIA", mesas: 22 }, { nombre: "CONC.ESCOLAR LAS COROCORAS", mesas: 13 }, { nombre: "CONC.ESCOLAR DIVINO NIÑO", mesas: 28 }, { nombre: "COL TEC SANTA TERESITA", mesas: 13 }, { nombre: "CARCEL", mesas: 1 }, { nombre: "CAÑAS BRAVAS", mesas: 2 }, { nombre: "MAPORILLAL", mesas: 1 }, { nombre: "SANTA BARBARA", mesas: 4 }, { nombre: "CARACOL", mesas: 2 }, { nombre: "TODOS LOS SANTOS", mesas: 3 }, { nombre: "LAS NUBES", mesas: 2 }, { nombre: "FELICIANO", mesas: 1 }, { nombre: "CLARINETERO", mesas: 1 } ],
@@ -161,128 +156,112 @@
         const inputCod = document.getElementById('codigo-seguridad');
         const btnEnv = document.getElementById('btn-enviar');
 
+        async function cargarCodigoSeguridad() {
+            try {
+                const { data } = await sClient.from('configuracion').select('codigo_testigos').eq('id', 1).single();
+                if (data) CODIGO_MAESTRO = data.codigo_testigos.toUpperCase();
+            } catch (err) {}
+        }
+        cargarCodigoSeguridad();
+
         selMun.addEventListener('change', () => {
             selPue.innerHTML = '<option value="">Seleccione Puesto</option>';
             if(selMun.value) {
                 puestos[selMun.value].forEach(p => {
                     const opt = document.createElement('option');
-                    opt.value = p.nombre; opt.textContent = `${p.nombre} `; opt.dataset.maxMesas = p.mesas;
+                    opt.value = p.nombre; opt.textContent = p.nombre; opt.dataset.maxMesas = p.mesas;
                     selPue.appendChild(opt);
                 });
                 selPue.disabled = false;
-                if (puestos[selMun.value].length === 1) selPue.value = puestos[selMun.value][0].nombre;
-            } else { selPue.disabled = true; }
+            }
         });
 
-        document.getElementById('btn-fijar').addEventListener('click', async () => {
+        async function verificarMesa() {
             const mesaInput = document.getElementById('input-mesa').value;
-            const mesa = parseInt(mesaInput);
             const munId = selMun.value;
             const puesto = selPue.value;
-            if(!munId || !puesto || !mesaInput) return alert("Por favor, completa todos los campos.");
+            if(!munId || !puesto || !mesaInput) return alert("Completa los datos");
 
             const btnFijar = document.getElementById('btn-fijar');
-            btnFijar.innerText = "CONSULTANDO ACTAS...";
+            btnFijar.innerText = "🔍 CONSULTANDO...";
             btnFijar.disabled = true;
 
             try {
-                const { data, error } = await sClient
-                    .from('reportes')
-                    .select('tipo_eleccion')
-                    .eq('municipio_id', parseInt(munId))
-                    .eq('puesto_nombre', puesto)
-                    .eq('mesa_numero', mesa);
-
-                if (error) throw error;
-
-                if (data && data.length >= 4) {
-                    alert("Esta Mesa " + mesa + " ya tiene todos sus E-14 reportados (Cámara, Senado, Consulta y CITREP).");
-                    btnFijar.innerText = "Fijar Ubicación";
-                    btnFijar.disabled = false;
+                const { data } = await sClient.from('reportes').select('tipo_eleccion').eq('municipio_id', parseInt(munId)).eq('puesto_nombre', puesto).eq('mesa_numero', parseInt(mesaInput));
+                
+                const tiposHechos = data.map(r => r.tipo_eleccion);
+                if(tiposHechos.length >= 4) {
+                    alert("Esta mesa ya completó todos sus reportes.");
+                    btnFijar.innerText = "Fijar Ubicación"; btnFijar.disabled = false;
                     return;
                 }
 
-                const tiposReportados = data.map(r => r.tipo_eleccion);
                 localStorage.setItem('config_testigo', JSON.stringify({ 
-                    munId: munId, munNom: selMun.options[selMun.selectedIndex].text, pue: puesto, mesa: mesa, tiposHechos: tiposReportados 
+                    munId: munId, munNom: selMun.options[selMun.selectedIndex].text, pue: puesto, mesa: mesaInput, tiposHechos: tiposHechos 
                 }));
-                
                 render();
-            } catch (err) {
-                alert("Error al verificar mesa.");
-                btnFijar.innerText = "Fijar Ubicación";
-                btnFijar.disabled = false;
-            }
-        });
+            } catch (err) { alert("Error de conexión"); btnFijar.innerText = "Fijar Ubicación"; btnFijar.disabled = false; }
+        }
 
         function render() {
             const d = JSON.parse(localStorage.getItem('config_testigo'));
             if(d) {
                 document.getElementById('pantalla-config').classList.add('hidden');
                 document.getElementById('pantalla-reporte').classList.remove('hidden');
-                document.getElementById('texto-ubicacion').innerText = `${d.munNom}\n${d.pue}\nMESA N° ${d.mesa}`;
+                document.getElementById('texto-ubicacion').innerText = `${d.munNom}\n${d.pue}\nMESA ${d.mesa}`;
                 
-                const opciones = selTipo.querySelectorAll('option');
-                opciones.forEach(opt => {
-                    if (d.tiposHechos.includes(opt.value)) {
-                        opt.disabled = true;
-                        opt.textContent = " " + opt.textContent.replace(" ", "");
+                selTipo.querySelectorAll('option').forEach(opt => {
+                    if(d.tiposHechos.includes(opt.value)) {
+                        opt.disabled = true; opt.textContent = "✅ " + opt.textContent.replace("✅ ", "");
                     } else {
-                        opt.disabled = false;
-                        opt.textContent = opt.textContent.replace(" ", "");
+                        opt.disabled = false; opt.textContent = opt.textContent.replace("✅ ", "");
                     }
                 });
+                selTipo.value = "";
             }
         }
 
-        function nuevoReporte() {
-            const d = JSON.parse(localStorage.getItem('config_testigo'));
-            if (d) {
-                document.getElementById('pantalla-exito').classList.add('hidden');
-                document.getElementById('pantalla-reporte').classList.remove('hidden');
-                inputVotos.value = "";
-                archivoOriginalParaSubir = null;
-                document.getElementById('previo-foto').innerHTML = `<p class="text-4xl">📸 📁</p><p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Subir Foto del E-14</p>`;
-                document.getElementById('nombre-foto').innerText = "Obligatorio para validar";
-                document.getElementById('btn-fijar').click();
-            } else { location.reload(); }
+        function continuarMismaMesa() {
+            document.getElementById('pantalla-exito').classList.add('hidden');
+            inputVotos.value = ""; 
+            archivoOriginalParaSubir = null;
+            document.getElementById('previo-foto').innerHTML = `<p class="text-4xl">📸 📁</p><p class="text-blue-900 font-black text-xs uppercase">Subir Foto E-14</p>`;
+            verificarMesa(); // Refresca qué actas quedan disponibles
+        }
+
+        function volverAlInicio() {
+            localStorage.removeItem('config_testigo');
+            location.reload();
         }
 
         document.getElementById('input-foto').addEventListener('change', (e) => {
             if(e.target.files[0]) {
                 archivoOriginalParaSubir = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    document.getElementById('previo-foto').innerHTML = `<img src="${event.target.result}" class="max-h-32 mx-auto rounded-lg mb-2 shadow-md">`;
-                    document.getElementById('nombre-foto').innerText = "LISTA PARA ENVIAR";
-                };
-                reader.readAsDataURL(archivoOriginalParaSubir);
+                document.getElementById('previo-foto').innerHTML = `<p class="text-emerald-500 font-black">✅ FOTO CARGADA</p>`;
                 validarFormulario();
             }
         });
 
-        [inputCod, inputVotos, selTipo].forEach(el => el.addEventListener('input', validarFormulario));
-
         function validarFormulario() {
-            if (CODIGO_MAESTRO === "") return;
+            if (!CODIGO_MAESTRO) return;
             const tipoOk = selTipo.value !== "" && !selTipo.options[selTipo.selectedIndex].disabled;
             const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
             const votosOk = inputVotos.value.length > 0;
             const fotoOk = archivoOriginalParaSubir !== null;
-            
             btnEnv.disabled = !(tipoOk && codOk && votosOk && fotoOk);
-            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest hover:bg-emerald-700 transition-all flex justify-center items-center gap-2";
+            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg";
         }
 
-        btnEnv.addEventListener('click', async () => {
-            btnEnv.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> SUBIENDO...`;
-            btnEnv.disabled = true;
+        [inputCod, inputVotos, selTipo].forEach(el => el.addEventListener('input', validarFormulario));
+
+        async function enviarReporte() {
+            btnEnv.innerText = "SUBIENDO..."; btnEnv.disabled = true;
             try {
                 const conf = JSON.parse(localStorage.getItem('config_testigo'));
-                const extension = archivoOriginalParaSubir.name.split('.').pop();
-                const fileName = `E14_${Date.now()}.${extension}`;
+                const fileName = `E14_${Date.now()}.jpg`;
                 await sClient.storage.from('fotos_e14').upload(fileName, archivoOriginalParaSubir);
                 const { data: publicUrl } = sClient.storage.from('fotos_e14').getPublicUrl(fileName);
+                
                 await sClient.from('reportes').insert([{
                     municipio_id: parseInt(conf.munId), puesto_nombre: conf.pue, mesa_numero: parseInt(conf.mesa),
                     tipo_eleccion: selTipo.value, votos_candidato: parseInt(inputVotos.value), foto_url: publicUrl.publicUrl, estado: 'pendiente'
@@ -290,28 +269,15 @@
                 
                 document.getElementById('pantalla-reporte').classList.add('hidden');
                 document.getElementById('pantalla-exito').classList.remove('hidden');
-            } catch (err) {
-                alert("Error al enviar reporte.");
-                btnEnv.innerHTML = "ENVIAR REPORTE";
-                btnEnv.disabled = false;
-            }
-        });
-
-        // RE-ACTIVACIÓN DE PARÁMETRO URL (?mun=X)
-        const parametrosURL = new URLSearchParams(window.location.search);
-        const municipioFijo = parametrosURL.get('mun');
-        if (municipioFijo && puestos[municipioFijo]) {
-            selMun.value = municipioFijo;
-            selMun.dispatchEvent(new Event('change'));
-            selMun.disabled = true; 
-            selMun.classList.add('opacity-70');
+            } catch (err) { alert("Error al enviar"); btnEnv.innerText = "Enviar Reporte"; btnEnv.disabled = false; }
         }
 
-        render();
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); });
+        const parametrosURL = new URLSearchParams(window.location.search);
+        const munUrl = parametrosURL.get('mun');
+        if (munUrl && puestos[munUrl]) {
+            selMun.value = munUrl; selMun.dispatchEvent(new Event('change'));
+            selMun.disabled = true; selMun.classList.add('opacity-70');
         }
     </script>
 </body>
 </html>
-
