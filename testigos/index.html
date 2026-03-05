@@ -212,9 +212,9 @@
                 
                 selTipo.querySelectorAll('option').forEach(opt => {
                     if(d.tiposHechos.includes(opt.value)) {
-                        opt.disabled = true; opt.textContent = "✅ " + opt.textContent.replace("✅ ", "");
+                        opt.disabled = true; opt.textContent = " " + opt.textContent.replace(" ", "");
                     } else {
-                        opt.disabled = false; opt.textContent = opt.textContent.replace("✅ ", "");
+                        opt.disabled = false; opt.textContent = opt.textContent.replace(" ", "");
                     }
                 });
                 selTipo.value = "";
@@ -281,3 +281,4 @@
     </script>
 </body>
 </html>
+
