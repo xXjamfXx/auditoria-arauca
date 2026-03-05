@@ -182,7 +182,7 @@
             if(!munId || !puesto || !mesaInput) return alert("Por favor, completa todos los campos.");
 
             const btnFijar = document.getElementById('btn-fijar');
-            btnFijar.innerText = "🔍 CONSULTANDO ACTAS...";
+            btnFijar.innerText = "CONSULTANDO ACTAS...";
             btnFijar.disabled = true;
 
             try {
@@ -226,10 +226,10 @@
                 opciones.forEach(opt => {
                     if (d.tiposHechos.includes(opt.value)) {
                         opt.disabled = true;
-                        opt.textContent = "✅ " + opt.textContent.replace("✅ ", "");
+                        opt.textContent = " " + opt.textContent.replace(" ", "");
                     } else {
                         opt.disabled = false;
-                        opt.textContent = opt.textContent.replace("✅ ", "");
+                        opt.textContent = opt.textContent.replace(" ", "");
                     }
                 });
             }
@@ -314,3 +314,4 @@
     </script>
 </body>
 </html>
+
