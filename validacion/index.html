@@ -37,7 +37,9 @@
                     <option value="7">TAME</option>
                 </select>
                 <input type="password" id="pass-inicio" placeholder="CONTRASEÑA" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-500 text-center tracking-widest">
-                <button onclick="iniciarSesionSegura()" class="w-full bg-slate-700 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-slate-800 transition-all uppercase text-sm">Ingresar</button>
+                <button onclick="iniciarSesionSegura()" class="w-full bg-slate-700 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-slate-800 transition-all uppercase text-sm">
+                    Ingresar a Estación
+                </button>
             </div>
         </div>
     </div>
@@ -70,6 +72,13 @@
         <div class="p-6 max-w-5xl mx-auto">
             <div id="contenedor-reportes" class="space-y-8"></div>
         </div>
+    </div>
+
+    <div class="w-full text-center py-8 opacity-40 pointer-events-none">
+        <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
+            Propiedad Intelectual de [Tu Nombre]<br>
+            © 2026 Auditoría Electoral L102 • Todos los derechos reservados
+        </p>
     </div>
 
     <script>
@@ -173,9 +182,10 @@
             }
             if (document.activeElement.tagName === 'INPUT') return;
 
+            container.innerHTML = '';
+
             let dataFiltrada = data;
             if (municipioActual === "6" && validadorActual !== "") {
-                // Mapeo manual de nombres a números 1, 2, 3 para el reparto
                 let numValidador = 0;
                 if (validadorActual === 'ING. URIEL') numValidador = 1;
                 if (validadorActual === 'ANA TRIANA') numValidador = 2;
@@ -187,7 +197,6 @@
                 });
             }
 
-            container.innerHTML = '';
             if (dataFiltrada.length === 0) {
                 container.innerHTML = `<div class="text-center py-10 font-bold text-slate-400 uppercase text-[10px]">Bandeja vacía. Sin actas asignadas a tu perfil en este momento.</div>`;
                 return;
