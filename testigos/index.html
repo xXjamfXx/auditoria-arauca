@@ -29,11 +29,11 @@
         
         <div class="text-center mb-6">
             <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  
-         alt="Logo L102" 
-         class="h-24 w-auto object-contain drop-shadow-md inline-block">
-         <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
-         alt="Numero 102" 
-         class="h-24 w-auto object-contain drop-shadow-md inline-block">
+          alt="Logo L102" 
+          class="h-24 w-auto object-contain drop-shadow-md inline-block">
+          <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
+          alt="Numero 102" 
+          class="h-24 w-auto object-contain drop-shadow-md inline-block">
             <h1 class="text-2xl font-black text-blue-900 leading-tight">Reporte Testigos</h1>
         </div>
 
@@ -75,6 +75,17 @@
             <div class="bg-blue-900 p-5 rounded-2xl text-white relative text-center">
                 <p id="texto-ubicacion" class="text-sm font-bold leading-tight uppercase"></p>
                 <button onclick="localStorage.removeItem('config_testigo'); location.reload();" class="text-[9px] text-blue-300 underline mt-2 uppercase font-black">Cambiar Mesa / Corregir</button>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-2">Tipo de Acta (E-14)</label>
+                <select id="select-tipo" class="w-full p-4 border-2 border-blue-500 rounded-2xl bg-blue-50 text-lg font-black text-blue-900 outline-none focus:ring-2 focus:ring-blue-300">
+                    <option value="">-- SELECCIONE TIPO --</option>
+                    <option value="CAMARA">CÁMARA DE REPRESENTANTES</option>
+                    <option value="SENADO">SENADO DE LA REPÚBLICA</option>
+                    <option value="CONSULTA">CONSULTAS INTERPARTIDISTAS</option>
+                    <option value="CITREP">CITREP (PAZ)</option>
+                </select>
             </div>
 
             <div>
@@ -154,6 +165,7 @@
 
         const selMun = document.getElementById('select-municipio');
         const selPue = document.getElementById('select-puesto');
+        const selTipo = document.getElementById('select-tipo'); // Nuevo
         const inputVotos = document.getElementById('input-votos');
         const inputCod = document.getElementById('codigo-seguridad');
         const btnEnv = document.getElementById('btn-enviar');
@@ -252,7 +264,7 @@
             }
         });
 
-        [inputCod, inputVotos].forEach(el => {
+        [inputCod, inputVotos, selTipo].forEach(el => {
             el.addEventListener('input', validarFormulario);
             el.addEventListener('change', validarFormulario);
             el.addEventListener('blur', validarFormulario);
@@ -262,11 +274,14 @@
 
         function validarFormulario() {
             if (CODIGO_MAESTRO === "") return;
+            const tipoOk = selTipo.value !== ""; // Nueva validación
             const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
             const votosOk = inputVotos.value.length > 0;
             const fotoOk = archivoOriginalParaSubir !== null;
-            btnEnv.disabled = !(codOk && votosOk && fotoOk);
+            
+            btnEnv.disabled = !(tipoOk && codOk && votosOk && fotoOk);
             btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest hover:bg-emerald-700 transition-all flex justify-center items-center gap-2";
+            
             if(codOk) localStorage.setItem('credencial_arauca', inputCod.value.toUpperCase());
         }
 
@@ -287,8 +302,13 @@
                 if(errorFoto) throw errorFoto;
                 const { data: publicUrl } = sClient.storage.from('fotos_e14').getPublicUrl(fileName);
                 const { error: errorDb } = await sClient.from('reportes').insert([{
-                    municipio_id: parseInt(conf.munId), puesto_nombre: conf.pue, mesa_numero: parseInt(conf.mesa),
-                    votos_candidato: parseInt(inputVotos.value), foto_url: publicUrl.publicUrl, estado: 'pendiente'
+                    municipio_id: parseInt(conf.munId), 
+                    puesto_nombre: conf.pue, 
+                    mesa_numero: parseInt(conf.mesa),
+                    tipo_eleccion: selTipo.value, // Nuevo campo
+                    votos_candidato: parseInt(inputVotos.value), 
+                    foto_url: publicUrl.publicUrl, 
+                    estado: 'pendiente'
                 }]);
                 if(errorDb) throw errorDb;
                 document.getElementById('pantalla-reporte').classList.add('hidden');
@@ -314,4 +334,3 @@
     </script>
 </body>
 </html>
-
