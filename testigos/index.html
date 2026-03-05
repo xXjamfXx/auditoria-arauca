@@ -17,6 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { position: relative; z-index: 10; overflow-x: hidden; }
+        option:disabled { color: #cbd5e1; background-color: #f1f5f9; }
     </style>
 </head>
 <body class="bg-gray-100 p-4 font-sans min-h-screen">
@@ -116,7 +117,7 @@
             <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">✓</div>
             <h2 class="text-2xl font-black text-blue-900 uppercase">¡RECIBIDO!</h2>
             <p class="text-slate-500 text-xs mt-2">El dato pasará a validación municipal.</p>
-            <button onclick="nuevoReporte()" class="mt-8 bg-slate-200 px-8 py-3 rounded-xl font-black text-xs uppercase text-slate-600">Reportar otra mesa</button>
+            <button onclick="nuevoReporte()" class="mt-8 bg-slate-200 px-8 py-3 rounded-xl font-black text-xs uppercase text-slate-600">Siguiente E-14 de esta mesa</button>
         </div>
     </div>
 
@@ -136,18 +137,9 @@
 
         async function cargarCodigoSeguridad() {
             try {
-                const { data, error } = await sClient
-                    .from('configuracion')
-                    .select('codigo_testigos')
-                    .eq('id', 1)
-                    .single();
-                
-                if (data && !error) {
-                    CODIGO_MAESTRO = data.codigo_testigos.toUpperCase();
-                }
-            } catch (err) {
-                console.log("Esperando código de seguridad...");
-            }
+                const { data, error } = await sClient.from('configuracion').select('codigo_testigos').eq('id', 1).single();
+                if (data && !error) CODIGO_MAESTRO = data.codigo_testigos.toUpperCase();
+            } catch (err) { console.log("Esperando código..."); }
         }
         cargarCodigoSeguridad();
 
@@ -162,10 +154,9 @@
         };
 
         let archivoOriginalParaSubir = null;
-
         const selMun = document.getElementById('select-municipio');
         const selPue = document.getElementById('select-puesto');
-        const selTipo = document.getElementById('select-tipo'); // Nuevo
+        const selTipo = document.getElementById('select-tipo');
         const inputVotos = document.getElementById('input-votos');
         const inputCod = document.getElementById('codigo-seguridad');
         const btnEnv = document.getElementById('btn-enviar');
@@ -173,21 +164,14 @@
         selMun.addEventListener('change', () => {
             selPue.innerHTML = '<option value="">Seleccione Puesto</option>';
             if(selMun.value) {
-                const listaPuestos = puestos[selMun.value];
-                listaPuestos.forEach(p => {
+                puestos[selMun.value].forEach(p => {
                     const opt = document.createElement('option');
-                    opt.value = p.nombre;
-                    opt.textContent = `${p.nombre} `;
-                    opt.dataset.maxMesas = p.mesas;
+                    opt.value = p.nombre; opt.textContent = `${p.nombre} `; opt.dataset.maxMesas = p.mesas;
                     selPue.appendChild(opt);
                 });
                 selPue.disabled = false;
-                if (listaPuestos.length === 1) {
-                    selPue.value = listaPuestos[0].nombre;
-                }
-            } else {
-                selPue.disabled = true;
-            }
+                if (puestos[selMun.value].length === 1) selPue.value = puestos[selMun.value][0].nombre;
+            } else { selPue.disabled = true; }
         });
 
         document.getElementById('btn-fijar').addEventListener('click', async () => {
@@ -196,35 +180,39 @@
             const munId = selMun.value;
             const puesto = selPue.value;
             if(!munId || !puesto || !mesaInput) return alert("Por favor, completa todos los campos.");
-            const opcionSeleccionada = selPue.options[selPue.selectedIndex];
-            const maxMesas = parseInt(opcionSeleccionada.dataset.maxMesas);
-            if (mesa < 1 || mesa > maxMesas) {
-                return alert(`ERROR: El puesto ${puesto} solo tiene ${maxMesas} mesas.`);
-            }
+
             const btnFijar = document.getElementById('btn-fijar');
-            btnFijar.innerText = "🔍 VERIFICANDO MESA...";
+            btnFijar.innerText = "🔍 CONSULTANDO ACTAS...";
             btnFijar.disabled = true;
+
             try {
+                // CONSULTAMOS TODOS LOS REPORTES DE ESTA MESA
                 const { data, error } = await sClient
                     .from('reportes')
-                    .select('id')
+                    .select('tipo_eleccion')
                     .eq('municipio_id', parseInt(munId))
                     .eq('puesto_nombre', puesto)
-                    .eq('mesa_numero', mesa)
-                    .limit(1);
+                    .eq('mesa_numero', mesa);
+
                 if (error) throw error;
-                if (data && data.length > 0) {
-                    alert("La Mesa " + mesa + " ya fue reportada anteriormente, valide e ingrese correctamente su información");
+
+                // Si ya tiene los 4 tipos, la mesa está completa
+                if (data && data.length >= 4) {
+                    alert("Esta Mesa " + mesa + " ya tiene todos sus E-14 reportados (Cámara, Senado, Consulta y CITREP).");
                     btnFijar.innerText = "Fijar Ubicación";
                     btnFijar.disabled = false;
-                } else {
-                    localStorage.setItem('config_testigo', JSON.stringify({ 
-                        munId: munId, munNom: selMun.options[selMun.selectedIndex].text, pue: puesto, mesa: mesa 
-                    }));
-                    render();
+                    return;
                 }
+
+                // Guardamos los tipos que ya existen para filtrarlos después
+                const tiposReportados = data.map(r => r.tipo_eleccion);
+                localStorage.setItem('config_testigo', JSON.stringify({ 
+                    munId: munId, munNom: selMun.options[selMun.selectedIndex].text, pue: puesto, mesa: mesa, tiposHechos: tiposReportados 
+                }));
+                
+                render();
             } catch (err) {
-                alert("Error al verificar base de datos.");
+                alert("Error al verificar mesa.");
                 btnFijar.innerText = "Fijar Ubicación";
                 btnFijar.disabled = false;
             }
@@ -236,16 +224,36 @@
                 document.getElementById('pantalla-config').classList.add('hidden');
                 document.getElementById('pantalla-reporte').classList.remove('hidden');
                 document.getElementById('texto-ubicacion').innerText = `${d.munNom}\n${d.pue}\nMESA N° ${d.mesa}`;
-            }
-            if(localStorage.getItem('credencial_arauca')) {
-                inputCod.value = localStorage.getItem('credencial_arauca');
-                validarFormulario();
+                
+                // FILTRAR SELECTOR DE TIPOS
+                const opciones = selTipo.querySelectorAll('option');
+                opciones.forEach(opt => {
+                    if (d.tiposHechos.includes(opt.value)) {
+                        opt.disabled = true;
+                        opt.textContent = "✅ " + opt.textContent.replace("✅ ", "");
+                    } else {
+                        opt.disabled = false;
+                        opt.textContent = opt.textContent.replace("✅ ", "");
+                    }
+                });
             }
         }
 
         function nuevoReporte() {
-            localStorage.removeItem('config_testigo');
-            location.reload();
+            // No borramos todo, solo volvemos a la pantalla de reporte para la misma mesa
+            const d = JSON.parse(localStorage.getItem('config_testigo'));
+            if (d) {
+                document.getElementById('pantalla-exito').classList.add('hidden');
+                document.getElementById('pantalla-reporte').classList.remove('hidden');
+                // Limpiamos campos de datos pero mantenemos ubicación
+                inputVotos.value = "";
+                archivoOriginalParaSubir = null;
+                document.getElementById('previo-foto').innerHTML = `<p class="text-4xl">📸 📁</p><p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Subir Foto del E-14</p>`;
+                document.getElementById('nombre-foto').innerText = "Obligatorio para validar";
+                
+                // Volvemos a consultar para actualizar los checks de "Hecho"
+                document.getElementById('btn-fijar').click();
+            } else { location.reload(); }
         }
 
         document.getElementById('input-foto').addEventListener('change', (e) => {
@@ -253,10 +261,7 @@
                 archivoOriginalParaSubir = e.target.files[0];
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    document.getElementById('previo-foto').innerHTML = `
-                        <img src="${event.target.result}" class="max-h-32 mx-auto rounded-lg mb-2 shadow-md">
-                        <p class="text-blue-900 font-black text-[10px] uppercase">Toca para cambiar foto</p>
-                    `;
+                    document.getElementById('previo-foto').innerHTML = `<img src="${event.target.result}" class="max-h-32 mx-auto rounded-lg mb-2 shadow-md">`;
                     document.getElementById('nombre-foto').innerText = "LISTA PARA ENVIAR";
                 };
                 reader.readAsDataURL(archivoOriginalParaSubir);
@@ -264,74 +269,41 @@
             }
         });
 
-        [inputCod, inputVotos, selTipo].forEach(el => {
-            el.addEventListener('input', validarFormulario);
-            el.addEventListener('change', validarFormulario);
-            el.addEventListener('blur', validarFormulario);
-        });
-
-        setInterval(validarFormulario, 1000);
+        [inputCod, inputVotos, selTipo].forEach(el => el.addEventListener('input', validarFormulario));
 
         function validarFormulario() {
             if (CODIGO_MAESTRO === "") return;
-            const tipoOk = selTipo.value !== ""; // Nueva validación
+            const tipoOk = selTipo.value !== "" && !selTipo.options[selTipo.selectedIndex].disabled;
             const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
             const votosOk = inputVotos.value.length > 0;
             const fotoOk = archivoOriginalParaSubir !== null;
             
             btnEnv.disabled = !(tipoOk && codOk && votosOk && fotoOk);
             btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest hover:bg-emerald-700 transition-all flex justify-center items-center gap-2";
-            
-            if(codOk) localStorage.setItem('credencial_arauca', inputCod.value.toUpperCase());
         }
 
         btnEnv.addEventListener('click', async () => {
-            btnEnv.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                SUBIENDO FOTO...
-            `;
+            btnEnv.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> SUBIENDO...`;
             btnEnv.disabled = true;
             try {
                 const conf = JSON.parse(localStorage.getItem('config_testigo'));
                 const extension = archivoOriginalParaSubir.name.split('.').pop();
                 const fileName = `E14_${Date.now()}.${extension}`;
-                const { error: errorFoto } = await sClient.storage.from('fotos_e14').upload(fileName, archivoOriginalParaSubir);
-                if(errorFoto) throw errorFoto;
+                await sClient.storage.from('fotos_e14').upload(fileName, archivoOriginalParaSubir);
                 const { data: publicUrl } = sClient.storage.from('fotos_e14').getPublicUrl(fileName);
-                const { error: errorDb } = await sClient.from('reportes').insert([{
-                    municipio_id: parseInt(conf.munId), 
-                    puesto_nombre: conf.pue, 
-                    mesa_numero: parseInt(conf.mesa),
-                    tipo_eleccion: selTipo.value, // Nuevo campo
-                    votos_candidato: parseInt(inputVotos.value), 
-                    foto_url: publicUrl.publicUrl, 
-                    estado: 'pendiente'
+                await sClient.from('reportes').insert([{
+                    municipio_id: parseInt(conf.munId), puesto_nombre: conf.pue, mesa_numero: parseInt(conf.mesa),
+                    tipo_eleccion: selTipo.value, votos_candidato: parseInt(inputVotos.value), foto_url: publicUrl.publicUrl, estado: 'pendiente'
                 }]);
-                if(errorDb) throw errorDb;
+                
                 document.getElementById('pantalla-reporte').classList.add('hidden');
                 document.getElementById('pantalla-exito').classList.remove('hidden');
             } catch (err) {
-                alert("Error al enviar el reporte.");
+                alert("Error al enviar reporte.");
                 btnEnv.innerHTML = "ENVIAR REPORTE";
                 btnEnv.disabled = false;
             }
         });
-
-        const parametrosURL = new URLSearchParams(window.location.search);
-        const municipioFijo = parametrosURL.get('mun');
-        if (municipioFijo && puestos[municipioFijo]) {
-            selMun.value = municipioFijo;
-            selMun.dispatchEvent(new Event('change'));
-            selMun.disabled = true; selMun.classList.add('opacity-70');
-        }
-        render();
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); });
-        }
     </script>
 </body>
 </html>
-
