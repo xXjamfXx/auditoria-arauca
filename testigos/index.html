@@ -118,9 +118,8 @@
             <h2 class="text-2xl font-black text-blue-900 uppercase">¡RECIBIDO!</h2>
             <p class="text-slate-500 text-[10px] mt-2 font-bold uppercase tracking-widest">El dato pasará a validación municipal.</p>
             
-            <div class="mt-8 space-y-3">
-               
-                <button onclick="volverAlInicio()" class="w-full bg-slate-200 text-slate-600 font-black py-4 rounded-2xl text-xs uppercase tracking-widest">Regresar al Incio</button>
+            <div class="mt-8">
+                <button onclick="volverAlInicio()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-md tracking-widest">Reportar Nueva Mesa / Acta</button>
             </div>
         </div>
     </div>
@@ -128,7 +127,7 @@
     <div class="max-w-md mx-auto text-center py-8 opacity-40 pointer-events-none">
         <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
             Propiedad Intelectual de JAMF <br>
-            © 2026 AuditorÍA ELECTORAL L102 • TODOS LOS DERECHOS RESERVADOS
+            © 2026 Auditoría Electoral L102 • Todos los derechos reservados
         </p>
     </div>
 
@@ -187,10 +186,10 @@
 
             try {
                 const { data } = await sClient.from('reportes').select('tipo_eleccion').eq('municipio_id', parseInt(munId)).eq('puesto_nombre', puesto).eq('mesa_numero', parseInt(mesaInput));
-                
                 const tiposHechos = data ? data.map(r => r.tipo_eleccion) : [];
+                
                 if(tiposHechos.length >= 4) {
-                    alert("Esta mesa ya completó todos sus reportes (Cámara, Senado, Consulta y CITREP).");
+                    alert("Esta mesa ya completó todos sus reportes.");
                     btnFijar.innerText = "Fijar Ubicación"; btnFijar.disabled = false;
                     return;
                 }
@@ -207,7 +206,6 @@
             if(d) {
                 document.getElementById('pantalla-config').classList.add('hidden');
                 document.getElementById('pantalla-reporte').classList.remove('hidden');
-                document.getElementById('pantalla-exito').classList.add('hidden');
                 document.getElementById('texto-ubicacion').innerText = `${d.munNom}\n${d.pue}\nMESA ${d.mesa}`;
                 
                 selTipo.querySelectorAll('option').forEach(opt => {
@@ -219,38 +217,23 @@
                     }
                 });
                 selTipo.value = "";
-                
-                // RESET TOTAL DEL BOTÓN
-                btnEnv.innerText = "Enviar Reporte";
-                validarFormulario();
             }
         }
 
-        function continuarMismaMesa() {
-            document.getElementById('pantalla-exito').classList.add('hidden');
-            // LIMPIEZA FÍSICA Y LÓGICA
-            inputVotos.value = ""; 
-            archivoOriginalParaSubir = null;
-            document.getElementById('input-foto').value = ""; // Limpiar input real
-            document.getElementById('previo-foto').innerHTML = `<p class="text-4xl">📸 📁</p><p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Subir Foto del E-14 (Desde Galería)</p>`;
-            document.getElementById('nombre-foto').innerText = "Obligatorio para validar";
-            
-            btnEnv.innerText = "Enviar Reporte";
-            btnEnv.disabled = true;
-            
-            verificarMesa(); 
-        }
-
         function volverAlInicio() {
+            // Mantener el parámetro mun de la URL si existe para no obligar a elegir municipio otra vez
+            const currentMun = selMun.value;
             localStorage.removeItem('config_testigo');
-            location.reload();
+            if(currentMun) {
+                window.location.href = window.location.pathname + "?mun=" + currentMun;
+            } else {
+                location.reload();
+            }
         }
 
         document.getElementById('input-foto').addEventListener('change', (e) => {
             if(e.target.files[0]) {
                 archivoOriginalParaSubir = e.target.files[0];
-                
-                // PREVISUALIZACIÓN RESTAURADA
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     document.getElementById('previo-foto').innerHTML = `
@@ -260,7 +243,6 @@
                     document.getElementById('nombre-foto').innerText = "LISTA PARA ENVIAR";
                 };
                 reader.readAsDataURL(archivoOriginalParaSubir);
-                
                 validarFormulario();
             }
         });
@@ -271,14 +253,8 @@
             const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
             const votosOk = inputVotos.value.length > 0;
             const fotoOk = archivoOriginalParaSubir !== null;
-            
             btnEnv.disabled = !(tipoOk && codOk && votosOk && fotoOk);
-            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest";
-            
-            // Asegurar que el texto sea correcto si el formulario es válido pero no se ha enviado aún
-            if(!btnEnv.disabled && btnEnv.innerText !== "SUBIENDO...") {
-                btnEnv.innerText = "Enviar Reporte";
-            }
+            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg";
         }
 
         [inputCod, inputVotos, selTipo].forEach(el => el.addEventListener('input', validarFormulario));
@@ -294,21 +270,13 @@
                 const { data: publicUrl } = sClient.storage.from('fotos_e14').getPublicUrl(fileName);
                 
                 await sClient.from('reportes').insert([{
-                    municipio_id: parseInt(conf.munId), 
-                    puesto_nombre: conf.pue, 
-                    mesa_numero: parseInt(conf.mesa),
-                    tipo_eleccion: selTipo.value, 
-                    votos_candidato: parseInt(inputVotos.value), 
-                    foto_url: publicUrl.publicUrl, 
-                    estado: 'pendiente'
+                    municipio_id: parseInt(conf.munId), puesto_nombre: conf.pue, mesa_numero: parseInt(conf.mesa),
+                    tipo_eleccion: selTipo.value, votos_candidato: parseInt(inputVotos.value), foto_url: publicUrl.publicUrl, estado: 'pendiente'
                 }]);
                 
                 document.getElementById('pantalla-reporte').classList.add('hidden');
                 document.getElementById('pantalla-exito').classList.remove('hidden');
-            } catch (err) { 
-                alert("Error al enviar. Intente de nuevo."); 
-                btnEnv.innerText = "Enviar Reporte"; btnEnv.disabled = false; 
-            }
+            } catch (err) { alert("Error al enviar"); btnEnv.innerText = "Enviar Reporte"; btnEnv.disabled = false; }
         }
 
         const parametrosURL = new URLSearchParams(window.location.search);
@@ -320,4 +288,3 @@
     </script>
 </body>
 </html>
-
