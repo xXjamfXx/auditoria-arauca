@@ -144,7 +144,7 @@
             "4": [ { nombre: "POLIDEPORTIVO MUNICIPAL", mesas: 18 }, { nombre: "CONCENTRACION ALEJANDRO HUMBOLDT", mesas: 15 }, { nombre: "CAÑO FLOREZ", mesas: 3 }, { nombre: "NUEVO CARANAL", mesas: 6 }, { nombre: "MATECAÑA", mesas: 2 } ],
             "5": [ { nombre: "PUESTO CABECERA MUNICIPAL", mesas: 13 } ],
             "6": [ { nombre: "CENTRO CULT Y DEPORTIVO SIMON", mesas: 19 }, { nombre: "IE LA FRONTERA", mesas: 27 }, { nombre: "SEDE EDUCATIVA SEIS DE OCTUBRE", mesas: 19 }, { nombre: "SEDE EDUCATIVA LAS VILLAS", mesas: 8 }, { nombre: "SEDE EDUCATIVA GENERAL SANTANDER", mesas: 14 }, { nombre: "IE TEC.IND.RAFAEL POMBO BTO", mesas: 25 }, { nombre: "SEDE EDUCATIVA MANUELA BELTRAN", mesas: 2 }, { nombre: "PUERTO NARIÑO", mesas: 10 }, { nombre: "RESGUARDO INDIGENAS DE PLAYAS DE BOJABA", mesas: 1 }, { nombre: "VEREDA VIAS", mesas: 3 } ],
-            "7": [ { nombre: "COL. INST. ORIENTAL FEMENINO", mesas: 21 }, { nombre: "ESCUELA SAN ANTONIO", mesas: 22 }, { nombre: "COLISEO CUBIERTO LOS LIBERTADORES", mesas: 13 }, { nombre: "COLEGIO FROILAN FARIAS", mesas: 19 }, { nombre: "CIUDADELA UNIVERSITARIA", mesas: 14 }, { nombre: "IE SAN LUIS", mesas: 1 }, { nombre: "BETOYES", mesas: 5 }, { nombre: "PUERTO GAITAN", mesas: 1 }, { nombre: "PUERTO SAN SALVADOR", mesas: 1 }, { nombre: "LA HOLANDA", mesas: 1 }, { nombre: "LA ARENOSA", mesas: 2 }, { nombre: "LAS MALVINAS", mesas: 2 }, { nombre: "PUERTO JORDAN", mesas: 10 }, { nombre: "CACHAMA", mesas: 1 }, { nombre: "EL BOTALON", mesas: 7 }, { nombre: "EL TABLON", mesas: 2 }, { nombre: "CENTRO POBLADO  COROCITO", mesas: 4 }, { nombre: "SANTO DOMINGO", mesas: 1 } ]
+            "7": [ { nombre: "COL. INST. ORIENTAL FEMENINO", mesas: 21 }, { nombre: "ESCUELA SAN ANTONIO", mesas: 22 }, { nombre: "COLISEO CUBIERSO LOS LIBERTADORES", mesas: 13 }, { nombre: "COLEGIO FROILAN FARIAS", mesas: 19 }, { nombre: "CIUDADELA UNIVERSITARIA", mesas: 14 }, { nombre: "IE SAN LUIS", mesas: 1 }, { nombre: "BETOYES", mesas: 5 }, { nombre: "PUERTO GAITAN", mesas: 1 }, { nombre: "PUERTO SAN SALVADOR", mesas: 1 }, { nombre: "LA HOLANDA", mesas: 1 }, { nombre: "LA ARENOSA", mesas: 2 }, { nombre: "LAS MALVINAS", mesas: 2 }, { nombre: "PUERTO JORDAN", mesas: 10 }, { nombre: "CACHAMA", mesas: 1 }, { nombre: "EL BOTALON", mesas: 7 }, { nombre: "EL TABLON", mesas: 2 }, { nombre: "CENTRO POBLADO  COROCITO", mesas: 4 }, { nombre: "SANTO DOMINGO", mesas: 1 } ]
         };
 
         let archivoOriginalParaSubir = null;
@@ -185,11 +185,19 @@
             btnFijar.innerText = "🔍 CONSULTANDO..."; btnFijar.disabled = true;
 
             try {
-                const { data } = await sClient.from('reportes').select('tipo_eleccion').eq('municipio_id', parseInt(munId)).eq('puesto_nombre', puesto).eq('mesa_numero', parseInt(mesaInput));
+                // SOLUCIÓN: Filtrar para que NO tome en cuenta los registros con estado 'rechazado'
+                const { data } = await sClient
+                    .from('reportes')
+                    .select('tipo_eleccion')
+                    .eq('municipio_id', parseInt(munId))
+                    .eq('puesto_nombre', puesto)
+                    .eq('mesa_numero', parseInt(mesaInput))
+                    .neq('estado', 'rechazado'); // <--- Filtro clave aplicado
+                
                 const tiposHechos = data ? data.map(r => r.tipo_eleccion) : [];
                 
                 if(tiposHechos.length >= 4) {
-                    alert("Esta mesa ya completó todos sus reportes.");
+                    alert("Esta mesa ya completó todos sus reportes válidos.");
                     btnFijar.innerText = "Fijar Ubicación"; btnFijar.disabled = false;
                     return;
                 }
@@ -221,7 +229,6 @@
         }
 
         function volverAlInicio() {
-            // Mantener el parámetro mun de la URL si existe para no obligar a elegir municipio otra vez
             const currentMun = selMun.value;
             localStorage.removeItem('config_testigo');
             if(currentMun) {
