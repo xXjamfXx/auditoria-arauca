@@ -217,9 +217,9 @@
                 document.getElementById('texto-ubicacion').innerText = `${d.munNom}\n${d.pue}\nMESA ${d.mesa}`;
                 
                 selTipo.querySelectorAll('option').forEach(opt => {
-                    const textoLimpio = opt.textContent.replace("✅ ", "");
+                    const textoLimpio = opt.textContent.replace(" ", "");
                     if(d.tiposHechos.includes(opt.value)) {
-                        opt.disabled = true; opt.textContent = "✅ " + textoLimpio;
+                        opt.disabled = true; opt.textContent = " " + textoLimpio;
                     } else {
                         opt.disabled = false; opt.textContent = textoLimpio;
                     }
@@ -295,3 +295,4 @@
     </script>
 </body>
 </html>
+
