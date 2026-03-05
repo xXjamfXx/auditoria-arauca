@@ -120,6 +120,13 @@
                 <div id="galeria-actas" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
             </div>
         </div>
+
+        <div class="max-w-6xl mx-auto text-center py-12 opacity-40 pointer-events-none">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
+                Propiedad Intelectual de JAMF<br>
+                © 2026 Auditoría Electoral L102 • Todos los derechos reservados
+            </p>
+        </div>
     </div>
 
     <script>
@@ -129,7 +136,7 @@
         const motorSupabase = supabase.createClient(sUrl, sKey);
         
         let datosExcel = [];
-        let actasAprobadasGlobal = []; // Variable para guardar las actas y poder filtrarlas sin recargar
+        let actasAprobadasGlobal = []; 
         
         const nombresMun = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
         const coloresMun = { 1: "#3b82f6", 2: "#10b981", 3: "#8b5cf6", 4: "#06b6d4", 5: "#6366f1", 6: "#2dd4bf", 7: "#a855f7" };
@@ -213,7 +220,7 @@
                 datosExcel = data;
 
                 const aprobados = data.filter(r => r.estado === 'aprobado');
-                actasAprobadasGlobal = aprobados; // Guardamos en global para el filtro
+                actasAprobadasGlobal = aprobados; 
                 
                 const totalVotos = aprobados.reduce((sum, r) => sum + (r.votos_oficiales || 0), 0);
                 
@@ -235,18 +242,15 @@
                         </div>`;
                 });
 
-                // Llamamos a la función de la galería para que dibuje respetando el filtro actual
                 renderizarGaleria();
 
             } catch (err) { console.log("Error de sincronización:", err); }
         }
 
-        // 👇 NUEVA FUNCIÓN: Dibuja la galería y aplica el filtro si hay uno seleccionado
         function renderizarGaleria() {
             const filtroMun = document.getElementById('filtro-municipio').value;
             let actasParaMostrar = actasAprobadasGlobal;
 
-            // Si hay un filtro, recortamos la lista solo a ese municipio
             if (filtroMun !== 'todos') {
                 actasParaMostrar = actasParaMostrar.filter(r => r.municipio_id == filtroMun);
             }
@@ -259,7 +263,6 @@
                 return;
             }
 
-            // Mostramos las últimas 9 o 12 (puse 12 para que se vea más lleno)
             actasParaMostrar.slice(0, 12).forEach(r => {
                 divGaleria.innerHTML += `
                     <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 p-2 shadow-sm group hover:border-blue-300 transition-colors flex flex-col justify-between">
@@ -312,7 +315,6 @@
             const reporte = datosExcel.map(r => ({
                 'MARCA_TIEMPO': new Date(r.creado_en).toLocaleString(),
                 'MUNICIPIO': nombresMun[r.municipio_id],
-                // 👇 SE AÑADIÓ EL PUESTO TAMBIÉN AL EXCEL PARA AUDITORÍA
                 'PUESTO_VOTACION': r.puesto_nombre, 
                 'MESA': r.mesa_numero,
                 'VOTOS_REPORTADOS': r.votos_candidato,
@@ -328,5 +330,3 @@
     </script>
 </body>
 </html>
-
-
