@@ -6,63 +6,74 @@
     <title>Calculadora Jurídica L102 - Art. 164</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
         .alerta-legal { background: #fee2e2; border: 2px solid #ef4444; color: #b91c1c; }
         .exito-legal { background: #dcfce7; border: 2px solid #22c55e; color: #15803d; }
     </style>
 </head>
-<body class="bg-slate-100 p-4 font-sans text-slate-800">
+<body class="bg-slate-100 p-4 text-slate-800 min-h-screen flex flex-col justify-between">
 
-    <div class="max-w-md mx-auto bg-white p-6 rounded-3xl shadow-2xl border border-slate-200">
+    <div class="max-w-md mx-auto bg-white p-6 rounded-3xl shadow-2xl border border-slate-200 mt-4">
         <div class="text-center mb-6">
-             <div class="text-center mb-6"><img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  
-         alt="Logo L102" 
-         class="h-24 w-auto object-contain drop-shadow-md inline-block">
-         <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
-         alt="Numero 102" 
-         class="h-24 w-auto object-contain drop-shadow-md inline-block">
-          <h1 class="text-2xl font-black text-blue-900 mt-2">DIFERENCIAL 10%</h1>
-            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Art. 164 del Código Electoral Colombiano</p>
+             <div class="text-center mb-6">
+                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  
+                     alt="Logo L102" 
+                     class="h-24 w-auto object-contain drop-shadow-md inline-block">
+                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
+                     alt="Numero 102" 
+                     class="h-24 w-auto object-contain drop-shadow-md inline-block">
+                <h1 class="text-2xl font-black text-blue-900 mt-2">DIFERENCIAL 10%</h1>
+                <p class="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Art. 164 del Código Electoral Colombiano</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-3 rounded-2xl">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Votos Cámara</label>
+                        <input type="number" id="votosA" oninput="calcular()" class="w-full bg-transparent text-center text-3xl font-black text-blue-900 outline-none" placeholder="0">
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-2xl">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Votos Senado</label>
+                        <input type="number" id="votosB" oninput="calcular()" class="w-full bg-transparent text-center text-3xl font-black text-blue-900 outline-none" placeholder="0">
+                    </div>
+                </div>
+
+                <div id="panel-calculo" class="bg-slate-900 text-white p-4 rounded-2xl hidden">
+                    <div class="flex justify-between items-center border-b border-slate-700 pb-2 mb-2">
+                        <span class="text-[10px] font-bold uppercase text-slate-400">Diferencia Votos:</span>
+                        <span id="diff-votos" class="text-xl font-black text-emerald-400">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-bold uppercase text-slate-400">Porcentaje de Variación:</span>
+                        <span id="diff-porcentaje" class="text-xl font-black text-emerald-400">0%</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-2">
+                    <label class="flex items-center space-x-3 p-3 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50">
+                        <input type="checkbox" id="tachaduras" onchange="calcular()" class="w-5 h-5 accent-blue-900">
+                        <span class="text-[11px] font-bold text-slate-700 uppercase leading-tight">Tachaduras / Enmendaduras NO justificadas en observaciones</span>
+                    </label>
+                </div>
+
+                <div id="resultado-caja" class="p-5 rounded-2xl text-center hidden">
+                    <p id="resultado-texto" class="text-sm font-black uppercase leading-tight"></p>
+                    <p id="resultado-base" class="text-[10px] mt-2 font-bold leading-relaxed"></p>
+                </div>
+
+                <p class="text-[8px] text-center text-slate-400 font-medium italic px-4">
+                    "Las comisiones escrutadoras no podrán negar la solicitud de recuento cuando aparezca una diferencia del 10% o más..." - Art. 164 Código Electoral.
+                </p>
+            </div>
         </div>
+    </div>
 
-        <div class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-slate-50 p-3 rounded-2xl">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Votos Cámara</label>
-                    <input type="number" id="votosA" oninput="calcular()" class="w-full bg-transparent text-center text-3xl font-black text-blue-900 outline-none" placeholder="0">
-                </div>
-                <div class="bg-slate-50 p-3 rounded-2xl">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Votos Senado</label>
-                    <input type="number" id="votosB" oninput="calcular()" class="w-full bg-transparent text-center text-3xl font-black text-blue-900 outline-none" placeholder="0">
-                </div>
-            </div>
-
-            <div id="panel-calculo" class="bg-slate-900 text-white p-4 rounded-2xl hidden">
-                <div class="flex justify-between items-center border-b border-slate-700 pb-2 mb-2">
-                    <span class="text-[10px] font-bold uppercase text-slate-400">Diferencia Votos:</span>
-                    <span id="diff-votos" class="text-xl font-black text-emerald-400">0</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-[10px] font-bold uppercase text-slate-400">Porcentaje de Variación:</span>
-                    <span id="diff-porcentaje" class="text-xl font-black text-emerald-400">0%</span>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-2">
-                <label class="flex items-center space-x-3 p-3 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50">
-                    <input type="checkbox" id="tachaduras" onchange="calcular()" class="w-5 h-5 accent-blue-900">
-                    <span class="text-[11px] font-bold text-slate-700 uppercase leading-tight">Tachaduras / Enmendaduras NO justificadas en observaciones</span>
-                </label>
-            </div>
-
-            <div id="resultado-caja" class="p-5 rounded-2xl text-center hidden">
-                <p id="resultado-texto" class="text-sm font-black uppercase leading-tight"></p>
-                <p id="resultado-base" class="text-[10px] mt-2 font-bold leading-relaxed"></p>
-            </div>
-
-            <p class="text-[8px] text-center text-slate-400 font-medium italic px-4">
-                "Las comisiones escrutadoras no podrán negar la solicitud de recuento cuando aparezca una diferencia del 10% o más..." - Art. 164 Código Electoral.
-            </p>
-        </div>
+    <div class="w-full text-center py-8 opacity-40 pointer-events-none mt-auto">
+        <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
+            Propiedad Intelectual de JAMF<br>
+            © 2026 Auditoría Electoral L102 • Todos los derechos reservados
+        </p>
     </div>
 
     <script>
