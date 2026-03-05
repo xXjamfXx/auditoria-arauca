@@ -212,12 +212,16 @@
                 
                 selTipo.querySelectorAll('option').forEach(opt => {
                     if(d.tiposHechos.includes(opt.value)) {
-                        opt.disabled = true; opt.textContent = " " + opt.textContent.replace(" ", "");
+                        opt.disabled = true; opt.textContent = "✅ " + opt.textContent.replace("✅ ", "");
                     } else {
-                        opt.disabled = false; opt.textContent = opt.textContent.replace(" ", "");
+                        opt.disabled = false; opt.textContent = opt.textContent.replace("✅ ", "");
                     }
                 });
                 selTipo.value = "";
+                
+                // IMPORTANTE: Resetear botón al renderizar para evitar que quede en "SUBIENDO..."
+                btnEnv.innerText = "Enviar Reporte";
+                validarFormulario();
             }
         }
 
@@ -226,7 +230,13 @@
             inputVotos.value = ""; 
             archivoOriginalParaSubir = null;
             document.getElementById('previo-foto').innerHTML = `<p class="text-4xl">📸 📁</p><p class="text-blue-900 font-black text-xs uppercase">Subir Foto E-14</p>`;
-            verificarMesa(); // Refresca qué actas quedan disponibles
+            document.getElementById('nombre-foto').innerText = "Obligatorio para validar";
+            
+            // Reiniciamos el estado del botón
+            btnEnv.innerText = "Enviar Reporte";
+            btnEnv.disabled = true;
+            
+            verificarMesa(); 
         }
 
         function volverAlInicio() {
@@ -237,7 +247,18 @@
         document.getElementById('input-foto').addEventListener('change', (e) => {
             if(e.target.files[0]) {
                 archivoOriginalParaSubir = e.target.files[0];
-                document.getElementById('previo-foto').innerHTML = `<p class="text-emerald-500 font-black">✅ FOTO CARGADA</p>`;
+                
+                // RESTAURADA PREVISUALIZACIÓN DE IMAGEN
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('previo-foto').innerHTML = `
+                        <img src="${event.target.result}" class="max-h-32 mx-auto rounded-lg mb-2 shadow-md">
+                        <p class="text-blue-900 font-black text-[10px] uppercase">Toca para cambiar foto</p>
+                    `;
+                    document.getElementById('nombre-foto').innerText = "LISTA PARA ENVIAR";
+                };
+                reader.readAsDataURL(archivoOriginalParaSubir);
+                
                 validarFormulario();
             }
         });
@@ -248,6 +269,7 @@
             const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
             const votosOk = inputVotos.value.length > 0;
             const fotoOk = archivoOriginalParaSubir !== null;
+            
             btnEnv.disabled = !(tipoOk && codOk && votosOk && fotoOk);
             btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg";
         }
@@ -255,30 +277,45 @@
         [inputCod, inputVotos, selTipo].forEach(el => el.addEventListener('input', validarFormulario));
 
         async function enviarReporte() {
-            btnEnv.innerText = "SUBIENDO..."; btnEnv.disabled = true;
+            // Cambio visual inmediato
+            btnEnv.innerText = "SUBIENDO..."; 
+            btnEnv.disabled = true;
+            
             try {
                 const conf = JSON.parse(localStorage.getItem('config_testigo'));
-                const fileName = `E14_${Date.now()}.jpg`;
+                const extension = archivoOriginalParaSubir.name.split('.').pop();
+                const fileName = `E14_${Date.now()}.${extension}`;
+                
                 await sClient.storage.from('fotos_e14').upload(fileName, archivoOriginalParaSubir);
                 const { data: publicUrl } = sClient.storage.from('fotos_e14').getPublicUrl(fileName);
                 
                 await sClient.from('reportes').insert([{
-                    municipio_id: parseInt(conf.munId), puesto_nombre: conf.pue, mesa_numero: parseInt(conf.mesa),
-                    tipo_eleccion: selTipo.value, votos_candidato: parseInt(inputVotos.value), foto_url: publicUrl.publicUrl, estado: 'pendiente'
+                    municipio_id: parseInt(conf.munId), 
+                    puesto_nombre: conf.pue, 
+                    mesa_numero: parseInt(conf.mesa),
+                    tipo_eleccion: selTipo.value, 
+                    votos_candidato: parseInt(inputVotos.value), 
+                    foto_url: publicUrl.publicUrl, 
+                    estado: 'pendiente'
                 }]);
                 
                 document.getElementById('pantalla-reporte').classList.add('hidden');
                 document.getElementById('pantalla-exito').classList.remove('hidden');
-            } catch (err) { alert("Error al enviar"); btnEnv.innerText = "Enviar Reporte"; btnEnv.disabled = false; }
+            } catch (err) { 
+                alert("Error al enviar el reporte. Por favor intente de nuevo."); 
+                btnEnv.innerText = "Enviar Reporte"; 
+                btnEnv.disabled = false; 
+            }
         }
 
         const parametrosURL = new URLSearchParams(window.location.search);
         const munUrl = parametrosURL.get('mun');
         if (munUrl && puestos[munUrl]) {
-            selMun.value = munUrl; selMun.dispatchEvent(new Event('change'));
-            selMun.disabled = true; selMun.classList.add('opacity-70');
+            selMun.value = munUrl; 
+            selMun.dispatchEvent(new Event('change'));
+            selMun.disabled = true; 
+            selMun.classList.add('opacity-70');
         }
     </script>
 </body>
 </html>
-
