@@ -12,6 +12,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
+        .columna-scroll { height: calc(100vh - 120px); overflow-y: auto; scrollbar-width: thin; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen relative">
@@ -37,6 +38,11 @@
                 <div>
                     <h1 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Resultados</h1>
                     <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Senado • CITREP • Consulta</p>
+                    
+                    <div class="flex items-center gap-1.5 mt-1">
+                        <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-300"></div>
+                        <span id="status-text" class="text-[8px] font-black uppercase tracking-widest text-slate-400">Conectando...</span>
+                    </div>
                 </div>
             </div>
             
@@ -77,7 +83,37 @@
                 <div id="lista-municipios" class="space-y-2"></div>
             </div>
             <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+                
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-4 border-b pb-4 gap-3">
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase">Visor de Actas Validadas</h3>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <select id="filtro-tipo" onchange="resetearGaleria()" class="bg-slate-50 text-[10px] font-bold p-2 rounded-xl border flex-1 outline-none">
+                            <option value="todos">Todos los Tipos</option>
+                            <option value="SENADO">Senado</option>
+                            <option value="CITREP">CITREP</option>
+                            <option value="CONSULTA">Consulta</option>
+                        </select>
+                        <select id="filtro-mun" onchange="resetearGaleria()" class="bg-slate-50 text-[10px] font-bold p-2 rounded-xl border flex-1 outline-none">
+                            <option value="todos">Todos los Municipios</option>
+                            <option value="1">Arauca</option>
+                            <option value="2">Arauquita</option>
+                            <option value="3">Cravo Norte</option>
+                            <option value="4">Fortul</option>
+                            <option value="5">Puerto Rondón</option>
+                            <option value="6">Saravena</option>
+                            <option value="7">Tame</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div id="galeria-actas" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                
+                <div class="mt-6 text-center">
+                    <button id="btn-cargar-mas" onclick="cargarMasActas()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold px-6 py-2 rounded-xl text-[10px] uppercase transition-all shadow-sm">
+                        ↓ Cargar más actas ↓
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -89,6 +125,7 @@
         
         let datosCompletos = [];
         let clicCount = 0;
+        let limiteGaleria = 12;
         const nombresMun = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
 
         function activarTruco() {
@@ -134,48 +171,105 @@
         }
 
         async function refrescar() {
-            const { data } = await motorSupabase.from('reportes')
-                .select('*')
-                .eq('estado', 'aprobado')
-                .neq('tipo_eleccion', 'CAMARA')
-                .order('creado_en', { ascending: false });
+            try {
+                const { data, error } = await motorSupabase.from('reportes')
+                    .select('*')
+                    .eq('estado', 'aprobado')
+                    .neq('tipo_eleccion', 'CAMARA')
+                    .order('creado_en', { ascending: false });
 
-            datosCompletos = data || [];
-            
-            const tipos = ['SENADO', 'CITREP', 'CONSULTA'];
-            tipos.forEach(t => {
-                const filtrados = datosCompletos.filter(r => r.tipo_eleccion === t);
-                const total = filtrados.reduce((sum, r) => sum + (r.votos_oficiales || 0), 0);
-                document.getElementById(`votos-${t.toLowerCase()}`).innerText = total.toLocaleString();
-            });
+                if (error) throw error;
 
-            const divMun = document.getElementById('lista-municipios');
-            divMun.innerHTML = '';
-            Object.keys(nombresMun).forEach(id => {
-                const v = datosCompletos.filter(r => r.municipio_id == id).reduce((sum, r) => sum + (r.votos_oficiales || 0), 0);
-                if(v > 0) {
-                    divMun.innerHTML += `<div class="flex justify-between p-2 bg-slate-50 rounded-lg text-xs">
-                        <span class="font-bold text-slate-500 uppercase">${nombresMun[id]}</span>
-                        <span class="font-black">${v.toLocaleString()}</span>
-                    </div>`;
-                }
-            });
+                datosCompletos = data || [];
+                
+                document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                document.getElementById('status-text').innerText = "ONLINE";
+                document.getElementById('status-text').className = "text-[8px] font-black uppercase tracking-widest text-emerald-600";
+                
+                const tipos = ['SENADO', 'CITREP', 'CONSULTA'];
+                tipos.forEach(t => {
+                    const filtrados = datosCompletos.filter(r => r.tipo_eleccion === t);
+                    const total = filtrados.reduce((sum, r) => sum + (r.votos_oficiales || 0), 0);
+                    document.getElementById(`votos-${t.toLowerCase()}`).innerText = total.toLocaleString();
+                });
 
+                const divMun = document.getElementById('lista-municipios');
+                divMun.innerHTML = '';
+                Object.keys(nombresMun).forEach(id => {
+                    const actasMun = datosCompletos.filter(r => r.municipio_id == id);
+                    const v = actasMun.reduce((sum, r) => sum + (r.votos_oficiales || 0), 0);
+                    const mesasCount = actasMun.length;
+
+                    if(v > 0) {
+                        divMun.innerHTML += `
+                            <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg text-xs border border-slate-100">
+                                <span class="font-bold text-slate-500 uppercase">${nombresMun[id]}</span>
+                                <div class="text-right leading-tight">
+                                    <span class="font-black text-slate-800 text-sm">${v.toLocaleString()} <span class="text-[8px] text-slate-400 font-normal">votos</span></span>
+                                    <p class="text-[8px] font-black text-slate-400 uppercase tracking-tighter">${mesasCount} actas</p>
+                                </div>
+                            </div>`;
+                    }
+                });
+
+                renderizarGaleria();
+
+            } catch (err) { 
+                document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-red-500";
+                document.getElementById('status-text').innerText = "SIN CONEXIÓN";
+                document.getElementById('status-text').className = "text-[8px] font-black uppercase tracking-widest text-red-500";
+                console.log("Error de conexión:", err);
+            }
+        }
+
+        function resetearGaleria() {
+            limiteGaleria = 12;
+            renderizarGaleria();
+        }
+
+        function cargarMasActas() {
+            limiteGaleria += 12;
+            renderizarGaleria();
+        }
+
+        function renderizarGaleria() {
+            const filtroTipo = document.getElementById('filtro-tipo').value;
+            const filtroMun = document.getElementById('filtro-mun').value;
             const divGal = document.getElementById('galeria-actas');
             divGal.innerHTML = '';
-            datosCompletos.slice(0, 12).forEach(r => {
-                divGal.innerHTML += `<div class="bg-slate-50 p-2 rounded-xl text-center">
+            
+            let filtradas = datosCompletos;
+            
+            if (filtroTipo !== 'todos') filtradas = filtradas.filter(r => r.tipo_eleccion === filtroTipo);
+            if (filtroMun !== 'todos') filtradas = filtradas.filter(r => r.municipio_id == filtroMun);
+
+            const btnMas = document.getElementById('btn-cargar-mas');
+            if (filtradas.length > limiteGaleria) {
+                btnMas.classList.remove('hidden');
+            } else {
+                btnMas.classList.add('hidden');
+            }
+
+            if (filtradas.length === 0) {
+                divGal.innerHTML = `<p class="col-span-full text-center text-xs text-slate-400 py-8 uppercase tracking-widest font-bold">No hay actas con estos filtros</p>`;
+                return;
+            }
+
+            filtradas.slice(0, limiteGaleria).forEach(r => {
+                divGal.innerHTML += `<div class="bg-slate-50 p-2 rounded-xl text-center border border-slate-100 shadow-sm hover:border-blue-200 transition-colors">
                     <img src="${r.foto_url}" class="w-full h-20 object-cover rounded-lg mb-1 cursor-pointer" onclick="window.open('${r.foto_url}')">
-                    <p class="text-[8px] font-black text-blue-600">${r.tipo_eleccion} - M${r.mesa_numero}</p>
+                    <p class="text-[8px] font-black text-blue-600 uppercase mt-2">${r.tipo_eleccion}</p>
+                    <p class="text-[9px] font-bold text-slate-600 uppercase truncate px-1">${nombresMun[r.municipio_id]}</p>
+                    <p class="text-[10px] font-black text-slate-800">Mesa ${r.mesa_numero}</p>
                 </div>`;
             });
         }
 
-        // Recuperar sesión al cargar
         if (localStorage.getItem('sesion_otros_l102') === 'activa') {
             document.getElementById('bloqueo-central').classList.add('hidden');
             document.getElementById('contenido-dashboard').classList.remove('hidden');
             refrescar();
+            setInterval(refrescar, 20000);
         }
 
         function exportarExcel() {
