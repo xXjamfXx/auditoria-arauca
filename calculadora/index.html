@@ -110,7 +110,7 @@
             if (esIlegal || tachaduras) {
                 caja.className = "p-5 rounded-2xl text-center alerta-legal";
                 diffPorcTxt.className = "text-xl font-black text-red-500";
-                texto.innerText = "🚨 RECUENTO OBLIGATORIO";
+                texto.innerText = "RECUENTO OBLIGATORIO";
                 
                 let razon = "";
                 if (esIlegal) razon += `Diferencial del ${porcentaje.toFixed(1)}% (${diferencia} votos). `;
@@ -120,10 +120,11 @@
             } else {
                 caja.className = "p-5 rounded-2xl text-center exito-legal";
                 diffPorcTxt.className = "text-xl font-black text-emerald-400";
-                texto.innerText = "✅ DENTRO DEL RANGO";
+                texto.innerText = "DENTRO DEL RANGO";
                 base.innerText = "El diferencial del " + porcentaje.toFixed(1) + "% no cumple la causal de obligatoriedad del Art. 164 del Código Electoral.";
             }
         }
     </script>
 </body>
 </html>
+
