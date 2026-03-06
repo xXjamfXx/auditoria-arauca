@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados en Vivo - Cámara L102</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen relative overflow-x-hidden">
+
+    <div class="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-[0.05] pointer-events-none" 
+         style="background-image: url('https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/fondo_candidato.JPG'); filter: grayscale(10%); mix-blend-mode: multiply;">
+    </div>
+
+    <div id="contenido-dashboard" class="p-4 md:p-8 relative z-10">
+        
+        <div class="max-w-6xl mx-auto mb-10 bg-white/80 p-6 rounded-3xl backdrop-blur-md shadow-sm border border-slate-200 flex flex-col gap-4">
+            
+            <div class="w-full relative overflow-hidden rounded-2xl">
+                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/baner%20pagina2.jpg" 
+                     class="w-full h-48 md:h-56 object-cover object-top drop-shadow-sm" 
+                     alt="Banner Campaña L102">
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-center px-2 pt-2 gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <p class="text-slate-500 font-bold uppercase tracking-widest text-[11px]">Monitoreo Cámara L102 en Vivo</p>
+                </div>
+
+                <div class="flex gap-3 items-center">
+                    <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png" alt="Logo L102" class="h-8 w-auto object-contain">
+                    <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png" alt="Numero 102" class="h-8 w-auto object-contain">
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white/90 border border-slate-200 p-8 rounded-3xl relative overflow-hidden group backdrop-blur-md shadow-xl text-center md:text-left">
+                <div class="absolute -right-4 -top-4 text-slate-100 text-9xl font-black italic group-hover:scale-110 transition-transform hidden md:block">V</div>
+                <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Votos Cámara Validados</p>
+                <h2 id="total-votos" class="text-7xl font-black text-slate-800 relative z-10 tracking-tighter">0</h2>
+            </div>
+            <div class="bg-white/90 border border-slate-200 p-8 rounded-3xl relative overflow-hidden group backdrop-blur-md shadow-xl text-center md:text-left">
+                <div class="absolute -right-4 -top-4 text-blue-50 text-9xl font-black italic group-hover:scale-110 transition-transform hidden md:block">M</div>
+                <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Mesas Reportadas Cámara</p>
+                <h2 id="total-mesas" class="text-6xl font-black text-blue-600 relative z-10 tracking-tighter">0</h2>
+            </div>
+            <div class="bg-white/90 border border-slate-200 p-8 rounded-3xl relative overflow-hidden group backdrop-blur-md shadow-xl text-center md:text-left">
+                <div class="absolute -right-4 -top-4 text-emerald-50 text-9xl font-black italic group-hover:scale-110 transition-transform hidden md:block">%</div>
+                <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Meta Cámara Alcanzada</p>
+                <h2 id="porcentaje-exito" class="text-6xl font-black text-emerald-500 relative z-10 tracking-tighter">0%</h2>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto mb-10">
+            <div class="bg-white/90 border border-slate-200 rounded-3xl p-6 shadow-xl backdrop-blur-md">
+                <h3 class="text-slate-400 font-black text-xs uppercase mb-6 border-b border-slate-100 pb-4 tracking-tighter text-center">Resultados Municipales (Cámara)</h3>
+                
+                <div id="lista-municipios" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    </div>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto text-center py-12 opacity-40 pointer-events-none">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
+                Propiedad Intelectual de JAMF<br>
+                © 2026 Auditoría Electoral L102 • Todos los derechos reservados
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
+        const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
+        
+        const motorSupabase = supabase.createClient(sUrl, sKey);
+        
+        const nombresMun = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
+        const coloresMun = { 1: "#3b82f6", 2: "#10b981", 3: "#8b5cf6", 4: "#06b6d4", 5: "#6366f1", 6: "#2dd4bf", 7: "#a855f7" };
+
+        // Al cargar la página, arranca de una vez
+        window.onload = () => {
+            refrescar();
+            setInterval(refrescar, 10000); // Se actualiza cada 10 segundos
+        };
+
+        async function refrescar() {
+            try {
+                const { data, error } = await motorSupabase
+                    .from('reportes')
+                    .select('municipio_id, votos_oficiales, estado, tipo_eleccion')
+                    .eq('tipo_eleccion', 'CAMARA');
+
+                if (error) throw error;
+
+                const aprobados = data.filter(r => r.estado === 'aprobado');
+                
+                const totalVotos = aprobados.reduce((sum, r) => sum + (r.votos_oficiales || 0), 0);
+                
+                document.getElementById('total-votos').innerText = totalVotos.toLocaleString();
+                document.getElementById('total-mesas').innerText = aprobados.length;
+                document.getElementById('porcentaje-exito').innerText = ((aprobados.length / 685) * 100).toFixed(1) + "%";
+
+                const conteoMun = {};
+                Object.keys(nombresMun).forEach(id => conteoMun[id] = 0);
+                aprobados.forEach(r => { if(conteoMun[r.municipio_id] !== undefined) conteoMun[r.municipio_id] += (r.votos_oficiales || 0); });
+
+                const divMun = document.getElementById('lista-municipios');
+                divMun.innerHTML = '';
+                Object.keys(conteoMun).forEach(id => {
+                    divMun.innerHTML += `
+                        <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-100 shadow-sm" style="border-left: 4px solid ${coloresMun[id]}">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">${nombresMun[id]}</span>
+                            <span class="font-black text-xl" style="color: ${coloresMun[id]}">${conteoMun[id].toLocaleString()}</span>
+                        </div>`;
+                });
+
+            } catch (err) { console.log("Error de sincronización:", err); }
+        }
+    </script>
+</body>
+</html>
