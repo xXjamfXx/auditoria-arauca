@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validación Multiacta - Arauca 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        /* Scroll independiente para cada columna */
+        .columna-scroll { height: calc(100vh - 120px); overflow-y: auto; scrollbar-width: thin; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+    <div id="pantalla-login" class="fixed inset-0 bg-slate-100/95 z-50 flex items-center justify-center p-6 backdrop-blur-md">
+        <div class="bg-white p-8 rounded-3xl shadow-xl max-w-sm w-full text-center border-t-8 border-blue-900">
+            <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png" alt="Logo L102" class="h-20 w-auto object-contain mx-auto mb-4 drop-shadow-md">
+            
+            <h2 class="text-xl font-black text-blue-900 mb-6 uppercase"> Multiacta <br> Consulta, Senado, Citrep</h2>
+            <div class="space-y-4">
+                <select id="select-inicio" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-900 transition-all text-slate-700">
+                    <option value="">-- Municipio --</option>
+                    <option value="1">ARAUCA</option>
+                    <option value="2">ARAUQUITA</option>
+                    <option value="3">CRAVO NORTE</option>
+                    <option value="4">FORTUL</option>
+                    <option value="5">PUERTO RONDÓN</option>
+                    <option value="6">SARAVENA</option>
+                    <option value="7">TAME</option>
+                </select>
+                <input type="password" id="pass-inicio" placeholder="CLAVE OTROS" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-center tracking-widest outline-none focus:border-blue-900 text-slate-700">
+                <button onclick="iniciarSesion()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-sm hover:bg-blue-800 transition-all">Ingresar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="interfaz-trabajo" class="hidden">
+        <nav class="bg-white border-b border-slate-200 p-4 sticky top-0 z-40 shadow-sm flex justify-between items-center px-8">
+            <div class="flex items-center gap-4">
+                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png" alt="Logo L102" class="h-10 w-auto object-contain drop-shadow-sm">
+                
+                <h1 id="titulo-municipio" class="text-2xl font-black text-blue-900 uppercase tracking-tighter"></h1>
+                <span class="bg-blue-900 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">Validación Externa</span>
+            </div>
+            <button onclick="localStorage.clear(); location.reload();" class="text-[10px] font-black text-red-500 border border-red-100 px-4 py-2 rounded-xl uppercase hover:bg-red-50 transition-all">Cerrar Sesión</button>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 h-screen">
+            
+            <div class="bg-white/50 rounded-3xl border border-slate-200 flex flex-col overflow-hidden shadow-sm">
+                <div class="bg-red-600 p-4 text-white flex justify-between items-center">
+                    <span class="font-black text-xs uppercase tracking-widest">Senado</span>
+                    <span id="count-senado" class="bg-white text-red-600 px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
+                </div>
+                <div id="col-senado" class="columna-scroll p-4 space-y-4"></div>
+            </div>
+
+            <div class="bg-white/50 rounded-3xl border border-slate-200 flex flex-col overflow-hidden shadow-sm">
+                <div class="bg-purple-600 p-4 text-white flex justify-between items-center">
+                    <span class="font-black text-xs uppercase tracking-widest">CITREP</span>
+                    <span id="count-citrep" class="bg-white text-purple-600 px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
+                </div>
+                <div id="col-citrep" class="columna-scroll p-4 space-y-4"></div>
+            </div>
+
+            <div class="bg-white/50 rounded-3xl border border-slate-200 flex flex-col overflow-hidden shadow-sm">
+                <div class="bg-emerald-600 p-4 text-white flex justify-between items-center">
+                    <span class="font-black text-xs uppercase tracking-widest">Consulta</span>
+                    <span id="count-consulta" class="bg-white text-emerald-600 px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
+                </div>
+                <div id="col-consulta" class="columna-scroll p-4 space-y-4"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
+        const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
+        const sClient = supabase.createClient(sUrl, sKey);
+
+        let municipioActual = null;
+        const nombresMun = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
+
+        async function iniciarSesion() {
+            const id = document.getElementById('select-inicio').value;
+            const pass = document.getElementById('pass-inicio').value;
+            const { data } = await sClient.from('llaves_municipales').select('clave_otros').eq('municipio_id', id).single();
+            
+            if (data && data.clave_otros === pass) {
+                municipioActual = id;
+                document.getElementById('pantalla-login').classList.add('hidden');
+                document.getElementById('interfaz-trabajo').classList.remove('hidden');
+                document.getElementById('titulo-municipio').innerText = nombresMun[id];
+                cargarDatos();
+                setInterval(cargarDatos, 5000);
+            } else { alert("Clave de acceso externo incorrecta."); }
+        }
+
+        async function cargarDatos() {
+            const { data, error } = await sClient
+                .from('reportes')
+                .select('*')
+                .eq('municipio_id', municipioActual)
+                .eq('estado', 'pendiente')
+                .neq('tipo_eleccion', 'CAMARA')
+                .order('creado_en', { ascending: true });
+
+            if (document.activeElement.tagName === 'INPUT') return;
+            renderColumna(data, 'CONSULTA', 'col-consulta', 'count-consulta');
+            renderColumna(data, 'SENADO', 'col-senado', 'count-senado');
+            renderColumna(data, 'CITREP', 'col-citrep', 'count-citrep');
+            
+        }
+
+        function renderColumna(allData, tipo, elementId, countId) {
+            const container = document.getElementById(elementId);
+            const countLabel = document.getElementById(countId);
+            const filtrados = allData ? allData.filter(r => r.tipo_eleccion === tipo) : [];
+            
+            countLabel.innerText = filtrados.length;
+
+            if (filtrados.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold uppercase text-[9px] tracking-widest border-2 border-dashed border-slate-200 rounded-3xl">Sin actas pendientes</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            filtrados.forEach(r => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-4";
+                card.innerHTML = `
+                    <div class="relative group">
+                        <img src="${r.foto_url}" class="w-full h-40 object-cover rounded-xl cursor-zoom-in" onclick="window.open('${r.foto_url}')">
+                        <span class="absolute top-2 right-2 bg-black/50 text-white text-[8px] px-2 py-1 rounded-md">MESA ${r.mesa_numero}</span>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-tighter truncate">${r.puesto_nombre}</p>
+                        <div class="flex justify-between items-end mt-1">
+                            <p class="text-2xl font-black text-slate-800">${r.votos_candidato} <span class="text-[10px] font-normal text-slate-400">votos</span></p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <input type="number" id="votos-${r.id}" value="${r.votos_candidato}" class="w-full border-2 border-emerald-500 p-2 rounded-xl text-xl font-black text-center outline-none bg-emerald-50/30">
+                        <div class="flex gap-2">
+                            <button onclick="procesar('${r.id}', 'aprobado')" class="flex-1 bg-emerald-500 text-white font-black py-3 rounded-xl uppercase text-[10px] hover:bg-emerald-600 transition-all">Validar</button>
+                            <button onclick="procesar('${r.id}', 'rechazado')" class="bg-red-50 text-red-500 font-bold px-3 rounded-xl text-[9px] hover:bg-red-100 transition-all">X</button>
+                        </div>
+                    </div>`;
+                container.appendChild(card);
+            });
+        }
+
+        async function procesar(id, estado) {
+            const v = document.getElementById('votos-' + id).value;
+            const { error } = await sClient
+                .from('reportes')
+                .update({ estado: estado, votos_oficiales: parseInt(v), validador_identidad: 'EXTERNO-OTROS' })
+                .eq('id', id);
+            if (!error) cargarDatos();
+        }
+    </script>
+</body>
+</html>
