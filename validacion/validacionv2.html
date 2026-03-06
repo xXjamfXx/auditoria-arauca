@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validación Otros E-14 - Arauca 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <div id="pantalla-login" class="fixed inset-0 bg-slate-900/90 z-50 flex items-center justify-center p-6 backdrop-blur-md">
+        <div class="bg-white p-8 rounded-3xl shadow-xl max-w-sm w-full text-center">
+            <h2 class="text-xl font-black text-slate-800 mb-6 uppercase">Acceso Externo <br> Senado / Otros</h2>
+            <div class="space-y-4">
+                <select id="select-inicio" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none">
+                    <option value="">-- Municipio --</option>
+                    <option value="1">ARAUCA</option>
+                    <option value="2">ARAUQUITA</option>
+                    <option value="3">CRAVO NORTE</option>
+                    <option value="4">FORTUL</option>
+                    <option value="5">PUERTO RONDÓN</option>
+                    <option value="6">SARAVENA</option>
+                    <option value="7">TAME</option>
+                </select>
+                <input type="password" id="pass-inicio" placeholder="CLAVE" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-center">
+                <button onclick="iniciarSesion()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-sm">Ingresar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="interfaz-trabajo" class="hidden">
+        <nav class="bg-white border-b p-4 sticky top-0 z-40 shadow-sm flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <h1 id="titulo-municipio" class="text-xl font-black text-blue-900 uppercase"></h1>
+                <select id="filtro-tipo" onchange="cargarDatos()" class="p-2 bg-blue-50 border-2 border-blue-200 rounded-xl text-xs font-black text-blue-800 outline-none">
+                    <option value="SENADO">SENADO</option>
+                    <option value="CONSULTA">CONSULTA</option>
+                    <option value="CITREP">CITREP</option>
+                </select>
+            </div>
+            <button onclick="localStorage.clear(); location.reload();" class="text-[10px] font-black text-red-500 uppercase">Salir</button>
+        </nav>
+
+        <div class="p-6 max-w-5xl mx-auto">
+            <div id="contenedor-reportes" class="space-y-8"></div>
+        </div>
+    </div>
+
+    <script>
+        const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
+        const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
+        const sClient = supabase.createClient(sUrl, sKey);
+
+        let municipioActual = null;
+        let timer = null;
+
+        async function iniciarSesion() {
+            const id = document.getElementById('select-inicio').value;
+            const pass = document.getElementById('pass-inicio').value;
+            const { data } = await sClient.from('llaves_municipales').select('clave').eq('municipio_id', id).single();
+            
+            if (data && data.clave === pass) {
+                municipioActual = id;
+                document.getElementById('pantalla-login').classList.add('hidden');
+                document.getElementById('interfaz-trabajo').classList.remove('hidden');
+                document.getElementById('titulo-municipio').innerText = id; // Aquí puedes poner los nombres reales
+                cargarDatos();
+                timer = setInterval(cargarDatos, 5000);
+            } else { alert("Clave Incorrecta"); }
+        }
+
+        async function cargarDatos() {
+            const tipoSeleccionado = document.getElementById('filtro-tipo').value;
+            const { data, error } = await sClient
+                .from('reportes')
+                .select('*')
+                .eq('municipio_id', municipioActual)
+                .eq('estado', 'pendiente')
+                .eq('tipo_eleccion', tipoSeleccionado) // <--- FILTRADO POR EL SELECTOR
+                .order('creado_en', { ascending: true });
+
+            const container = document.getElementById('contenedor-reportes');
+            if (document.activeElement.tagName === 'INPUT') return;
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div class="text-center py-20 text-slate-400 font-bold uppercase text-[10px]">Sin actas pendientes de ${tipoSeleccionado}</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            data.forEach(r => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col md:flex-row border-l-[12px] border-slate-800 mb-6";
+                card.innerHTML = `
+                    <div class="md:w-1/2 bg-black flex items-center justify-center">
+                        <img src="${r.foto_url}" class="max-h-[400px]" onclick="window.open('${r.foto_url}')">
+                    </div>
+                    <div class="md:w-1/2 p-6">
+                        <span class="bg-slate-100 px-3 py-1 rounded-lg text-[10px] font-black">${r.tipo_eleccion} - MESA ${r.mesa_numero}</span>
+                        <h3 class="text-xl font-black mt-2">${r.puesto_nombre}</h3>
+                        <div class="mt-4 p-4 bg-slate-50 rounded-xl">
+                            <p class="text-[10px] font-bold text-slate-400">DATO TESTIGO:</p>
+                            <p class="text-2xl font-black">${r.votos_candidato}</p>
+                        </div>
+                        <input type="number" id="votos-${r.id}" value="${r.votos_candidato}" class="w-full mt-4 border-2 border-emerald-500 p-4 rounded-xl text-3xl font-black text-center">
+                        <div class="flex gap-2 mt-4">
+                            <button onclick="procesar('${r.id}', 'aprobado')" class="flex-1 bg-emerald-500 text-white font-black py-4 rounded-xl uppercase text-xs">Validar</button>
+                            <button onclick="procesar('${r.id}', 'rechazado')" class="bg-red-50 text-red-500 font-bold px-4 rounded-xl text-[10px]">Rechazar</button>
+                        </div>
+                    </div>`;
+                container.appendChild(card);
+            });
+        }
+
+        async function procesar(id, estado) {
+            const v = document.getElementById('votos-' + id).value;
+            await sClient.from('reportes').update({ estado: estado, votos_oficiales: parseInt(v), validador_identidad: 'EXTERNO' }).eq('id', id);
+            cargarDatos();
+        }
+    </script>
+</body>
+</html>
