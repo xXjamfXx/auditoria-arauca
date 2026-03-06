@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultados en Vivo - Cámara L102</title>
+    <title>Resultados - Cámara L102</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -84,10 +84,10 @@
         const nombresMun = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
         const coloresMun = { 1: "#3b82f6", 2: "#10b981", 3: "#8b5cf6", 4: "#06b6d4", 5: "#6366f1", 6: "#2dd4bf", 7: "#a855f7" };
 
-        // Al cargar la página, arranca de una vez
+        
         window.onload = () => {
             refrescar();
-            setInterval(refrescar, 10000); // Se actualiza cada 10 segundos
+            setInterval(refrescar, 10000);
         };
 
         async function refrescar() {
@@ -126,3 +126,4 @@
     </script>
 </body>
 </html>
+
