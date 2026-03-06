@@ -173,6 +173,7 @@
                 .select('*')
                 .eq('municipio_id', municipioActual)
                 .eq('estado', 'pendiente')
+                .eq('tipo_eleccion', 'CAMARA')
                 .order('creado_en', { ascending: true });
 
             const container = document.getElementById('contenedor-reportes');
@@ -244,4 +245,5 @@
     </script>
 </body>
 </html>
+
 
