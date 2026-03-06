@@ -15,11 +15,13 @@
 </head>
 <body class="bg-slate-100 min-h-screen">
 
-    <div id="pantalla-login" class="fixed inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-6 backdrop-blur-md">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center border-t-8 border-slate-800">
-            <h2 class="text-xl font-black text-slate-800 mb-6 uppercase">Acceso Estación <br> Multiacta Conuslta, Senado, Citrep</h2>
+    <div id="pantalla-login" class="fixed inset-0 bg-slate-100/95 z-50 flex items-center justify-center p-6 backdrop-blur-md">
+        <div class="bg-white p-8 rounded-3xl shadow-xl max-w-sm w-full text-center border-t-8 border-blue-900">
+            <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png" alt="Logo L102" class="h-20 w-auto object-contain mx-auto mb-4 drop-shadow-md">
+            
+            <h2 class="text-xl font-black text-blue-900 mb-6 uppercase"> Multiacta <br> Consulta, Senado, Citrep</h2>
             <div class="space-y-4">
-                <select id="select-inicio" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-slate-800 transition-all">
+                <select id="select-inicio" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-900 transition-all text-slate-700">
                     <option value="">-- Municipio --</option>
                     <option value="1">ARAUCA</option>
                     <option value="2">ARAUQUITA</option>
@@ -29,8 +31,8 @@
                     <option value="6">SARAVENA</option>
                     <option value="7">TAME</option>
                 </select>
-                <input type="password" id="pass-inicio" placeholder="CLAVE OTROS" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-center tracking-widest outline-none focus:border-slate-800">
-                <button onclick="iniciarSesion()" class="w-full bg-slate-800 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-sm hover:bg-black transition-all">Ingresar a Estación</button>
+                <input type="password" id="pass-inicio" placeholder="CLAVE OTROS" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-center tracking-widest outline-none focus:border-blue-900 text-slate-700">
+                <button onclick="iniciarSesion()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-sm hover:bg-blue-800 transition-all">Ingresar</button>
             </div>
         </div>
     </div>
@@ -38,15 +40,17 @@
     <div id="interfaz-trabajo" class="hidden">
         <nav class="bg-white border-b border-slate-200 p-4 sticky top-0 z-40 shadow-sm flex justify-between items-center px-8">
             <div class="flex items-center gap-4">
-                <h1 id="titulo-municipio" class="text-2xl font-black text-slate-800 uppercase tracking-tighter"></h1>
-                <span class="bg-slate-800 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">Validación Externa</span>
+                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png" alt="Logo L102" class="h-10 w-auto object-contain drop-shadow-sm">
+                
+                <h1 id="titulo-municipio" class="text-2xl font-black text-blue-900 uppercase tracking-tighter"></h1>
+                <span class="bg-blue-900 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">Validación Externa</span>
             </div>
             <button onclick="localStorage.clear(); location.reload();" class="text-[10px] font-black text-red-500 border border-red-100 px-4 py-2 rounded-xl uppercase hover:bg-red-50 transition-all">Cerrar Sesión</button>
         </nav>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 h-screen">
             
-            <div class="bg-white/50 rounded-3xl border border-slate-200 flex flex-col overflow-hidden">
+            <div class="bg-white/50 rounded-3xl border border-slate-200 flex flex-col overflow-hidden shadow-sm">
                 <div class="bg-red-600 p-4 text-white flex justify-between items-center">
                     <span class="font-black text-xs uppercase tracking-widest">Senado</span>
                     <span id="count-senado" class="bg-white text-red-600 px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
@@ -54,7 +58,7 @@
                 <div id="col-senado" class="columna-scroll p-4 space-y-4"></div>
             </div>
 
-            <div class="bg-white/50 rounded-3xl border border-slate-200 flex flex-col overflow-hidden">
+            <div class="bg-white/50 rounded-3xl border border-slate-200 flex flex-col overflow-hidden shadow-sm">
                 <div class="bg-purple-600 p-4 text-white flex justify-between items-center">
                     <span class="font-black text-xs uppercase tracking-widest">CITREP</span>
                     <span id="count-citrep" class="bg-white text-purple-600 px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
@@ -62,7 +66,7 @@
                 <div id="col-citrep" class="columna-scroll p-4 space-y-4"></div>
             </div>
 
-            <div class="bg-white/50 rounded-3xl border border-slate-200 flex flex-col overflow-hidden">
+            <div class="bg-white/50 rounded-3xl border border-slate-200 flex flex-col overflow-hidden shadow-sm">
                 <div class="bg-emerald-600 p-4 text-white flex justify-between items-center">
                     <span class="font-black text-xs uppercase tracking-widest">Consulta</span>
                     <span id="count-consulta" class="bg-white text-emerald-600 px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
@@ -120,7 +124,7 @@
             countLabel.innerText = filtrados.length;
 
             if (filtrados.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 text-slate-300 font-bold uppercase text-[9px] tracking-widest border-2 border-dashed border-slate-100 rounded-3xl">Sin actas pendientes</div>`;
+                container.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold uppercase text-[9px] tracking-widest border-2 border-dashed border-slate-200 rounded-3xl">Sin actas pendientes</div>`;
                 return;
             }
 
@@ -161,4 +165,3 @@
     </script>
 </body>
 </html>
-
