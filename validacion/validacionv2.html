@@ -60,19 +60,31 @@
         let timer = null;
 
         async function iniciarSesion() {
-            const id = document.getElementById('select-inicio').value;
-            const pass = document.getElementById('pass-inicio').value;
-            const { data } = await sClient.from('llaves_municipales').select('clave').eq('municipio_id', id).single();
-            
-            if (data && data.clave === pass) {
-                municipioActual = id;
-                document.getElementById('pantalla-login').classList.add('hidden');
-                document.getElementById('interfaz-trabajo').classList.remove('hidden');
-                document.getElementById('titulo-municipio').innerText = id; // Aquí puedes poner los nombres reales
-                cargarDatos();
-                timer = setInterval(cargarDatos, 5000);
-            } else { alert("Clave Incorrecta"); }
-        }
+    const id = document.getElementById('select-inicio').value;
+    const pass = document.getElementById('pass-inicio').value;
+    
+    // CAMBIO CLAVE: Ahora consultamos 'clave_otros' en lugar de 'clave'
+    const { data, error } = await sClient
+        .from('llaves_municipales')
+        .select('clave_otros') 
+        .eq('municipio_id', id)
+        .single();
+    
+    if (data && data.clave_otros === pass) {
+        municipioActual = id;
+        document.getElementById('pantalla-login').classList.add('hidden');
+        document.getElementById('interfaz-trabajo').classList.remove('hidden');
+        
+        // Buscamos el nombre del municipio para el título
+        const nombres = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
+        document.getElementById('titulo-municipio').innerText = nombres[id];
+        
+        cargarDatos();
+        timer = setInterval(cargarDatos, 5000);
+    } else { 
+        alert("Acceso Denegado: Esta clave no corresponde a la Estación de Senado/Otros"); 
+    }
+}
 
         async function cargarDatos() {
             const tipoSeleccionado = document.getElementById('filtro-tipo').value;
@@ -124,4 +136,5 @@
         }
     </script>
 </body>
+
 </html>
