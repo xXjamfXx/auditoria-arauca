@@ -89,11 +89,6 @@
                 <input type="file" id="input-foto" accept=".jpg, .jpeg, .png" class="hidden">
             </div>
 
-            <div class="bg-slate-100 p-4 rounded-2xl border border-slate-200">
-                <label class="block text-[9px] font-black text-slate-500 uppercase mb-2 text-center">Codigo de Credencial Campaña</label>
-                <input type="text" id="codigo-seguridad" autocomplete="off" class="w-full p-3 border-2 border-white rounded-xl text-center font-mono text-xl font-black uppercase outline-none focus:border-blue-500" placeholder="CODIGO">
-            </div>
-
             <button id="btn-enviar" onclick="enviarReporte()" disabled class="w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all">
                 Enviar Reporte
             </button>
@@ -120,7 +115,6 @@
     </div>
 
     <script>
-        let CODIGO_MAESTRO = ""; 
         const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
         const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
         const sClient = supabase.createClient(sUrl, sKey);
@@ -131,16 +125,7 @@
         const selMesa = document.getElementById('select-mesa');
         const selTipo = document.getElementById('select-tipo');
         const inputVotos = document.getElementById('input-votos');
-        const inputCod = document.getElementById('codigo-seguridad');
         const btnEnv = document.getElementById('btn-enviar');
-
-        async function cargarCodigoSeguridad() {
-            try {
-                const { data } = await sClient.from('configuracion').select('codigo_testigos').eq('id', 1).single();
-                if (data) CODIGO_MAESTRO = data.codigo_testigos.toUpperCase();
-            } catch (err) {}
-        }
-        cargarCodigoSeguridad();
 
         window.onload = () => {
             if(localStorage.getItem('config_testigo')) {
@@ -247,7 +232,6 @@
                 }
 
                 inputVotos.value = "";
-                inputCod.value = "";
                 archivoOriginalParaSubir = null;
                 document.getElementById('previo-foto').innerHTML = `
                     <svg class="w-10 h-10 mx-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -333,17 +317,15 @@
         });
 
         function validarFormulario() {
-            if (!CODIGO_MAESTRO) return;
             const mesaOk = selMesa.value !== "";
             const tipoOk = selTipo.value !== "" && !selTipo.options[selTipo.selectedIndex].disabled;
-            const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
             const votosOk = inputVotos.value.length > 0;
             const fotoOk = archivoOriginalParaSubir !== null;
-            btnEnv.disabled = !(mesaOk && tipoOk && codOk && votosOk && fotoOk);
+            btnEnv.disabled = !(mesaOk && tipoOk && votosOk && fotoOk);
             btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl text-xl uppercase tracking-widest transition-all" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all";
         }
 
-        [inputCod, inputVotos, selTipo, selMesa].forEach(el => el.addEventListener('input', validarFormulario));
+        [inputVotos, selTipo, selMesa].forEach(el => el.addEventListener('input', validarFormulario));
 
         async function enviarReporte() {
             btnEnv.innerText = "SUBIENDO..."; btnEnv.disabled = true;
