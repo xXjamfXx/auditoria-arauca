@@ -39,12 +39,12 @@
         <div id="pantalla-login" class="space-y-4">
             <div>
                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">CEDULA DE CIUDADANIA</label>
-                <input type="number" id="input-cedula" autocomplete="off" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-xl font-black text-blue-900 outline-none focus:border-blue-500 transition-all" placeholder="Numero de cedula">
+                <input type="number" id="input-cedula" inputmode="numeric" autocomplete="off" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-xl font-black text-blue-900 outline-none focus:border-blue-500 transition-all" placeholder="Numero de cedula">
             </div>
 
             <div>
                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">CONTRASEÑA (ULTIMOS 4 DIGITOS)</label>
-                <input type="password" id="input-clave" autocomplete="off" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-xl font-black text-blue-900 outline-none focus:border-blue-500 transition-all" placeholder="****">
+                <input type="number" id="input-clave" inputmode="numeric" autocomplete="off" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-xl font-black text-blue-900 outline-none focus:border-blue-500 transition-all" placeholder="****">
             </div>
 
             <button id="btn-login" onclick="iniciarSesion()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl shadow-lg uppercase tracking-widest mt-4 transition-all">
@@ -78,7 +78,7 @@
 
             <div id="contenedor-votos">
                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-2 text-center">Votos Candidato en E-14</label>
-                <input type="number" id="input-votos" autocomplete="off" class="w-full p-6 border-4 border-emerald-500 rounded-3xl text-center text-6xl font-black text-emerald-700 bg-emerald-50 outline-none shadow-inner" placeholder="0">
+                <input type="number" id="input-votos" inputmode="numeric" autocomplete="off" class="w-full p-6 border-4 border-emerald-500 rounded-3xl text-center text-6xl font-black text-emerald-700 bg-emerald-50 outline-none shadow-inner" placeholder="0">
             </div>
 
             <div class="border-4 border-dashed border-slate-200 bg-slate-50 p-8 rounded-3xl text-center cursor-pointer hover:bg-slate-100 transition-all relative" onclick="document.getElementById('input-foto').click()">
