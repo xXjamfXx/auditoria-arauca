@@ -100,6 +100,7 @@
         const motorSupabase = supabase.createClient(sUrl, sKey);
         
         let intervaloActualizacion = null;
+        const nombresMun = { "1": "ARAUCA", "2": "ARAUQUITA", "3": "CRAVO NORTE", "4": "FORTUL", "5": "PUERTO RONDON", "6": "SARAVENA", "7": "TAME" };
 
         function ingresarDashboard() {
             const select = document.getElementById('filtro-municipio');
@@ -166,9 +167,13 @@
                 }
 
                 data.forEach(r => {
+                    const cedulaTexto = r.testigo_cedula ? r.testigo_cedula : 'SIN_CEDULA';
+                    const munTexto = nombresMun[r.municipio_id] || 'MUNICIPIO';
+                    const nombreArchivoDeseado = `${cedulaTexto}_${munTexto}_MESA_${r.mesa_numero}.jpg`;
+
                     divGaleria.innerHTML += `
                         <div class="bg-slate-50 p-2 rounded-xl text-center border border-slate-100 shadow-sm hover:border-blue-200 transition-colors">
-                            <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg mb-2 cursor-pointer" onclick="window.open('${r.foto_url}')">
+                            <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg mb-2 cursor-pointer" onclick="descargarImagenForce('${r.foto_url}', '${nombreArchivoDeseado}')" title="Click para descargar">
                             <p class="text-[9px] font-black text-slate-600 uppercase truncate px-1" title="${r.puesto_nombre}">${r.puesto_nombre}</p>
                             <p class="text-[10px] font-black text-blue-900 mt-1">MESA ${r.mesa_numero}</p>
                             <p class="text-xs font-black text-emerald-600 mt-1">${r.votos_candidato} VOTOS</p>
@@ -180,6 +185,24 @@
                 document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-red-500";
                 document.getElementById('status-text').innerText = "SIN CONEXION";
                 document.getElementById('status-text').className = "text-[8px] font-black uppercase tracking-widest text-red-500";
+            }
+        }
+
+        async function descargarImagenForce(url, nombreDeseado) {
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = nombreDeseado;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+            } catch (error) {
+                window.open(url, '_blank');
             }
         }
     </script>
