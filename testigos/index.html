@@ -238,8 +238,14 @@
                     selMesa.appendChild(opt);
                 });
 
-                selTipo.disabled = true;
-                selTipo.value = "";
+                if (d.mesas.length === 1) {
+                    selMesa.value = d.mesas[0];
+                    actualizarTiposActa();
+                } else {
+                    selTipo.disabled = true;
+                    selTipo.value = "";
+                }
+
                 inputVotos.value = "";
                 inputCod.value = "";
                 archivoOriginalParaSubir = null;
