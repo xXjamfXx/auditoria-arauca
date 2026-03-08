@@ -59,8 +59,8 @@
             </div>
 
             <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-2">Numero de Mesa</label>
-                <select id="select-mesa" onchange="actualizarTiposActa()" class="w-full p-4 border-2 border-blue-500 rounded-2xl bg-blue-50 text-lg font-black text-blue-900 outline-none focus:ring-2 focus:ring-blue-300">
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-2">Seleccione Ubicacion y Mesa</label>
+                <select id="select-mesa" onchange="actualizarTiposActa()" class="w-full p-4 border-2 border-blue-500 rounded-2xl bg-blue-50 text-sm font-black text-blue-900 outline-none focus:ring-2 focus:ring-blue-300">
                 </select>
             </div>
 
@@ -144,34 +144,43 @@
             btn.disabled = true;
 
             try {
-                const { data: testigo, error: errTestigo } = await sClient
+                const { data: testigoFilas, error: errTestigo } = await sClient
                     .from('testigos_acreditados')
                     .select('*')
                     .eq('cedula', cedula)
-                    .eq('clave', clave)
-                    .single();
+                    .eq('clave', clave);
 
-                if (errTestigo || !testigo) {
+                if (errTestigo || !testigoFilas || testigoFilas.length === 0) {
                     alert("Credenciales incorrectas o testigo no registrado.");
                     btn.innerText = "INGRESAR AL SISTEMA"; 
                     btn.disabled = false;
                     return;
                 }
 
-                const mesasArray = testigo.mesa_numero.toString().split(',').map(m => parseInt(m.trim()));
+                let asignaciones = [];
+                testigoFilas.forEach(fila => {
+                    const mesas = fila.mesa_numero.toString().split(',').map(m => parseInt(m.trim()));
+                    mesas.forEach(m => {
+                        asignaciones.push({
+                            munId: fila.municipio_id,
+                            pue: fila.puesto_nombre,
+                            mesa: m
+                        });
+                    });
+                });
+
+                const munIdPrincipal = asignaciones[0].munId;
 
                 const { data: reportes } = await sClient
                     .from('reportes')
-                    .select('mesa_numero, tipo_eleccion')
-                    .eq('municipio_id', testigo.municipio_id)
-                    .eq('puesto_nombre', testigo.puesto_nombre)
-                    .in('mesa_numero', mesasArray)
+                    .select('puesto_nombre, mesa_numero, tipo_eleccion')
+                    .eq('municipio_id', munIdPrincipal)
                     .neq('estado', 'rechazado');
 
                 let mesasDisponibles = false;
-                mesasArray.forEach(m => {
-                    const tiposMesa = reportes ? reportes.filter(r => r.mesa_numero === m) : [];
-                    if (tiposMesa.length < 4) mesasDisponibles = true;
+                asignaciones.forEach(a => {
+                    const hechos = reportes ? reportes.filter(r => r.puesto_nombre === a.pue && r.mesa_numero === a.mesa) : [];
+                    if (hechos.length < 4) mesasDisponibles = true;
                 });
                 
                 if(!mesasDisponibles) {
@@ -182,12 +191,10 @@
                 }
 
                 localStorage.setItem('config_testigo', JSON.stringify({ 
-                    munId: testigo.municipio_id, 
-                    munNom: nombresMun[testigo.municipio_id], 
-                    pue: testigo.puesto_nombre, 
-                    mesas: mesasArray,
-                    nombre: testigo.nombre_completo,
-                    cedula: testigo.cedula,
+                    asignaciones: asignaciones,
+                    nombre: testigoFilas[0].nombre_completo,
+                    cedula: testigoFilas[0].cedula,
+                    munNom: nombresMun[testigoFilas[0].municipio_id],
                     reportes: reportes || []
                 }));
                 
@@ -208,23 +215,23 @@
                 document.getElementById('pantalla-exito').classList.add('hidden');
                 
                 document.getElementById('texto-testigo').innerText = d.nombre;
-                document.getElementById('texto-ubicacion').innerText = `${d.munNom}\n${d.pue}`;
+                document.getElementById('texto-ubicacion').innerText = d.munNom;
                 
-                selMesa.innerHTML = '<option value="">-- SELECCIONE MESA --</option>';
-                d.mesas.forEach(m => {
-                    const reportesMesa = d.reportes.filter(r => r.mesa_numero === m);
+                selMesa.innerHTML = '<option value="">-- SELECCIONE UBICACION --</option>';
+                d.asignaciones.forEach((a, index) => {
+                    const hechos = d.reportes.filter(r => r.puesto_nombre === a.pue && r.mesa_numero === a.mesa);
                     const opt = document.createElement('option');
-                    opt.value = m;
-                    opt.textContent = "MESA " + m;
-                    if (reportesMesa.length >= 4) {
+                    opt.value = index;
+                    opt.textContent = `${a.pue} - MESA ${a.mesa}`;
+                    if (hechos.length >= 4) {
                         opt.disabled = true;
                         opt.textContent += " (COMPLETADA)";
                     }
                     selMesa.appendChild(opt);
                 });
 
-                if (d.mesas.length === 1) {
-                    selMesa.value = d.mesas[0];
+                if (d.asignaciones.length === 1) {
+                    selMesa.value = 0;
                     actualizarTiposActa();
                 } else {
                     selTipo.disabled = true;
@@ -244,23 +251,24 @@
 
         function actualizarTiposActa() {
             const d = JSON.parse(localStorage.getItem('config_testigo'));
-            const mesaVal = selMesa.value;
-            const mesaSeleccionada = mesaVal ? parseInt(mesaVal) : null;
+            const indexVal = selMesa.value;
             
-            if (!mesaSeleccionada) {
+            if (indexVal === "") {
                 selTipo.disabled = true;
                 selTipo.value = "";
                 validarFormulario();
                 return;
             }
 
+            const asignacion = d.asignaciones[parseInt(indexVal)];
             selTipo.disabled = false;
-            const tiposHechos = d.reportes.filter(r => r.mesa_numero === mesaSeleccionada).map(r => r.tipo_eleccion);
+            
+            const hechos = d.reportes.filter(r => r.puesto_nombre === asignacion.pue && r.mesa_numero === asignacion.mesa).map(r => r.tipo_eleccion);
 
             selTipo.querySelectorAll('option').forEach(opt => {
                 if(!opt.value) return;
                 const textoLimpio = opt.textContent.replace(" ", "");
-                if(tiposHechos.includes(opt.value)) {
+                if(hechos.includes(opt.value)) {
                     opt.disabled = true; opt.textContent = " " + textoLimpio;
                 } else {
                     opt.disabled = false; opt.textContent = textoLimpio;
@@ -286,10 +294,8 @@
             try {
                 const { data: reportes } = await sClient
                     .from('reportes')
-                    .select('mesa_numero, tipo_eleccion')
-                    .eq('municipio_id', conf.munId)
-                    .eq('puesto_nombre', conf.pue)
-                    .in('mesa_numero', conf.mesas)
+                    .select('puesto_nombre, mesa_numero, tipo_eleccion')
+                    .eq('municipio_id', conf.asignaciones[0].munId)
                     .neq('estado', 'rechazado');
                 
                 conf.reportes = reportes || [];
@@ -331,6 +337,7 @@
             btnEnv.innerText = "SUBIENDO..."; btnEnv.disabled = true;
             try {
                 const conf = JSON.parse(localStorage.getItem('config_testigo'));
+                const asignacion = conf.asignaciones[parseInt(selMesa.value)];
                 const extension = archivoOriginalParaSubir.name.split('.').pop();
                 const fileName = `E14_${Date.now()}.${extension}`;
                 
@@ -340,9 +347,9 @@
                 const estadoActa = selTipo.value === 'CONSULTA' ? 'aprobado' : 'pendiente';
 
                 await sClient.from('reportes').insert([{
-                    municipio_id: parseInt(conf.munId), 
-                    puesto_nombre: conf.pue, 
-                    mesa_numero: parseInt(selMesa.value),
+                    municipio_id: parseInt(asignacion.munId), 
+                    puesto_nombre: asignacion.pue, 
+                    mesa_numero: parseInt(asignacion.mesa),
                     tipo_eleccion: selTipo.value, 
                     votos_candidato: parseInt(inputVotos.value), 
                     foto_url: publicUrl.publicUrl, 
@@ -358,5 +365,3 @@
     </script>
 </body>
 </html>
-
-
