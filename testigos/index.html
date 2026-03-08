@@ -4,15 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reporte Electoral - Arauca 2026</title>
-    
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="L102 Testigos">
     <link rel="apple-touch-icon" href="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -38,53 +35,42 @@
             <h1 class="text-2xl font-black text-blue-900 leading-tight">Reporte Testigos</h1>
         </div>
 
-        <div id="pantalla-config">
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Municipio</label>
-                    <select id="select-municipio" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-lg font-bold outline-none focus:border-blue-500 transition-all">
-                        <option value="">Seleccionar...</option>
-                        <option value="1">ARAUCA</option>
-                        <option value="2">ARAUQUITA</option>
-                        <option value="3">CRAVO NORTE</option>
-                        <option value="4">FORTUL</option>
-                        <option value="5">PUERTO RONDÓN</option>
-                        <option value="6">SARAVENA</option>
-                        <option value="7">TAME</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Puesto de Votación</label>
-                    <select id="select-puesto" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-lg font-bold outline-none" disabled>
-                        <option value="">-- Elija municipio --</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">Mesa Número</label>
-                    <input type="number" id="input-mesa" autocomplete="off" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-2xl font-black text-blue-900 outline-none" placeholder="00">
-                </div>
-
-                <button id="btn-fijar" onclick="verificarMesa()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl shadow-lg uppercase tracking-widest mt-4">
-                    Fijar Ubicación
-                </button>
+        <div id="pantalla-login" class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">CEDULA DE CIUDADANIA</label>
+                <input type="number" id="input-cedula" autocomplete="off" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-xl font-black text-blue-900 outline-none focus:border-blue-500 transition-all" placeholder="Numero de cedula">
             </div>
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">CONTRASEÑA (ULTIMOS 4 DIGITOS)</label>
+                <input type="password" id="input-clave" autocomplete="off" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-xl font-black text-blue-900 outline-none focus:border-blue-500 transition-all" placeholder="****">
+            </div>
+
+            <button id="btn-login" onclick="iniciarSesion()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl shadow-lg uppercase tracking-widest mt-4 transition-all">
+                Ingresar al Sistema
+            </button>
         </div>
 
         <div id="pantalla-reporte" class="hidden space-y-6">
-            <div class="bg-blue-900 p-5 rounded-2xl text-white relative text-center">
+            <div class="bg-blue-900 p-5 rounded-2xl text-white relative text-center shadow-inner">
+                <p id="texto-testigo" class="text-lg font-black text-blue-200 uppercase mb-2"></p>
                 <p id="texto-ubicacion" class="text-sm font-bold leading-tight uppercase"></p>
-                <button onclick="volverAlInicio()" class="text-[9px] text-blue-300 underline mt-2 uppercase font-black">Cambiar Mesa / Corregir</button>
+                <button onclick="volverAlInicio()" class="text-[9px] text-red-300 underline mt-3 uppercase font-black">Cerrar Sesion</button>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-2">Numero de Mesa</label>
+                <select id="select-mesa" onchange="actualizarTiposActa()" class="w-full p-4 border-2 border-blue-500 rounded-2xl bg-blue-50 text-lg font-black text-blue-900 outline-none focus:ring-2 focus:ring-blue-300">
+                </select>
             </div>
 
             <div>
                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-2">Tipo de Acta (E-14)</label>
-                <select id="select-tipo" class="w-full p-4 border-2 border-blue-500 rounded-2xl bg-blue-50 text-lg font-black text-blue-900 outline-none focus:ring-2 focus:ring-blue-300">
+                <select id="select-tipo" class="w-full p-4 border-2 border-blue-500 rounded-2xl bg-blue-50 text-lg font-black text-blue-900 outline-none focus:ring-2 focus:ring-blue-300" disabled>
                     <option value="">-- SELECCIONE TIPO --</option>
                     <option value="CONSULTA">E-14  CONSULTA</option>
                     <option value="SENADO">E-14  SENADO</option>
-                    <option value="CAMARA">E-14  CÁMARA</option>
+                    <option value="CAMARA">E-14  CAMARA</option>
                     <option value="CITREP">E-14  CITREP</option>                   
                 </select>
             </div>
@@ -96,16 +82,16 @@
 
             <div class="border-4 border-dashed border-slate-200 bg-slate-50 p-8 rounded-3xl text-center cursor-pointer hover:bg-slate-100 transition-all relative" onclick="document.getElementById('input-foto').click()">
                 <div id="previo-foto" class="space-y-2">
-                    <p class="text-4xl">📸 📁</p>
-                    <p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Subir Foto del E-14 (Desde Galería)</p>
+                    <svg class="w-10 h-10 mx-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Subir Foto del E-14</p>
                     <p id="nombre-foto" class="text-[10px] text-slate-400 italic font-bold">Obligatorio para validar</p>
                 </div>
                 <input type="file" id="input-foto" accept=".jpg, .jpeg, .png" class="hidden">
             </div>
 
             <div class="bg-slate-100 p-4 rounded-2xl border border-slate-200">
-                <label class="block text-[9px] font-black text-slate-500 uppercase mb-2 text-center">Código de Credencial Campaña</label>
-                <input type="text" id="codigo-seguridad" autocomplete="off" class="w-full p-3 border-2 border-white rounded-xl text-center font-mono text-xl font-black uppercase outline-none focus:border-blue-500" placeholder="CÓDIGO">
+                <label class="block text-[9px] font-black text-slate-500 uppercase mb-2 text-center">Codigo de Credencial Campaña</label>
+                <input type="text" id="codigo-seguridad" autocomplete="off" class="w-full p-3 border-2 border-white rounded-xl text-center font-mono text-xl font-black uppercase outline-none focus:border-blue-500" placeholder="CODIGO">
             </div>
 
             <button id="btn-enviar" onclick="enviarReporte()" disabled class="w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all">
@@ -114,12 +100,14 @@
         </div>
 
         <div id="pantalla-exito" class="hidden text-center py-10">
-            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">✓</div>
-            <h2 class="text-2xl font-black text-blue-900 uppercase">¡RECIBIDO!</h2>
-            <p class="text-slate-500 text-[10px] mt-2 font-bold uppercase tracking-widest">El dato pasará a validación municipal.</p>
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h2 class="text-2xl font-black text-blue-900 uppercase">RECIBIDO</h2>
+            <p class="text-slate-500 text-[10px] mt-2 font-bold uppercase tracking-widest">El dato pasara a validacion municipal.</p>
             
             <div class="mt-8">
-                <button onclick="volverAlInicio()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-md tracking-widest">Reportar Nueva Mesa / Acta</button>
+                <button onclick="prepararNuevoReporte()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-md tracking-widest">Reportar Nueva Acta</button>
             </div>
         </div>
     </div>
@@ -127,7 +115,7 @@
     <div class="max-w-md mx-auto text-center py-8 opacity-40 pointer-events-none">
         <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
             Propiedad Intelectual de JAMF <br>
-            © 2026 Auditoría Electoral L102 • Todos los derechos reservados
+            © 2026 Auditoria Electoral L102
         </p>
     </div>
 
@@ -137,19 +125,10 @@
         const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
         const sClient = supabase.createClient(sUrl, sKey);
 
-        const puestos = {
-            "1": [ { nombre: "COLEGIO SIMON BOLIVAR", mesas: 37 }, { nombre: "CONCENTRACION CAMILO TORRES", mesas: 21 }, { nombre: "ESCUELA LOS LIBERTADORES", mesas: 8 }, { nombre: "ESCUELA JOSE MARIA CORDOBA", mesas: 5 }, { nombre: "NORMAL MARIA INMACULADA", mesas: 26 }, { nombre: "COLEGIO TEC. CRISTO REY", mesas: 40 }, { nombre: "ESCUELA FLOR DE MI LLANO", mesas: 26 }, { nombre: "UNIDAD DE SALUD MENTAL ARAUCA", mesas: 1 }, { nombre: "IE JUAN ISIDRO DABOIN", mesas: 2 }, { nombre: "IE SEDE LUIS CARLOS GALAN", mesas: 1 }, { nombre: "COLEGIO SANTANDER PRIMARIA", mesas: 22 }, { nombre: "CONC.ESCOLAR LAS COROCORAS", mesas: 13 }, { nombre: "CONC.ESCOLAR DIVINO NIÑO", mesas: 28 }, { nombre: "COL TEC SANTA TERESITA", mesas: 13 }, { nombre: "CARCEL", mesas: 1 }, { nombre: "CAÑAS BRAVAS", mesas: 2 }, { nombre: "MAPORILLAL", mesas: 1 }, { nombre: "SANTA BARBARA", mesas: 4 }, { nombre: "CARACOL", mesas: 2 }, { nombre: "TODOS LOS SANTOS", mesas: 3 }, { nombre: "LAS NUBES", mesas: 2 }, { nombre: "FELICIANO", mesas: 1 }, { nombre: "CLARINETERO", mesas: 1 } ],
-            "2": [ { nombre: "IE LICEO DEL LLANO", mesas: 16 }, { nombre: "IE LICEO DEL LLANO SEDE SIMON BOLIVAR", mesas: 17 }, { nombre: "IE GABRIEL GARCIA MARQUEZ SEC PRIMARIA", mesas: 16 }, { nombre: "IE GABRIEL GARCIA MARQUEZ SEC SECUNDARIA", mesas: 17 }, { nombre: "AGUACHICA", mesas: 6 }, { nombre: "LA ESMERALDA", mesas: 11 }, { nombre: "LA PAZ", mesas: 4 }, { nombre: "REINERA", mesas: 4 }, { nombre: "LA PESQUERA", mesas: 5 }, { nombre: "BRISAS DEL CARANAL", mesas: 2 }, { nombre: "RESGUARDO INDIGENA EL VIGIA", mesas: 1 }, { nombre: "RESGUARDO INDIGENA SAN JOSE DE LIPA", mesas: 1 }, { nombre: "RESGUARDO INDIGENA IGUANITOS", mesas: 1 }, { nombre: "VEREDA FILIPINAS", mesas: 1 }, { nombre: "VEREDA SAN LORENZO", mesas: 1 }, { nombre: "VEREDA EL TRONCAL", mesas: 2 }, { nombre: "PANAMA DE ARAUCA", mesas: 10 } ],
-            "3": [ { nombre: "PUESTO CABECERA MUNICIPAL", mesas: 12 } ],
-            "4": [ { nombre: "POLIDEPORTIVO MUNICIPAL", mesas: 18 }, { nombre: "CONCENTRACION ALEJANDRO HUMBOLDT", mesas: 15 }, { nombre: "CAÑO FLOREZ", mesas: 3 }, { nombre: "NUEVO CARANAL", mesas: 6 }, { nombre: "MATECAÑA", mesas: 2 } ],
-            "5": [ { nombre: "PUESTO CABECERA MUNICIPAL", mesas: 13 } ],
-            "6": [ { nombre: "CENTRO CULT Y DEPORTIVO SIMON", mesas: 19 }, { nombre: "IE LA FRONTERA", mesas: 27 }, { nombre: "SEDE EDUCATIVA SEIS DE OCTUBRE", mesas: 19 }, { nombre: "SEDE EDUCATIVA LAS VILLAS", mesas: 8 }, { nombre: "SEDE EDUCATIVA GENERAL SANTANDER", mesas: 14 }, { nombre: "IE TEC.IND.RAFAEL POMBO BTO", mesas: 25 }, { nombre: "SEDE EDUCATIVA MANUELA BELTRAN", mesas: 2 }, { nombre: "PUERTO NARIÑO", mesas: 10 }, { nombre: "RESGUARDO INDIGENAS DE PLAYAS DE BOJABA", mesas: 1 }, { nombre: "VEREDA VIAS", mesas: 3 } ],
-            "7": [ { nombre: "COL. INST. ORIENTAL FEMENINO", mesas: 21 }, { nombre: "ESCUELA SAN ANTONIO", mesas: 22 }, { nombre: "COLISEO CUBIERSO LOS LIBERTADORES", mesas: 13 }, { nombre: "COLEGIO FROILAN FARIAS", mesas: 19 }, { nombre: "CIUDADELA UNIVERSITARIA", mesas: 14 }, { nombre: "IE SAN LUIS", mesas: 1 }, { nombre: "BETOYES", mesas: 5 }, { nombre: "PUERTO GAITAN", mesas: 1 }, { nombre: "PUERTO SAN SALVADOR", mesas: 1 }, { nombre: "LA HOLANDA", mesas: 1 }, { nombre: "LA ARENOSA", mesas: 2 }, { nombre: "LAS MALVINAS", mesas: 2 }, { nombre: "PUERTO JORDAN", mesas: 10 }, { nombre: "CACHAMA", mesas: 1 }, { nombre: "EL BOTALON", mesas: 7 }, { nombre: "EL TABLON", mesas: 2 }, { nombre: "CENTRO POBLADO  COROCITO", mesas: 4 }, { nombre: "SANTO DOMINGO", mesas: 1 } ]
-        };
+        const nombresMun = { 1: "ARAUCA", 2: "ARAUQUITA", 3: "CRAVO NORTE", 4: "FORTUL", 5: "PUERTO RONDON", 6: "SARAVENA", 7: "TAME" };
 
         let archivoOriginalParaSubir = null;
-        const selMun = document.getElementById('select-municipio');
-        const selPue = document.getElementById('select-puesto');
+        const selMesa = document.getElementById('select-mesa');
         const selTipo = document.getElementById('select-tipo');
         const inputVotos = document.getElementById('input-votos');
         const inputCod = document.getElementById('codigo-seguridad');
@@ -163,78 +142,171 @@
         }
         cargarCodigoSeguridad();
 
-        selMun.addEventListener('change', () => {
-            selPue.innerHTML = '<option value="">Seleccione Puesto</option>';
-            if(selMun.value) {
-                puestos[selMun.value].forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = p.nombre; opt.textContent = p.nombre; opt.dataset.maxMesas = p.mesas;
-                    selPue.appendChild(opt);
-                });
-                selPue.disabled = false;
+        window.onload = () => {
+            if(localStorage.getItem('config_testigo')) {
+                render();
             }
-        });
+        };
 
-        async function verificarMesa() {
-            const mesaInput = document.getElementById('input-mesa').value;
-            const munId = selMun.value;
-            const puesto = selPue.value;
-            if(!munId || !puesto || !mesaInput) return alert("Completa los datos");
+        async function iniciarSesion() {
+            const cedula = document.getElementById('input-cedula').value;
+            const clave = document.getElementById('input-clave').value;
+            
+            if(!cedula || !clave) return alert("Ingrese cedula y contraseña completa.");
 
-            const btnFijar = document.getElementById('btn-fijar');
-            btnFijar.innerText = "🔍 CONSULTANDO..."; btnFijar.disabled = true;
+            const btn = document.getElementById('btn-login');
+            btn.innerText = "VERIFICANDO..."; 
+            btn.disabled = true;
 
             try {
-                // SOLUCIÓN: Filtrar para que NO tome en cuenta los registros con estado 'rechazado'
-                const { data } = await sClient
+                const { data: testigo, error: errTestigo } = await sClient
+                    .from('testigos_acreditados')
+                    .select('*')
+                    .eq('cedula', cedula)
+                    .eq('clave', clave)
+                    .single();
+
+                if (errTestigo || !testigo) {
+                    alert("Credenciales incorrectas o testigo no registrado.");
+                    btn.innerText = "INGRESAR AL SISTEMA"; 
+                    btn.disabled = false;
+                    return;
+                }
+
+                const mesasArray = testigo.mesa_numero.toString().split(',').map(m => parseInt(m.trim()));
+
+                const { data: reportes } = await sClient
                     .from('reportes')
-                    .select('tipo_eleccion')
-                    .eq('municipio_id', parseInt(munId))
-                    .eq('puesto_nombre', puesto)
-                    .eq('mesa_numero', parseInt(mesaInput))
-                    .neq('estado', 'rechazado'); // <--- Filtro clave aplicado
+                    .select('mesa_numero, tipo_eleccion')
+                    .eq('municipio_id', testigo.municipio_id)
+                    .eq('puesto_nombre', testigo.puesto_nombre)
+                    .in('mesa_numero', mesasArray)
+                    .neq('estado', 'rechazado');
+
+                let mesasDisponibles = false;
+                mesasArray.forEach(m => {
+                    const tiposMesa = reportes ? reportes.filter(r => r.mesa_numero === m) : [];
+                    if (tiposMesa.length < 4) mesasDisponibles = true;
+                });
                 
-                const tiposHechos = data ? data.map(r => r.tipo_eleccion) : [];
-                
-                if(tiposHechos.length >= 4) {
-                    alert("Esta mesa ya completó todos sus reportes válidos.");
-                    btnFijar.innerText = "Fijar Ubicación"; btnFijar.disabled = false;
+                if(!mesasDisponibles) {
+                    alert("Todas sus mesas asignadas completaron los reportes validos.");
+                    btn.innerText = "INGRESAR AL SISTEMA"; 
+                    btn.disabled = false;
                     return;
                 }
 
                 localStorage.setItem('config_testigo', JSON.stringify({ 
-                    munId: munId, munNom: selMun.options[selMun.selectedIndex].text, pue: puesto, mesa: mesaInput, tiposHechos: tiposHechos 
+                    munId: testigo.municipio_id, 
+                    munNom: nombresMun[testigo.municipio_id], 
+                    pue: testigo.puesto_nombre, 
+                    mesas: mesasArray,
+                    nombre: testigo.nombre_completo,
+                    cedula: testigo.cedula,
+                    reportes: reportes || []
                 }));
+                
                 render();
-            } catch (err) { alert("Error de conexión"); btnFijar.innerText = "Fijar Ubicación"; btnFijar.disabled = false; }
+
+            } catch (err) { 
+                alert("Error de conexion con el servidor principal."); 
+                btn.innerText = "INGRESAR AL SISTEMA"; 
+                btn.disabled = false; 
+            }
         }
 
         function render() {
             const d = JSON.parse(localStorage.getItem('config_testigo'));
             if(d) {
-                document.getElementById('pantalla-config').classList.add('hidden');
+                document.getElementById('pantalla-login').classList.add('hidden');
                 document.getElementById('pantalla-reporte').classList.remove('hidden');
-                document.getElementById('texto-ubicacion').innerText = `${d.munNom}\n${d.pue}\nMESA ${d.mesa}`;
+                document.getElementById('pantalla-exito').classList.add('hidden');
                 
-                selTipo.querySelectorAll('option').forEach(opt => {
-                    const textoLimpio = opt.textContent.replace(" ", "");
-                    if(d.tiposHechos.includes(opt.value)) {
-                        opt.disabled = true; opt.textContent = " " + textoLimpio;
-                    } else {
-                        opt.disabled = false; opt.textContent = textoLimpio;
+                document.getElementById('texto-testigo').innerText = d.nombre;
+                document.getElementById('texto-ubicacion').innerText = `${d.munNom}\n${d.pue}`;
+                
+                selMesa.innerHTML = '<option value="">-- SELECCIONE MESA --</option>';
+                d.mesas.forEach(m => {
+                    const reportesMesa = d.reportes.filter(r => r.mesa_numero === m);
+                    const opt = document.createElement('option');
+                    opt.value = m;
+                    opt.textContent = "MESA " + m;
+                    if (reportesMesa.length >= 4) {
+                        opt.disabled = true;
+                        opt.textContent += " (COMPLETADA)";
                     }
+                    selMesa.appendChild(opt);
                 });
+
+                selTipo.disabled = true;
                 selTipo.value = "";
+                inputVotos.value = "";
+                inputCod.value = "";
+                archivoOriginalParaSubir = null;
+                document.getElementById('previo-foto').innerHTML = `
+                    <svg class="w-10 h-10 mx-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Subir Foto del E-14</p>
+                    <p id="nombre-foto" class="text-[10px] text-slate-400 italic font-bold">Obligatorio para validar</p>
+                `;
+                validarFormulario();
             }
         }
 
+        function actualizarTiposActa() {
+            const d = JSON.parse(localStorage.getItem('config_testigo'));
+            const mesaVal = selMesa.value;
+            const mesaSeleccionada = mesaVal ? parseInt(mesaVal) : null;
+            
+            if (!mesaSeleccionada) {
+                selTipo.disabled = true;
+                selTipo.value = "";
+                validarFormulario();
+                return;
+            }
+
+            selTipo.disabled = false;
+            const tiposHechos = d.reportes.filter(r => r.mesa_numero === mesaSeleccionada).map(r => r.tipo_eleccion);
+
+            selTipo.querySelectorAll('option').forEach(opt => {
+                if(!opt.value) return;
+                const textoLimpio = opt.textContent.replace(" ", "");
+                if(tiposHechos.includes(opt.value)) {
+                    opt.disabled = true; opt.textContent = " " + textoLimpio;
+                } else {
+                    opt.disabled = false; opt.textContent = textoLimpio;
+                }
+            });
+            selTipo.value = "";
+            validarFormulario();
+        }
+
         function volverAlInicio() {
-            const currentMun = selMun.value;
             localStorage.removeItem('config_testigo');
-            if(currentMun) {
-                window.location.href = window.location.pathname + "?mun=" + currentMun;
-            } else {
-                location.reload();
+            location.reload();
+        }
+
+        function prepararNuevoReporte() {
+            iniciarSesionLogicoInterno();
+        }
+
+        async function iniciarSesionLogicoInterno() {
+            const conf = JSON.parse(localStorage.getItem('config_testigo'));
+            if(!conf) return volverAlInicio();
+
+            try {
+                const { data: reportes } = await sClient
+                    .from('reportes')
+                    .select('mesa_numero, tipo_eleccion')
+                    .eq('municipio_id', conf.munId)
+                    .eq('puesto_nombre', conf.pue)
+                    .in('mesa_numero', conf.mesas)
+                    .neq('estado', 'rechazado');
+                
+                conf.reportes = reportes || [];
+                localStorage.setItem('config_testigo', JSON.stringify(conf));
+                render();
+            } catch(e) {
+                render();
             }
         }
 
@@ -256,15 +328,16 @@
 
         function validarFormulario() {
             if (!CODIGO_MAESTRO) return;
+            const mesaOk = selMesa.value !== "";
             const tipoOk = selTipo.value !== "" && !selTipo.options[selTipo.selectedIndex].disabled;
             const codOk = inputCod.value.toUpperCase() === CODIGO_MAESTRO;
             const votosOk = inputVotos.value.length > 0;
             const fotoOk = archivoOriginalParaSubir !== null;
-            btnEnv.disabled = !(tipoOk && codOk && votosOk && fotoOk);
-            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg";
+            btnEnv.disabled = !(mesaOk && tipoOk && codOk && votosOk && fotoOk);
+            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl text-xl uppercase tracking-widest transition-all" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all";
         }
 
-        [inputCod, inputVotos, selTipo].forEach(el => el.addEventListener('input', validarFormulario));
+        [inputCod, inputVotos, selTipo, selMesa].forEach(el => el.addEventListener('input', validarFormulario));
 
         async function enviarReporte() {
             btnEnv.innerText = "SUBIENDO..."; btnEnv.disabled = true;
@@ -277,24 +350,14 @@
                 const { data: publicUrl } = sClient.storage.from('fotos_e14').getPublicUrl(fileName);
                 
                 await sClient.from('reportes').insert([{
-                    municipio_id: parseInt(conf.munId), puesto_nombre: conf.pue, mesa_numero: parseInt(conf.mesa),
+                    municipio_id: parseInt(conf.munId), puesto_nombre: conf.pue, mesa_numero: parseInt(selMesa.value),
                     tipo_eleccion: selTipo.value, votos_candidato: parseInt(inputVotos.value), foto_url: publicUrl.publicUrl, estado: 'pendiente'
                 }]);
                 
                 document.getElementById('pantalla-reporte').classList.add('hidden');
                 document.getElementById('pantalla-exito').classList.remove('hidden');
-            } catch (err) { alert("Error al enviar"); btnEnv.innerText = "Enviar Reporte"; btnEnv.disabled = false; }
-        }
-
-        const parametrosURL = new URLSearchParams(window.location.search);
-        const munUrl = parametrosURL.get('mun');
-        if (munUrl && puestos[munUrl]) {
-            selMun.value = munUrl; selMun.dispatchEvent(new Event('change'));
-            selMun.disabled = true; selMun.classList.add('opacity-70');
+            } catch (err) { alert("Error al enviar informacion."); btnEnv.innerText = "Enviar Reporte"; btnEnv.disabled = false; }
         }
     </script>
 </body>
 </html>
-
-
-
