@@ -2,128 +2,384 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultados - Cámara L102</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reporte Electoral - Arauca 2026</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="L102 Testigos">
+    <link rel="apple-touch-icon" href="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        body { position: relative; z-index: 10; overflow-x: hidden; }
+        option:disabled { color: #cbd5e1; background-color: #f1f5f9; }
+        input:disabled { background-color: #f1f5f9; border-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen relative overflow-x-hidden">
+<body class="bg-gray-100 p-4 font-sans min-h-screen">
 
-    <div class="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-[0.05] pointer-events-none" 
+    <div class="fixed inset-0 z-[-1] bg-cover bg-center bg-no-repeat opacity-[0.05] pointer-events-none" 
          style="background-image: url('https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/fondo_candidato.JPG'); filter: grayscale(10%); mix-blend-mode: multiply;">
     </div>
 
-    <div id="contenido-dashboard" class="p-4 md:p-8 relative z-10">
+    <div class="max-w-md mx-auto bg-white/95 backdrop-blur-sm p-6 rounded-3xl shadow-xl border border-gray-200 relative z-10">
         
-        <div class="max-w-6xl mx-auto mb-10 bg-white/80 p-6 rounded-3xl backdrop-blur-md shadow-sm border border-slate-200 flex flex-col gap-4">
+        <div class="text-center mb-6">
+            <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png"  
+          alt="Logo L102" 
+          class="h-24 w-auto object-contain drop-shadow-md inline-block">
+          <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png"
+          alt="Numero 102" 
+          class="h-24 w-auto object-contain drop-shadow-md inline-block">
+            <h1 class="text-2xl font-black text-blue-900 leading-tight">Reporte Testigos</h1>
+        </div>
+
+        <div id="pantalla-login" class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">CEDULA DE CIUDADANIA</label>
+                <input type="number" id="input-cedula" inputmode="numeric" autocomplete="off" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-xl font-black text-blue-900 outline-none focus:border-blue-500 transition-all" placeholder="Numero de cedula">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-2">CONTRASEÑA (ULTIMOS 4 DIGITOS)</label>
+                <input type="number" id="input-clave" inputmode="numeric" autocomplete="off" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 text-xl font-black text-blue-900 outline-none focus:border-blue-500 transition-all" placeholder="****">
+            </div>
+
+            <button id="btn-login" onclick="iniciarSesion()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl shadow-lg uppercase tracking-widest mt-4 transition-all">
+                Ingresar al Sistema
+            </button>
+        </div>
+
+        <div id="pantalla-reporte" class="hidden space-y-6">
+            <div class="bg-blue-900 p-5 rounded-2xl text-white relative text-center shadow-inner">
+                <p id="texto-testigo" class="text-lg font-black text-blue-200 uppercase mb-2"></p>
+                <p id="texto-ubicacion" class="text-sm font-bold leading-tight uppercase"></p>
+                <button onclick="volverAlInicio()" class="text-[9px] text-red-300 underline mt-3 uppercase font-black">Cerrar Sesion</button>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-2">Seleccione Ubicacion y Mesa</label>
+                <select id="select-mesa" onchange="actualizarTiposActa()" class="w-full p-4 border-2 border-blue-500 rounded-2xl bg-blue-50 text-sm font-black text-blue-900 outline-none focus:ring-2 focus:ring-blue-300">
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-2">Tipo de Acta (E-14)</label>
+                <select id="select-tipo" onchange="gestionarInputVotos()" class="w-full p-4 border-2 border-blue-500 rounded-2xl bg-blue-50 text-lg font-black text-blue-900 outline-none focus:ring-2 focus:ring-blue-300" disabled>
+                    <option value="">-- SELECCIONE TIPO --</option>
+                    <option value="CONSULTA">E-14  CONSULTA</option>
+                    <option value="SENADO">E-14  SENADO</option>
+                    <option value="CAMARA">E-14  CAMARA</option>
+                    <option value="CITREP">E-14  CITREP</option>                   
+                </select>
+            </div>
+
+            <div id="contenedor-votos">
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-2 text-center">Votos Candidato en E-14</label>
+                <input type="number" id="input-votos" inputmode="numeric" autocomplete="off" onfocus="if(this.value==='0')this.value=''" class="w-full p-6 border-4 border-emerald-500 rounded-3xl text-center text-6xl font-black text-emerald-700 bg-emerald-50 outline-none shadow-inner" placeholder="0">
+            </div>
+
+            <div class="border-4 border-dashed border-slate-200 bg-slate-50 p-8 rounded-3xl text-center cursor-pointer hover:bg-slate-100 transition-all relative" onclick="document.getElementById('input-foto').click()">
+                <div id="previo-foto" class="space-y-2">
+                    <svg class="w-10 h-10 mx-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Subir Foto del E-14</p>
+                    <p id="nombre-foto" class="text-[10px] text-slate-400 italic font-bold">Obligatorio para validar</p>
+                </div>
+                <input type="file" id="input-foto" accept=".jpg, .jpeg, .png" class="hidden">
+            </div>
+
+            <button id="btn-enviar" onclick="enviarReporte()" disabled class="w-full bg-slate-300 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all">
+                Enviar Reporte
+            </button>
+        </div>
+
+        <div id="pantalla-exito" class="hidden text-center py-10">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h2 class="text-2xl font-black text-blue-900 uppercase">RECIBIDO</h2>
+            <p class="text-slate-500 text-[10px] mt-2 font-bold uppercase tracking-widest">El dato pasara a validacion municipal.</p>
             
-            <div class="w-full relative overflow-hidden rounded-2xl">
-                <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/baner%20pagina2.jpg" 
-                     class="w-full h-48 md:h-56 object-cover object-top drop-shadow-sm" 
-                     alt="Banner Campaña L102">
-            </div>
-
-            <div class="flex flex-col md:flex-row justify-between items-center px-2 pt-2 gap-4">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <p class="text-slate-500 font-bold uppercase tracking-widest text-[11px]">Monitoreo Cámara L102 en Vivo</p>
-                </div>
-
-                <div class="flex gap-3 items-center">
-                    <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/l102-remo.png" alt="Logo L102" class="h-8 w-auto object-contain">
-                    <img src="https://fybolbgnxoertkocmmza.supabase.co/storage/v1/object/public/recursos/L102-NUMERO.png" alt="Numero 102" class="h-8 w-auto object-contain">
-                </div>
+            <div class="mt-8">
+                <button onclick="prepararNuevoReporte()" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-md tracking-widest">Reportar Nueva Acta</button>
             </div>
         </div>
+    </div>
 
-        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="bg-white/90 border border-slate-200 p-8 rounded-3xl relative overflow-hidden group backdrop-blur-md shadow-xl text-center md:text-left">
-                <div class="absolute -right-4 -top-4 text-slate-100 text-9xl font-black italic group-hover:scale-110 transition-transform hidden md:block">V</div>
-                <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Votos Cámara Validados</p>
-                <h2 id="total-votos" class="text-7xl font-black text-slate-800 relative z-10 tracking-tighter">0</h2>
-            </div>
-            <div class="bg-white/90 border border-slate-200 p-8 rounded-3xl relative overflow-hidden group backdrop-blur-md shadow-xl text-center md:text-left">
-                <div class="absolute -right-4 -top-4 text-blue-50 text-9xl font-black italic group-hover:scale-110 transition-transform hidden md:block">M</div>
-                <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Mesas Reportadas Cámara</p>
-                <h2 id="total-mesas" class="text-6xl font-black text-blue-600 relative z-10 tracking-tighter">0</h2>
-            </div>
-            <div class="bg-white/90 border border-slate-200 p-8 rounded-3xl relative overflow-hidden group backdrop-blur-md shadow-xl text-center md:text-left">
-                <div class="absolute -right-4 -top-4 text-emerald-50 text-9xl font-black italic group-hover:scale-110 transition-transform hidden md:block">%</div>
-                <p class="text-slate-400 font-bold text-xs uppercase mb-2 tracking-widest relative z-10">Meta Cámara Alcanzada</p>
-                <h2 id="porcentaje-exito" class="text-6xl font-black text-emerald-500 relative z-10 tracking-tighter">0%</h2>
-            </div>
-        </div>
-
-        <div class="max-w-6xl mx-auto mb-10">
-            <div class="bg-white/90 border border-slate-200 rounded-3xl p-6 shadow-xl backdrop-blur-md">
-                <h3 class="text-slate-400 font-black text-xs uppercase mb-6 border-b border-slate-100 pb-4 tracking-tighter text-center">Resultados Municipales (Cámara)</h3>
-                
-                <div id="lista-municipios" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    </div>
-            </div>
-        </div>
-
-        <div class="max-w-6xl mx-auto text-center py-12 opacity-40 pointer-events-none">
-            <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
-                Propiedad Intelectual de JAMF<br>
-                © 2026 Auditoría Electoral L102 • Todos los derechos reservados
-            </p>
-        </div>
+    <div class="max-w-md mx-auto text-center py-8 opacity-40 pointer-events-none">
+        <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
+            Propiedad Intelectual de JAMF <br>
+            © 2026 Auditoria Electoral L102
+        </p>
     </div>
 
     <script>
         const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
         const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
-        
-        const motorSupabase = supabase.createClient(sUrl, sKey);
-        
-        const nombresMun = { 1: "Arauca", 2: "Arauquita", 3: "Cravo Norte", 4: "Fortul", 5: "Puerto Rondón", 6: "Saravena", 7: "Tame" };
-        const coloresMun = { 1: "#3b82f6", 2: "#10b981", 3: "#8b5cf6", 4: "#06b6d4", 5: "#6366f1", 6: "#2dd4bf", 7: "#a855f7" };
+        const sClient = supabase.createClient(sUrl, sKey);
 
-        
+        const nombresMun = { 1: "ARAUCA", 2: "ARAUQUITA", 3: "CRAVO NORTE", 4: "FORTUL", 5: "PUERTO RONDON", 6: "SARAVENA", 7: "TAME" };
+
+        let archivoOriginalParaSubir = null;
+        const selMesa = document.getElementById('select-mesa');
+        const selTipo = document.getElementById('select-tipo');
+        const inputVotos = document.getElementById('input-votos');
+        const btnEnv = document.getElementById('btn-enviar');
+
         window.onload = () => {
-            refrescar();
-            setInterval(refrescar, 10000);
+            if(localStorage.getItem('config_testigo')) {
+                render();
+            }
         };
 
-        async function refrescar() {
+        async function iniciarSesion() {
+            const cedula = document.getElementById('input-cedula').value;
+            const clave = document.getElementById('input-clave').value;
+            
+            if(!cedula || !clave) return alert("Ingrese cedula y contraseña completa.");
+
+            const btn = document.getElementById('btn-login');
+            btn.innerText = "VERIFICANDO..."; 
+            btn.disabled = true;
+
             try {
-                const { data, error } = await motorSupabase
-                    .from('reportes')
-                    .select('municipio_id, votos_oficiales, estado, tipo_eleccion')
-                    .eq('tipo_eleccion', 'CAMARA');
+                const { data: testigoFilas, error: errTestigo } = await sClient
+                    .from('testigos_acreditados')
+                    .select('*')
+                    .eq('cedula', cedula)
+                    .eq('clave', clave);
 
-                if (error) throw error;
+                if (errTestigo || !testigoFilas || testigoFilas.length === 0) {
+                    alert("Credenciales incorrectas o testigo no registrado.");
+                    btn.innerText = "INGRESAR AL SISTEMA"; 
+                    btn.disabled = false;
+                    return;
+                }
 
-                const aprobados = data.filter(r => r.estado === 'aprobado');
-                
-                const totalVotos = aprobados.reduce((sum, r) => sum + (r.votos_oficiales || 0), 0);
-                
-                document.getElementById('total-votos').innerText = totalVotos.toLocaleString();
-                document.getElementById('total-mesas').innerText = aprobados.length;
-                document.getElementById('porcentaje-exito').innerText = ((aprobados.length / 685) * 100).toFixed(1) + "%";
-
-                const conteoMun = {};
-                Object.keys(nombresMun).forEach(id => conteoMun[id] = 0);
-                aprobados.forEach(r => { if(conteoMun[r.municipio_id] !== undefined) conteoMun[r.municipio_id] += (r.votos_oficiales || 0); });
-
-                const divMun = document.getElementById('lista-municipios');
-                divMun.innerHTML = '';
-                Object.keys(conteoMun).forEach(id => {
-                    divMun.innerHTML += `
-                        <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-100 shadow-sm" style="border-left: 4px solid ${coloresMun[id]}">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">${nombresMun[id]}</span>
-                            <span class="font-black text-xl" style="color: ${coloresMun[id]}">${conteoMun[id].toLocaleString()}</span>
-                        </div>`;
+                let asignaciones = [];
+                testigoFilas.forEach(fila => {
+                    const mesas = fila.mesa_numero.toString().split(',').map(m => parseInt(m.trim()));
+                    mesas.forEach(m => {
+                        asignaciones.push({
+                            munId: fila.municipio_id,
+                            pue: fila.puesto_nombre,
+                            mesa: m
+                        });
+                    });
                 });
 
-            } catch (err) { console.log("Error de sincronización:", err); }
+                const munIdPrincipal = asignaciones[0].munId;
+
+                const { data: reportes } = await sClient
+                    .from('reportes')
+                    .select('puesto_nombre, mesa_numero, tipo_eleccion')
+                    .eq('municipio_id', munIdPrincipal)
+                    .neq('estado', 'rechazado');
+
+                let mesasDisponibles = false;
+                asignaciones.forEach(a => {
+                    const hechos = reportes ? reportes.filter(r => r.puesto_nombre === a.pue && r.mesa_numero === a.mesa) : [];
+                    if (hechos.length < 4) mesasDisponibles = true;
+                });
+                
+                if(!mesasDisponibles) {
+                    alert("Todas sus mesas asignadas completaron los reportes validos.");
+                    btn.innerText = "INGRESAR AL SISTEMA"; 
+                    btn.disabled = false;
+                    return;
+                }
+
+                localStorage.setItem('config_testigo', JSON.stringify({ 
+                    asignaciones: asignaciones,
+                    nombre: testigoFilas[0].nombre_completo,
+                    cedula: testigoFilas[0].cedula,
+                    munNom: nombresMun[testigoFilas[0].municipio_id],
+                    reportes: reportes || []
+                }));
+                
+                render();
+
+            } catch (err) { 
+                alert("Error de conexion con el servidor principal."); 
+                btn.innerText = "INGRESAR AL SISTEMA"; 
+                btn.disabled = false; 
+            }
+        }
+
+        function render() {
+            const d = JSON.parse(localStorage.getItem('config_testigo'));
+            if(d) {
+                document.getElementById('pantalla-login').classList.add('hidden');
+                document.getElementById('pantalla-reporte').classList.remove('hidden');
+                document.getElementById('pantalla-exito').classList.add('hidden');
+                
+                document.getElementById('texto-testigo').innerText = d.nombre;
+                document.getElementById('texto-ubicacion').innerText = d.munNom;
+                
+                selMesa.innerHTML = '<option value="">-- SELECCIONE UBICACION --</option>';
+                d.asignaciones.forEach((a, index) => {
+                    const hechos = d.reportes.filter(r => r.puesto_nombre === a.pue && r.mesa_numero === a.mesa);
+                    const opt = document.createElement('option');
+                    opt.value = index;
+                    opt.textContent = `${a.pue} - MESA ${a.mesa}`;
+                    if (hechos.length >= 4) {
+                        opt.disabled = true;
+                        opt.textContent += " (COMPLETADA)";
+                    }
+                    selMesa.appendChild(opt);
+                });
+
+                if (d.asignaciones.length === 1) {
+                    selMesa.value = 0;
+                    actualizarTiposActa();
+                } else {
+                    selTipo.disabled = true;
+                    selTipo.value = "";
+                }
+
+                inputVotos.value = "";
+                gestionarInputVotos();
+                archivoOriginalParaSubir = null;
+                document.getElementById('previo-foto').innerHTML = `
+                    <svg class="w-10 h-10 mx-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <p class="text-blue-900 font-black text-xs uppercase tracking-tighter">Subir Foto del E-14</p>
+                    <p id="nombre-foto" class="text-[10px] text-slate-400 italic font-bold">Obligatorio para validar</p>
+                `;
+                btnEnv.innerText = "Enviar Reporte";
+                validarFormulario();
+            }
+        }
+
+        function gestionarInputVotos() {
+            if (selTipo.value === 'CAMARA') {
+                inputVotos.disabled = false;
+                inputVotos.value = "";
+                inputVotos.className = "w-full p-6 border-4 border-emerald-500 rounded-3xl text-center text-6xl font-black text-emerald-700 bg-emerald-50 outline-none shadow-inner";
+            } else {
+                inputVotos.value = "0";
+                inputVotos.disabled = true;
+                inputVotos.className = "w-full p-6 border-4 border-slate-200 rounded-3xl text-center text-6xl font-black text-slate-400 bg-slate-50 outline-none shadow-inner";
+            }
+            validarFormulario();
+        }
+
+        function actualizarTiposActa() {
+            const d = JSON.parse(localStorage.getItem('config_testigo'));
+            const indexVal = selMesa.value;
+            
+            if (indexVal === "") {
+                selTipo.disabled = true;
+                selTipo.value = "";
+                gestionarInputVotos();
+                validarFormulario();
+                return;
+            }
+
+            const asignacion = d.asignaciones[parseInt(indexVal)];
+            selTipo.disabled = false;
+            
+            const hechos = d.reportes.filter(r => r.puesto_nombre === asignacion.pue && r.mesa_numero === asignacion.mesa).map(r => r.tipo_eleccion);
+
+            selTipo.querySelectorAll('option').forEach(opt => {
+                if(!opt.value) return;
+                const textoLimpio = opt.textContent.replace(" ", "");
+                if(hechos.includes(opt.value)) {
+                    opt.disabled = true; opt.textContent = " " + textoLimpio;
+                } else {
+                    opt.disabled = false; opt.textContent = textoLimpio;
+                }
+            });
+            selTipo.value = "";
+            gestionarInputVotos();
+            validarFormulario();
+        }
+
+        function volverAlInicio() {
+            localStorage.removeItem('config_testigo');
+            location.reload();
+        }
+
+        function prepararNuevoReporte() {
+            iniciarSesionLogicoInterno();
+        }
+
+        async function iniciarSesionLogicoInterno() {
+            const conf = JSON.parse(localStorage.getItem('config_testigo'));
+            if(!conf) return volverAlInicio();
+
+            try {
+                const { data: reportes } = await sClient
+                    .from('reportes')
+                    .select('puesto_nombre, mesa_numero, tipo_eleccion')
+                    .eq('municipio_id', conf.asignaciones[0].munId)
+                    .neq('estado', 'rechazado');
+                
+                conf.reportes = reportes || [];
+                localStorage.setItem('config_testigo', JSON.stringify(conf));
+                render();
+            } catch(e) {
+                render();
+            }
+        }
+
+        document.getElementById('input-foto').addEventListener('change', (e) => {
+            if(e.target.files[0]) {
+                archivoOriginalParaSubir = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('previo-foto').innerHTML = `
+                        <img src="${event.target.result}" class="max-h-32 mx-auto rounded-lg mb-2 shadow-md">
+                        <p class="text-blue-900 font-black text-[10px] uppercase">Toca para cambiar foto</p>
+                    `;
+                    document.getElementById('nombre-foto').innerText = "LISTA PARA ENVIAR";
+                };
+                reader.readAsDataURL(archivoOriginalParaSubir);
+                validarFormulario();
+            }
+        });
+
+        function validarFormulario() {
+            const mesaOk = selMesa.value !== "";
+            const tipoOk = selTipo.value !== "" && !selTipo.options[selTipo.selectedIndex].disabled;
+            const votosOk = inputVotos.disabled || inputVotos.value.length > 0;
+            const fotoOk = archivoOriginalParaSubir !== null;
+            btnEnv.disabled = !(mesaOk && tipoOk && votosOk && fotoOk);
+            btnEnv.className = btnEnv.disabled ? "w-full bg-slate-300 text-white font-black py-5 rounded-2xl text-xl uppercase tracking-widest transition-all" : "w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-lg text-xl uppercase tracking-widest transition-all";
+        }
+
+        [inputVotos, selTipo, selMesa].forEach(el => el.addEventListener('input', validarFormulario));
+
+        async function enviarReporte() {
+            btnEnv.innerText = "SUBIENDO..."; btnEnv.disabled = true;
+            try {
+                const conf = JSON.parse(localStorage.getItem('config_testigo'));
+                const asignacion = conf.asignaciones[parseInt(selMesa.value)];
+                const extension = archivoOriginalParaSubir.name.split('.').pop();
+                const fileName = `E14_${Date.now()}.${extension}`;
+                
+                await sClient.storage.from('fotos_e14').upload(fileName, archivoOriginalParaSubir);
+                const { data: publicUrl } = sClient.storage.from('fotos_e14').getPublicUrl(fileName);
+                
+                const estadoActa = selTipo.value === 'CONSULTA' ? 'aprobado' : 'pendiente';
+
+                await sClient.from('reportes').insert([{
+                    municipio_id: parseInt(asignacion.munId), 
+                    puesto_nombre: asignacion.pue, 
+                    mesa_numero: parseInt(asignacion.mesa),
+                    tipo_eleccion: selTipo.value, 
+                    votos_candidato: parseInt(inputVotos.value), 
+                    foto_url: publicUrl.publicUrl, 
+                    estado: estadoActa,
+                    testigo_cedula: conf.cedula,
+                    testigo_nombre: conf.nombre
+                }]);
+                
+                document.getElementById('pantalla-reporte').classList.add('hidden');
+                document.getElementById('pantalla-exito').classList.remove('hidden');
+            } catch (err) { alert("Error al enviar informacion."); btnEnv.innerText = "Enviar Reporte"; btnEnv.disabled = false; }
         }
     </script>
 </body>
 </html>
-
