@@ -340,8 +340,15 @@
                 const estadoActa = selTipo.value === 'CONSULTA' ? 'aprobado' : 'pendiente';
 
                 await sClient.from('reportes').insert([{
-                    municipio_id: parseInt(conf.munId), puesto_nombre: conf.pue, mesa_numero: parseInt(selMesa.value),
-                    tipo_eleccion: selTipo.value, votos_candidato: parseInt(inputVotos.value), foto_url: publicUrl.publicUrl, estado: estadoActa
+                    municipio_id: parseInt(conf.munId), 
+                    puesto_nombre: conf.pue, 
+                    mesa_numero: parseInt(selMesa.value),
+                    tipo_eleccion: selTipo.value, 
+                    votos_candidato: parseInt(inputVotos.value), 
+                    foto_url: publicUrl.publicUrl, 
+                    estado: estadoActa,
+                    testigo_cedula: conf.cedula,
+                    testigo_nombre: conf.nombre
                 }]);
                 
                 document.getElementById('pantalla-reporte').classList.add('hidden');
@@ -351,4 +358,5 @@
     </script>
 </body>
 </html>
+
 
