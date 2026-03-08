@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Municipal - Consulta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <div class="p-4 md:p-8">
+        <div class="max-w-5xl mx-auto bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-black text-blue-900 uppercase tracking-tighter">Resultados Consulta</h1>
+                <div class="flex items-center gap-1.5 mt-1">
+                    <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-300"></div>
+                    <span id="status-text" class="text-[8px] font-black uppercase tracking-widest text-slate-400">Conectando...</span>
+                </div>
+            </div>
+            
+            <div class="w-full md:w-64">
+                <select id="filtro-municipio" onchange="refrescar()" class="w-full bg-slate-50 border-2 border-blue-500 text-blue-900 font-black p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-300 uppercase text-sm">
+                    <option value="1">ARAUCA</option>
+                    <option value="2">ARAUQUITA</option>
+                    <option value="3">CRAVO NORTE</option>
+                    <option value="4">FORTUL</option>
+                    <option value="5">PUERTO RONDON</option>
+                    <option value="6">SARAVENA</option>
+                    <option value="7">TAME</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-emerald-600 p-8 rounded-3xl shadow-lg text-white text-center">
+                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-200 mb-2">Votos Totales Consulta</p>
+                <h2 id="total-votos" class="text-7xl font-black tracking-tighter">0</h2>
+            </div>
+            <div class="bg-white border border-slate-200 p-8 rounded-3xl shadow-sm text-center flex flex-col justify-center">
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Mesas Reportadas</p>
+                <h2 id="total-mesas" class="text-5xl font-black text-blue-900 tracking-tighter">0</h2>
+            </div>
+        </div>
+
+        <div class="max-w-5xl mx-auto bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-2">Galeria de Actas (Consulta)</h3>
+            <div id="galeria-actas" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+        </div>
+    </div>
+
+    <script>
+        const sUrl = 'https://fybolbgnxoertkocmmza.supabase.co';
+        const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Ym9sYmdueG9lcnRrb2NtbXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4NzksImV4cCI6MjA4NzA3NDg3OX0.TtaObQZc_HnsG0qF7XZg7pkMo5_i1Sht_bcxrF8MoLE';
+        const motorSupabase = supabase.createClient(sUrl, sKey);
+
+        async function refrescar() {
+            const munId = document.getElementById('filtro-municipio').value;
+            
+            try {
+                const { data, error } = await motorSupabase
+                    .from('reportes')
+                    .select('*')
+                    .eq('tipo_eleccion', 'CONSULTA')
+                    .eq('estado', 'aprobado')
+                    .eq('municipio_id', parseInt(munId))
+                    .order('creado_en', { ascending: false });
+
+                if (error) throw error;
+
+                document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                document.getElementById('status-text').innerText = "ONLINE";
+                document.getElementById('status-text').className = "text-[8px] font-black uppercase tracking-widest text-emerald-600";
+
+                const totalVotos = data.reduce((sum, r) => sum + (r.votos_candidato || 0), 0);
+                
+                document.getElementById('total-votos').innerText = totalVotos.toLocaleString();
+                document.getElementById('total-mesas').innerText = data.length;
+
+                const divGaleria = document.getElementById('galeria-actas');
+                divGaleria.innerHTML = '';
+
+                if (data.length === 0) {
+                    divGaleria.innerHTML = '<p class="col-span-full text-center text-xs text-slate-400 py-8 uppercase tracking-widest font-bold">No hay actas registradas aun.</p>';
+                    return;
+                }
+
+                data.forEach(r => {
+                    divGaleria.innerHTML += `
+                        <div class="bg-slate-50 p-2 rounded-xl text-center border border-slate-100 shadow-sm">
+                            <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg mb-2 cursor-pointer" onclick="window.open('${r.foto_url}')">
+                            <p class="text-[9px] font-black text-slate-600 uppercase truncate px-1" title="${r.puesto_nombre}">${r.puesto_nombre}</p>
+                            <p class="text-[10px] font-black text-blue-900 mt-1">MESA ${r.mesa_numero}</p>
+                            <p class="text-xs font-black text-emerald-600 mt-1">${r.votos_candidato} VOTOS</p>
+                        </div>
+                    `;
+                });
+
+            } catch (err) {
+                document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-red-500";
+                document.getElementById('status-text').innerText = "SIN CONEXION";
+                document.getElementById('status-text').className = "text-[8px] font-black uppercase tracking-widest text-red-500";
+            }
+        }
+
+        window.onload = () => {
+            refrescar();
+            setInterval(refrescar, 5000);
+        };
+    </script>
+</body>
+</html>
