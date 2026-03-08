@@ -166,14 +166,21 @@
                     return;
                 }
 
+                let descargadas = JSON.parse(localStorage.getItem('actas_descargadas')) || [];
+
                 data.forEach(r => {
                     const cedulaTexto = r.testigo_cedula ? r.testigo_cedula : 'SIN_CEDULA';
                     const munTexto = nombresMun[r.municipio_id] || 'MUNICIPIO';
                     const nombreArchivoDeseado = `${cedulaTexto}_${munTexto}_MESA_${r.mesa_numero}.jpg`;
+                    
+                    const estaDescargada = descargadas.includes(r.foto_url);
+                    const borderClass = estaDescargada ? 'border-4 border-emerald-500 bg-emerald-50 opacity-80' : 'border border-slate-100 hover:border-blue-200';
+                    const badgeHtml = estaDescargada ? '<div class="absolute top-2 right-2 bg-emerald-500 text-white text-[8px] font-black px-2 py-1 rounded-bl-lg rounded-tr-xl z-10 shadow-sm">DESCARGADA</div>' : '';
 
                     divGaleria.innerHTML += `
-                        <div class="bg-slate-50 p-2 rounded-xl text-center border border-slate-100 shadow-sm hover:border-blue-200 transition-colors">
-                            <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg mb-2 cursor-pointer" onclick="descargarImagenForce('${r.foto_url}', '${nombreArchivoDeseado}')" title="Click para descargar">
+                        <div class="p-2 rounded-xl text-center shadow-sm transition-all relative ${borderClass}">
+                            ${badgeHtml}
+                            <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg mb-2 cursor-pointer relative z-0" onclick="registrarDescarga('${r.foto_url}', '${nombreArchivoDeseado}')" title="Click para descargar">
                             <p class="text-[9px] font-black text-slate-600 uppercase truncate px-1" title="${r.puesto_nombre}">${r.puesto_nombre}</p>
                             <p class="text-[10px] font-black text-blue-900 mt-1">MESA ${r.mesa_numero}</p>
                             <p class="text-xs font-black text-emerald-600 mt-1">${r.votos_candidato} VOTOS</p>
@@ -186,6 +193,16 @@
                 document.getElementById('status-text').innerText = "SIN CONEXION";
                 document.getElementById('status-text').className = "text-[8px] font-black uppercase tracking-widest text-red-500";
             }
+        }
+
+        async function registrarDescarga(url, nombreDeseado) {
+            let descargadas = JSON.parse(localStorage.getItem('actas_descargadas')) || [];
+            if (!descargadas.includes(url)) {
+                descargadas.push(url);
+                localStorage.setItem('actas_descargadas', JSON.stringify(descargadas));
+            }
+            descargarImagenForce(url, nombreDeseado);
+            refrescar();
         }
 
         async function descargarImagenForce(url, nombreDeseado) {
