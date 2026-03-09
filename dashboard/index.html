@@ -138,7 +138,7 @@
         <div class="max-w-6xl mx-auto text-center py-12 opacity-40 pointer-events-none">
             <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
                 Propiedad Intelectual de JAMF<br>
-                © 2026 Auditoria Electoral L102 • Todos los derechos reservados
+                © 2026 Auditoría Electoral L102
             </p>
         </div>
     </div>
@@ -202,7 +202,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                alert("Error de conexion al verificar la clave.");
+                alert("Error de conexión al verificar la clave.");
                 btn.innerText = "INGRESAR";
                 btn.disabled = false;
             }
@@ -318,6 +318,7 @@
             }
 
             actasParaMostrar.slice(0, limiteGaleria).forEach(r => {
+                const nombreTestigo = r.testigo_nombre || 'S/N';
                 divGaleria.innerHTML += `
                     <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 p-2 shadow-sm group hover:border-blue-300 transition-colors flex flex-col justify-between">
                         <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg cursor-pointer" onclick="window.open('${r.foto_url}')">
@@ -325,6 +326,7 @@
                             <p class="text-[9px] font-black text-slate-400 uppercase tracking-tight">${nombresMun[r.municipio_id]}</p>
                             <p class="text-[10px] font-black text-slate-800 uppercase leading-tight mt-1 mb-1 truncate px-1" title="${r.puesto_nombre}">${r.puesto_nombre}</p>
                             <p class="text-[9px] font-bold text-slate-500 uppercase bg-slate-100 rounded-md py-0.5 w-fit mx-auto px-2">Mesa ${r.mesa_numero}</p>
+                            <p class="text-[8px] font-bold text-emerald-600 uppercase mt-1 truncate px-1" title="${nombreTestigo}">POR: ${nombreTestigo}</p>
                             <p class="text-sm font-black text-blue-600 mt-2">${r.votos_oficiales} Votos</p>
                         </div>
                     </div>`;
@@ -374,7 +376,8 @@
                 'VOTOS_REPORTADOS': r.votos_candidato,
                 'VOTOS_VALIDADOS': r.votos_oficiales,
                 'ESTADO': r.estado.toUpperCase(),
-                'URL_PRUEBA': r.foto_url
+                'URL_PRUEBA': r.foto_url,
+                'TESTIGO': r.testigo_nombre || 'N/A'
             }));
             const ws = XLSX.utils.json_to_sheet(reporte);
             const wb = XLSX.utils.book_new();
@@ -384,4 +387,3 @@
     </script>
 </body>
 </html>
-
