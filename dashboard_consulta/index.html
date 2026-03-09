@@ -6,6 +6,8 @@
     <title>Dashboard Municipal - Consulta</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -61,7 +63,10 @@
                 </div>
             </div>
             
-            <div>
+            <div class="flex gap-2 flex-wrap justify-end">
+                <button id="btn-descargar-zip" onclick="descargarPaqueteE14()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-3 rounded-2xl flex items-center gap-2 transition-all text-xs shadow-md">
+                    Descargar Actas (ZIP)
+                </button>
                 <button onclick="volverInicio()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-6 py-3 rounded-2xl transition-all uppercase tracking-widest text-xs border border-slate-200 shadow-sm">
                     Cambiar Municipio
                 </button>
@@ -100,6 +105,7 @@
         const motorSupabase = supabase.createClient(sUrl, sKey);
         
         let intervaloActualizacion = null;
+        let datosDescargaActuales = []; // Variable global para guardar los datos y poder descargarlos
         const nombresMun = { "1": "ARAUCA", "2": "ARAUQUITA", "3": "CRAVO NORTE", "4": "FORTUL", "5": "PUERTO RONDON", "6": "SARAVENA", "7": "TAME" };
 
         function ingresarDashboard() {
@@ -132,6 +138,7 @@
             document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-slate-300";
             document.getElementById('status-text').innerText = "ESPERANDO...";
             document.getElementById('status-text').className = "text-[8px] font-black uppercase tracking-widest text-slate-400";
+            datosDescargaActuales = [];
         }
 
         async function refrescar() {
@@ -148,6 +155,8 @@
                     .order('creado_en', { ascending: false });
 
                 if (error) throw error;
+                
+                datosDescargaActuales = data; // Guardamos los datos para el botón ZIP
 
                 document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
                 document.getElementById('status-text').innerText = "ONLINE";
@@ -220,6 +229,52 @@
                 window.URL.revokeObjectURL(blobUrl);
             } catch (error) {
                 window.open(url, '_blank');
+            }
+        }
+
+        async function descargarPaqueteE14() {
+            if (datosDescargaActuales.length === 0) return alert("No hay actas de Consulta para descargar.");
+            
+            const btn = document.getElementById('btn-descargar-zip');
+            const originalText = btn.innerHTML;
+            btn.innerText = "Organizando carpetas...";
+            btn.disabled = true;
+
+            const zip = new JSZip();
+            const root = zip.folder("e14_Consulta");
+            
+            try {
+                const promesas = datosDescargaActuales.map(async (r) => {
+                    try {
+                        const response = await fetch(r.foto_url);
+                        const blob = await response.blob();
+                        
+                        const munNombre = nombresMun[r.municipio_id] || "Otros";
+                        const puestoNombre = (r.puesto_nombre || "SIN_NOMBRE").replace(/[/\\?%*:|"<>]/g, '-');
+                        
+                        const carpetaMun = root.folder(munNombre);
+                        const carpetaColegio = carpetaMun.folder(puestoNombre);
+                        
+                        const nombreArchivo = `Mesa_${r.mesa_numero}_CONSULTA.jpg`;
+                        
+                        carpetaColegio.file(nombreArchivo, blob);
+                    } catch (e) { 
+                        console.error("Error descargando imagen:", r.foto_url); 
+                    }
+                });
+
+                await Promise.all(promesas);
+                btn.innerText = "Comprimiendo...";
+                const content = await zip.generateAsync({ type: "blob" });
+                
+                const select = document.getElementById('filtro-municipio');
+                const nombreMun = select.options[select.selectedIndex].text;
+                saveAs(content, `Actas_Consulta_${nombreMun}.zip`);
+            } catch (err) {
+                alert("Error al generar el paquete estructurado.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
     </script>
