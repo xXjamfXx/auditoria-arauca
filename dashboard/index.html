@@ -340,27 +340,38 @@
             
             const btn = event.currentTarget;
             const originalText = btn.innerHTML;
-            btn.innerText = "Preparando...";
+            btn.innerText = "Organizando carpetas...";
             btn.disabled = true;
 
             const zip = new JSZip();
-            const carpeta = zip.folder("Actas_E14_CAMARA_Arauca");
+            const root = zip.folder("e14");
             
             try {
                 const promesas = aprobados.map(async (r) => {
                     try {
                         const response = await fetch(r.foto_url);
                         const blob = await response.blob();
-                        const nombreArchivo = `CAMARA_${nombresMun[r.municipio_id]}_${r.puesto_nombre.substring(0,10)}_Mesa_${r.mesa_numero}.jpg`.replace(/\s+/g, '_');
-                        carpeta.file(nombreArchivo, blob);
-                    } catch (e) { console.error("Error descargando imagen:", r.foto_url); }
+                        
+                        const munNombre = nombresMun[r.municipio_id] || "Otros";
+                        const puestoNombre = (r.puesto_nombre || "SIN_NOMBRE").replace(/[/\\?%*:|"<>]/g, '-');
+                        
+                        const carpetaMun = root.folder(munNombre);
+                        const carpetaColegio = carpetaMun.folder(puestoNombre);
+                        
+                        const nombreArchivo = `Mesa_${r.mesa_numero}_CAMARA.jpg`;
+                        
+                        carpetaColegio.file(nombreArchivo, blob);
+                    } catch (e) { 
+                        console.error("Error descargando imagen:", r.foto_url); 
+                    }
                 });
 
                 await Promise.all(promesas);
+                btn.innerText = "Comprimiendo...";
                 const content = await zip.generateAsync({ type: "blob" });
-                saveAs(content, `Actas_CAMARA_Arauca_2026.zip`);
+                saveAs(content, `E14_Organizados_L102.zip`);
             } catch (err) {
-                alert("Error al generar el paquete.");
+                alert("Error al generar el paquete estructurado.");
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
