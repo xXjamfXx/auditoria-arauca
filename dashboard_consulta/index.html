@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Municipal - Consulta</title>
+    <title>Dashboard Municipal - Consulta y Senado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -32,7 +32,7 @@
             </div>
             
             <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
-                <h2 class="text-xs font-black text-slate-400 mb-6 uppercase tracking-widest">DASHBOARD CONSULTA</h2>
+                <h2 class="text-xs font-black text-slate-400 mb-6 uppercase tracking-widest">DASHBOARD MIXTO (CONSULTA Y SENADO)</h2>
                 <select id="filtro-municipio" class="w-full bg-slate-50 border-2 border-slate-200 p-4 rounded-2xl text-center font-black text-lg mb-6 focus:border-blue-500 outline-none transition-all text-blue-900 uppercase">
                     <option value="">-- SELECCIONE MUNICIPIO --</option>
                     <option value="1">ARAUCA</option>
@@ -54,7 +54,7 @@
         
         <div class="max-w-6xl mx-auto bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl font-black text-blue-900 uppercase tracking-tighter">Resultados Consulta</h1>
+                <h1 class="text-2xl font-black text-blue-900 uppercase tracking-tighter">Resultados Mixtos</h1>
                 <p id="texto-municipio" class="text-xs font-black text-slate-500 uppercase tracking-widest mt-1"></p>
                 
                 <div class="flex items-center gap-1.5 mt-2">
@@ -76,7 +76,7 @@
         <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div class="bg-emerald-600 p-8 rounded-3xl shadow-lg text-white text-center relative overflow-hidden group">
                 <div class="absolute -right-4 -top-4 text-emerald-500 text-9xl font-black italic group-hover:scale-110 transition-transform opacity-50">V</div>
-                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-200 mb-2 relative z-10">Votos Totales Consulta</p>
+                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-200 mb-2 relative z-10">Votos Totales (Mixtos)</p>
                 <h2 id="total-votos" class="text-7xl font-black tracking-tighter relative z-10">0</h2>
             </div>
             <div class="bg-white border border-slate-200 p-8 rounded-3xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden group">
@@ -87,7 +87,7 @@
         </div>
 
         <div class="max-w-6xl mx-auto bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-100 pb-4">Galeria de Actas (Consulta)</h3>
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-100 pb-4">Galeria de Actas (Consulta y Senado)</h3>
             <div id="galeria-actas" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
         </div>
         
@@ -105,7 +105,7 @@
         const motorSupabase = supabase.createClient(sUrl, sKey);
         
         let intervaloActualizacion = null;
-        let datosDescargaActuales = []; // Variable global para guardar los datos y poder descargarlos
+        let datosDescargaActuales = []; 
         const nombresMun = { "1": "ARAUCA", "2": "ARAUQUITA", "3": "CRAVO NORTE", "4": "FORTUL", "5": "PUERTO RONDON", "6": "SARAVENA", "7": "TAME" };
 
         function ingresarDashboard() {
@@ -146,17 +146,18 @@
             if (!munId) return;
             
             try {
+                // ACA EL CAMBIO CLAVE: Traemos Consulta y Senado al mismo tiempo
                 const { data, error } = await motorSupabase
                     .from('reportes')
                     .select('*')
-                    .eq('tipo_eleccion', 'CONSULTA')
+                    .in('tipo_eleccion', ['CONSULTA', 'SENADO']) 
                     .eq('estado', 'aprobado')
                     .eq('municipio_id', parseInt(munId))
                     .order('creado_en', { ascending: false });
 
                 if (error) throw error;
                 
-                datosDescargaActuales = data; // Guardamos los datos para el botón ZIP
+                datosDescargaActuales = data; 
 
                 document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
                 document.getElementById('status-text').innerText = "ONLINE";
@@ -180,19 +181,29 @@
                 data.forEach(r => {
                     const cedulaTexto = r.testigo_cedula ? r.testigo_cedula : 'SIN_CEDULA';
                     const munTexto = nombresMun[r.municipio_id] || 'MUNICIPIO';
-                    const nombreArchivoDeseado = `${cedulaTexto}_${munTexto}_MESA_${r.mesa_numero}.jpg`;
+                    
+                    // Aseguramos que el nombre incluya si es Senado o Consulta
+                    const nombreArchivoDeseado = `${cedulaTexto}_${munTexto}_MESA_${r.mesa_numero}_${r.tipo_eleccion}.jpg`;
                     
                     const estaDescargada = descargadas.includes(r.foto_url);
                     const borderClass = estaDescargada ? 'border-4 border-emerald-500 bg-emerald-50 opacity-80' : 'border border-slate-100 hover:border-blue-200';
                     const badgeHtml = estaDescargada ? '<div class="absolute top-2 right-2 bg-emerald-500 text-white text-[8px] font-black px-2 py-1 rounded-bl-lg rounded-tr-xl z-10 shadow-sm">DESCARGADA</div>' : '';
 
+                    // Etiqueta visual para distinguir Consulta de Senado en pantalla
+                    const etiquetaColor = r.tipo_eleccion === 'SENADO' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-600';
+
                     divGaleria.innerHTML += `
-                        <div class="p-2 rounded-xl text-center shadow-sm transition-all relative ${borderClass}">
+                        <div class="p-2 rounded-xl text-center shadow-sm transition-all relative ${borderClass} flex flex-col justify-between h-full">
                             ${badgeHtml}
-                            <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg mb-2 cursor-pointer relative z-0" onclick="registrarDescarga('${r.foto_url}', '${nombreArchivoDeseado}')" title="Click para descargar">
-                            <p class="text-[9px] font-black text-slate-600 uppercase truncate px-1" title="${r.puesto_nombre}">${r.puesto_nombre}</p>
-                            <p class="text-[10px] font-black text-blue-900 mt-1">MESA ${r.mesa_numero}</p>
-                            <p class="text-xs font-black text-emerald-600 mt-1">${r.votos_candidato} VOTOS</p>
+                            <div>
+                                <img src="${r.foto_url}" class="w-full h-24 object-cover rounded-lg mb-2 cursor-pointer relative z-0" onclick="registrarDescarga('${r.foto_url}', '${nombreArchivoDeseado}')" title="Click para descargar">
+                                <span class="${etiquetaColor} text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest block w-fit mx-auto mb-1">${r.tipo_eleccion}</span>
+                                <p class="text-[9px] font-black text-slate-600 uppercase truncate px-1" title="${r.puesto_nombre}">${r.puesto_nombre}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black text-blue-900 mt-1">MESA ${r.mesa_numero}</p>
+                                <p class="text-xs font-black text-emerald-600 mt-1">${r.votos_candidato} VOTOS</p>
+                            </div>
                         </div>
                     `;
                 });
@@ -233,7 +244,7 @@
         }
 
         async function descargarPaqueteE14() {
-            if (datosDescargaActuales.length === 0) return alert("No hay actas de Consulta para descargar.");
+            if (datosDescargaActuales.length === 0) return alert("No hay actas para descargar.");
             
             const btn = document.getElementById('btn-descargar-zip');
             const originalText = btn.innerHTML;
@@ -241,7 +252,7 @@
             btn.disabled = true;
 
             const zip = new JSZip();
-            const root = zip.folder("e14_Consulta");
+            const root = zip.folder("e14_Mixtos");
             
             try {
                 const promesas = datosDescargaActuales.map(async (r) => {
@@ -255,7 +266,8 @@
                         const carpetaMun = root.folder(munNombre);
                         const carpetaColegio = carpetaMun.folder(puestoNombre);
                         
-                        const nombreArchivo = `Mesa_${r.mesa_numero}_CONSULTA.jpg`;
+                        // Nombre diferenciado para que no se pisen si suben consulta y senado en la misma mesa
+                        const nombreArchivo = `Mesa_${r.mesa_numero}_${r.tipo_eleccion}.jpg`;
                         
                         carpetaColegio.file(nombreArchivo, blob);
                     } catch (e) { 
@@ -269,7 +281,7 @@
                 
                 const select = document.getElementById('filtro-municipio');
                 const nombreMun = select.options[select.selectedIndex].text;
-                saveAs(content, `Actas_Consulta_${nombreMun}.zip`);
+                saveAs(content, `Actas_Mixtas_${nombreMun}.zip`);
             } catch (err) {
                 alert("Error al generar el paquete estructurado.");
             } finally {
